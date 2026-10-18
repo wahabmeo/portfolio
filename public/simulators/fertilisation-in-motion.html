@@ -1,0 +1,377 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>Fertilisation in Motion</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Young+Serif&family=Atkinson+Hyperlegible:wght@400;700&family=IBM+Plex+Mono:wght@500&display=swap">
+<style>
+/* Layout: specimen plate. Animated scene on the left, step card on the right, comparison table below. */
+:root{
+  --bg:#eef3ea; --surface:#f9fbf6; --ink:#1d2b1f; --muted:#556656; --line:#cbd7c5; --accent:#2f7a3a; --accent-ink:#ffffff;
+  --fluid:#f7eaec; --tissue:#e8bcc1; --cilia:#c98790; --egg:#fbe7c6; --eggline:#d9a95b; --coat:#f1cf9c; --seal:#8c6bc7;
+  --sperm:#3d6fb0; --acro:#9fd0f5; --male:#3d6fb0; --female:#c2477a; --zygote:#7d4bb0;
+  --sky:#eaf3f6; --petal:#f2b8cf; --filament:#9bbf6a; --anther:#e2b23a; --pollen:#f0c43c;
+  --carpel:#9ccb7c; --carpel-ink:#4f8a36; --cavity:#e4f2d6; --stigma:#78ad55; --ovule:#f4e3b0; --ovule-ink:#b9973c;
+  --tube:#e0a43a; --fruit:#f08a3c; --seed:#8a5a2b; --stem:#6f9e4c;
+  --display:"Young Serif", Georgia, "Times New Roman", serif;
+  --body:"Atkinson Hyperlegible", "Segoe UI", system-ui, sans-serif;
+  --mono:"IBM Plex Mono", ui-monospace, Consolas, monospace;
+}
+@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]){
+  --bg:#0e1510; --surface:#152018; --ink:#e3ecdf; --muted:#9db09e; --line:#2b3b2e; --accent:#8fd07e; --accent-ink:#0e1510;
+  --fluid:#26181c; --tissue:#55303a; --cilia:#8a4c57; --egg:#4a3a22; --eggline:#c09550; --coat:#6e5531; --seal:#b79cf0;
+  --sperm:#8fb6ec; --acro:#cfe8ff; --male:#8fb6ec; --female:#f08bb4; --zygote:#c09af0;
+  --sky:#122028; --petal:#6b3550; --filament:#5d7f3a; --anther:#c99a24; --pollen:#f2cc55;
+  --carpel:#3f6b2c; --carpel-ink:#9fd884; --cavity:#1b2e17; --stigma:#5e9a3c; --ovule:#5b4d2a; --ovule-ink:#d8b860;
+  --tube:#f0b44a; --fruit:#c96a22; --seed:#b07a40; --stem:#4a7a30; color-scheme:dark }}
+:root[data-theme="dark"]{
+  --bg:#0e1510; --surface:#152018; --ink:#e3ecdf; --muted:#9db09e; --line:#2b3b2e; --accent:#8fd07e; --accent-ink:#0e1510;
+  --fluid:#26181c; --tissue:#55303a; --cilia:#8a4c57; --egg:#4a3a22; --eggline:#c09550; --coat:#6e5531; --seal:#b79cf0;
+  --sperm:#8fb6ec; --acro:#cfe8ff; --male:#8fb6ec; --female:#f08bb4; --zygote:#c09af0;
+  --sky:#122028; --petal:#6b3550; --filament:#5d7f3a; --anther:#c99a24; --pollen:#f2cc55;
+  --carpel:#3f6b2c; --carpel-ink:#9fd884; --cavity:#1b2e17; --stigma:#5e9a3c; --ovule:#5b4d2a; --ovule-ink:#d8b860;
+  --tube:#f0b44a; --fruit:#c96a22; --seed:#b07a40; --stem:#4a7a30; color-scheme:dark }
+
+body{background:var(--bg);color:var(--ink);font-family:var(--body);font-size:16px;line-height:1.55}
+.wrap{max-width:1180px;margin:0 auto;padding-inline:20px;padding-block:28px 48px;display:grid;gap:28px}
+header{display:grid;gap:6px}
+.eyebrow{font-family:var(--mono);font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin:0}
+h1{font-family:var(--display);font-weight:400;font-size:clamp(30px,5vw,46px);line-height:1.1;margin:0;text-wrap:balance}
+.lede{margin:0;max-width:62ch;color:var(--muted)}
+
+.stage{display:grid;grid-template-columns:minmax(0,1fr) 340px;gap:24px;align-items:start}
+@media (max-width:860px){.stage{grid-template-columns:minmax(0,1fr)}}
+.plate{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:12px;min-width:0;display:grid;gap:10px}
+.row{display:flex;flex-wrap:wrap;gap:8px;align-items:center;justify-content:space-between}
+.group{display:flex;flex-wrap:wrap;gap:6px}
+button{font:inherit;cursor:pointer;color:var(--ink);background:transparent;border:1px solid var(--line);border-radius:999px;padding:6px 14px;font-size:14px}
+button:hover:not(:disabled){border-color:var(--accent)}
+button:disabled{opacity:.4;cursor:default}
+button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+button[aria-pressed="true"]{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+button.primary{background:var(--accent);color:var(--accent-ink);border-color:var(--accent);min-width:88px}
+canvas{display:block;width:100%;aspect-ratio:960/560;max-width:100%;border-radius:10px}
+.steps{display:flex;flex-wrap:wrap;gap:6px;list-style:none;margin:0;padding:0}
+.steps button{font-size:13px;padding:4px 10px;display:flex;gap:6px;align-items:center}
+.steps .n{font-family:var(--mono);font-size:11px;opacity:.75}
+.steps button.done{border-color:var(--accent)}
+
+.card{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:18px;display:grid;gap:12px;min-width:0;align-content:start}
+.tag{display:inline-block;font-family:var(--mono);font-size:12px;letter-spacing:.06em;text-transform:uppercase;padding:3px 9px;border-radius:999px;border:1px solid var(--accent);color:var(--accent);justify-self:start}
+.card h2{font-family:var(--display);font-weight:400;font-size:28px;line-height:1.15;margin:0;text-wrap:balance}
+.card p{margin:0}
+.eq{font-family:var(--mono);font-size:13px;background:var(--bg);border-radius:8px;padding:8px 10px}
+.tip{border-top:1px dashed var(--line);padding-top:10px;font-size:15px}
+.tip b{font-family:var(--mono);font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--accent);display:block;margin-bottom:2px;font-weight:500}
+.bar{height:4px;background:var(--line);border-radius:4px;overflow:hidden}
+.bar i{display:block;height:100%;width:0;background:var(--accent)}
+
+.compare{display:grid;gap:10px}
+.compare h2{font-family:var(--display);font-weight:400;font-size:24px;margin:0}
+.tablewrap{overflow-x:auto;background:var(--surface);border:1px solid var(--line);border-radius:14px}
+table{border-collapse:collapse;width:100%;min-width:560px;font-size:15px}
+th,td{text-align:left;padding:10px 16px;border-bottom:1px solid var(--line);vertical-align:top}
+th{font-family:var(--mono);font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);font-weight:500}
+td:first-child{font-weight:700}
+tr:last-child td{border-bottom:0}
+</style>
+
+<div class="wrap">
+  <header>
+    <p class="eyebrow">Biology · Grade 9 · Reproduction</p>
+    <h1>Fertilisation in Motion</h1>
+    <p class="lede">Watch a male gamete meet a female gamete, step by step. Choose humans or flowering plants, then play the animation or jump to any step.</p>
+  </header>
+
+  <section class="stage">
+    <div class="plate">
+      <div class="row">
+        <div class="group" role="group" aria-label="Choose organism">
+          <button data-scene="human" aria-pressed="true">Humans</button>
+          <button data-scene="plant" aria-pressed="false">Flowering plants</button>
+        </div>
+        <div class="group">
+          <button id="prev" aria-label="Previous step">Back</button>
+          <button id="play" class="primary">Pause</button>
+          <button id="next" aria-label="Next step">Next</button>
+        </div>
+      </div>
+      <canvas id="cv" role="img" aria-label="Animation of fertilisation"></canvas>
+      <ol class="steps" id="steps"></ol>
+    </div>
+
+    <aside class="card" aria-live="polite">
+      <span class="tag" id="cStep"></span>
+      <h2 id="cTitle"></h2>
+      <div class="bar"><i id="cBar"></i></div>
+      <p id="cText"></p>
+      <p class="eq" id="cEq" hidden></p>
+      <p class="tip"><b>Remember</b><span id="cTip"></span></p>
+    </aside>
+  </section>
+
+  <section class="compare">
+    <h2>Humans and flowering plants compared</h2>
+    <div class="tablewrap">
+      <table>
+        <thead><tr><th></th><th>Humans</th><th>Flowering plants</th></tr></thead>
+        <tbody>
+          <tr><td>Male gamete</td><td>Sperm cell</td><td>Male nucleus inside the pollen grain</td></tr>
+          <tr><td>Female gamete</td><td>Egg cell (ovum)</td><td>Female nucleus inside the ovule</td></tr>
+          <tr><td>How the male gamete travels</td><td>Sperm swims using its tail</td><td>Pollen tube grows down the style</td></tr>
+          <tr><td>Where fertilisation happens</td><td>Oviduct</td><td>Inside the ovule, in the ovary</td></tr>
+          <tr><td>Chromosomes</td><td>23 + 23 → 46 in the zygote</td><td>Haploid + haploid → diploid zygote</td></tr>
+          <tr><td>What forms next</td><td>Zygote → embryo → implants in uterus</td><td>Zygote → embryo; ovule → seed; ovary → fruit</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+</div>
+
+<script>
+const SCENES = {
+  human: [
+    {t:'Sperm swim to the egg', d:'After sexual intercourse, millions of sperm swim through the uterus and into the oviducts. Each tail beats to push the sperm forward, using energy released by mitochondria in the midpiece.', tip:'Fertilisation happens in the oviduct, not in the uterus.', dur:5},
+    {t:'Sperm reach the egg', d:'Only a few hundred sperm reach the egg. They surround its jelly coat. The egg cannot swim; cilia lining the oviduct move it along.', tip:'The egg is much larger than a sperm because its cytoplasm stores food for the early embryo.', dur:3.5},
+    {t:'One sperm enters', d:'The acrosome in the sperm head releases enzymes that digest a path through the jelly coat. The head of one sperm enters the egg. Its tail stays outside.', tip:'Acrosome = a bag of digestive enzymes at the tip of the sperm head.', dur:4},
+    {t:'The jelly coat changes', d:'As soon as one sperm gets in, the jelly coat changes so that no other sperm can enter. The egg receives only one set of male chromosomes.', tip:'If two sperm entered, the cell would have too many chromosomes and could not develop.', dur:3.5},
+    {t:'Nuclei fuse', d:'The sperm nucleus moves to the egg nucleus and the two fuse. This fusion is fertilisation. The new cell is called a zygote.', eq:'sperm (23) + egg (23) → zygote (46 chromosomes)', tip:'Gametes are haploid. The zygote is diploid.', dur:4.5},
+    {t:'The zygote divides', d:'The zygote divides by mitosis into 2, then 4, then 8 cells, forming a ball of cells called an embryo. It moves down the oviduct and implants in the lining of the uterus.', tip:'Fertilisation → zygote → embryo → implantation.', dur:6}
+  ],
+  plant: [
+    {t:'Pollination', d:'A pollen grain is carried from an anther to a stigma by an insect or by the wind. Pollination brings the male gamete to the flower, but it is not fertilisation yet.', tip:'Self-pollination: same plant. Cross-pollination: a different plant of the same species.', dur:4},
+    {t:'A pollen tube grows', d:'The pollen grain grows a tube down through the style towards the ovary. The tube releases enzymes to digest a path. The male nucleus travels at the tip.', tip:'Sugar on the stigma helps the pollen grain to start growing a tube.', dur:5},
+    {t:'Into the ovule', d:'The pollen tube enters the ovule through a tiny hole called the micropyle.', tip:'Micropyle = the small opening in the ovule. Later it is where water enters the seed.', dur:3},
+    {t:'Nuclei fuse', d:'The male nucleus fuses with the female nucleus inside the ovule. This is fertilisation, and it forms a zygote.', eq:'male nucleus + female nucleus → zygote', tip:'Fertilisation in plants happens inside the ovule.', dur:4},
+    {t:'Seed and fruit form', d:'The zygote grows into an embryo. The ovule becomes a seed and the ovary becomes a fruit. The petals, stamens, stigma and style wither and fall off.', tip:'Ovule → seed. Ovary → fruit.', dur:5}
+  ]
+};
+
+const cv = document.getElementById('cv'), ctx = cv.getContext('2d');
+const W = 960, H = 560;
+const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+let C = {};
+function readColors(){ const cs=getComputedStyle(document.documentElement); ['bg','surface','ink','muted','fluid','tissue','cilia','egg','eggline','coat','seal','sperm','acro','male','female','zygote','sky','petal','filament','anther','pollen','carpel','carpel-ink','cavity','stigma','ovule','ovule-ink','tube','fruit','seed','stem'].forEach(k=>C[k]=cs.getPropertyValue('--'+k).trim()); }
+readColors();
+window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change',readColors);
+new MutationObserver(readColors).observe(document.documentElement,{attributes:true,attributeFilter:['data-theme']});
+
+function resize(){ const dpr=window.devicePixelRatio||1, w=cv.clientWidth; cv.width=Math.round(w*dpr); cv.height=Math.round(w*H/W*dpr); ctx.setTransform(cv.width/W,0,0,cv.height/H,0,0); }
+new ResizeObserver(resize).observe(cv); resize();
+
+const ease = t => t<.5 ? 2*t*t : 1-Math.pow(-2*t+2,2)/2;
+const lerp = (a,b,t) => a+(b-a)*t;
+const clamp = (v,a=0,b=1) => Math.max(a,Math.min(b,v));
+function lerpAng(a,b,t){ let d=((b-a+Math.PI*3)%(Math.PI*2))-Math.PI; return a+d*t; }
+function circle(x,y,r,fill,stroke,lw=2){ ctx.beginPath(); ctx.arc(x,y,r,0,Math.PI*2); if(fill){ctx.fillStyle=fill;ctx.fill();} if(stroke){ctx.strokeStyle=stroke;ctx.lineWidth=lw;ctx.stroke();} }
+function ellipse(x,y,rx,ry,rot,fill,stroke,lw=2){ ctx.beginPath(); ctx.ellipse(x,y,rx,ry,rot,0,Math.PI*2); if(fill){ctx.fillStyle=fill;ctx.fill();} if(stroke){ctx.strokeStyle=stroke;ctx.lineWidth=lw;ctx.stroke();} }
+function label(text,x,y,tx,ty,align='left',alpha=1){
+  if(alpha<=0)return;
+  ctx.save(); ctx.globalAlpha=alpha;
+  ctx.strokeStyle=C.ink; ctx.lineWidth=1.3; ctx.beginPath(); ctx.moveTo(x,y); ctx.lineTo(tx,ty); ctx.stroke();
+  circle(tx,ty,3.2,C.ink);
+  ctx.font='700 18px "Atkinson Hyperlegible", "Segoe UI", sans-serif'; ctx.textAlign=align; ctx.textBaseline='middle';
+  const ox = align==='left'?6:align==='right'?-6:0, oy = align==='center'?(ty>y?-12:12):0;
+  ctx.lineJoin='round'; ctx.lineWidth=5; ctx.strokeStyle=C.surface; ctx.strokeText(text,x+ox,y+oy);
+  ctx.fillStyle=C.ink; ctx.fillText(text,x+ox,y+oy);
+  ctx.restore();
+}
+function bigText(text,x,y,alpha=1){ ctx.save(); ctx.globalAlpha=alpha; ctx.font='400 30px "Young Serif", Georgia, serif'; ctx.textAlign='center'; ctx.textBaseline='middle'; ctx.lineJoin='round'; ctx.lineWidth=6; ctx.strokeStyle=C.surface; ctx.strokeText(text,x,y); ctx.fillStyle=C.ink; ctx.fillText(text,x,y); ctx.restore(); }
+
+/* ---------- state ---------- */
+let scene='human', stage=0, p=0, playing=!reduce, hold=0, clock=0, paused=reduce;
+if(reduce) p=1;
+
+/* ---------- human scene ---------- */
+const E={x:640,y:280}, R=92, COAT=104;
+const ANG=[Math.PI, Math.PI-.26, Math.PI+.26, Math.PI-.52, Math.PI+.52, Math.PI-.78, Math.PI+.78, Math.PI-1.04, Math.PI+1.04, Math.PI-1.3, Math.PI+1.3, Math.PI-1.56];
+const SP = ANG.map((a,i)=>({a, s:{x:-60-(i%4)*45, y:90+i*34}, A:{x:E.x+250*Math.cos(a), y:E.y+250*Math.sin(a)}, Cc:{x:E.x+122*Math.cos(a), y:E.y+122*Math.sin(a)}, ph:i*1.7}));
+const CELLS=[
+  [[0,0,.86]],
+  [[-.42,0,.46],[.42,0,.46]],
+  [[-.36,-.36,.36],[-.36,.36,.36],[.36,-.36,.36],[.36,.36,.36]],
+  [202.5,247.5,112.5,157.5,292.5,337.5,22.5,67.5].map(d=>[.52*Math.cos(d*Math.PI/180),.52*Math.sin(d*Math.PI/180),.3])
+];
+
+function drawSperm(x,y,ang,head=1,tail=1,ph=0){
+  ctx.save(); ctx.translate(x,y); ctx.rotate(ang);
+  if(tail>0){ ctx.globalAlpha=tail; ctx.strokeStyle=C.sperm; ctx.lineWidth=2.2; ctx.lineCap='round'; ctx.beginPath();
+    for(let k=0;k<=22;k++){ const xx=-13-k*2.4, yy=Math.sin(k*.45-clock*14+ph)*(k/22)*7; k?ctx.lineTo(xx,yy):ctx.moveTo(xx,yy);} ctx.stroke();
+    ctx.lineWidth=4.5; ctx.beginPath(); ctx.moveTo(-14,0); ctx.lineTo(-7,0); ctx.stroke(); }
+  if(head>0){ ctx.globalAlpha=head; ellipse(0,0,10,6.5,0,C.sperm); ellipse(4.5,0,5,5.2,0,C.acro); }
+  ctx.restore();
+}
+function drawHuman(){
+  const P=k=> k<stage?1 : k===stage?p:0;
+  ctx.fillStyle=C.fluid; ctx.fillRect(0,0,W,H);
+  // oviduct walls with cilia
+  for(const top of [true,false]){
+    ctx.beginPath(); ctx.moveTo(0, top?0:H);
+    for(let x=0;x<=W;x+=10){ const y = top? 46+9*Math.sin(x/95) : H-46-9*Math.sin(x/95+1.3); ctx.lineTo(x,y); }
+    ctx.lineTo(W, top?0:H); ctx.closePath(); ctx.fillStyle=C.tissue; ctx.fill();
+    ctx.strokeStyle=C.cilia; ctx.lineWidth=2; ctx.lineCap='round';
+    for(let x=8;x<W;x+=16){ const y = top? 46+9*Math.sin(x/95) : H-46-9*Math.sin(x/95+1.3); const sw=Math.sin(clock*6+x/26)*.5; const dir=top?1:-1;
+      ctx.beginPath(); ctx.moveTo(x,y); ctx.lineTo(x+Math.sin(sw)*12, y+dir*Math.cos(sw)*12); ctx.stroke(); }
+  }
+  const p0=P(0),p1=P(1),p2=P(2),p3=P(3),p4=P(4),p5=P(5);
+  // jelly coat
+  ctx.save(); ctx.globalAlpha=.85; circle(E.x,E.y,COAT,null,C.coat,26); ctx.restore();
+  if(p3>0){ ctx.save(); ctx.globalAlpha=.8*p3; circle(E.x,E.y,COAT+2,null,C.seal,4+5*p3); ctx.restore(); }
+  // egg or embryo
+  if(p5<=0){ circle(E.x,E.y,R,C.egg,C.eggline,2.5); }
+  else {
+    const sub=Math.min(p5*3,2.9999), idx=Math.floor(sub), s=p5>=1?1:ease(sub-idx);
+    const par=CELLS[idx], ch=CELLS[idx+1];
+    ch.forEach((c,j)=>{ const pp=par[Math.floor(j*par.length/ch.length)];
+      const x=E.x+R*lerp(pp[0],c[0],s), y=E.y+R*lerp(pp[1],c[1],s), r=R*lerp(pp[2],c[2],s);
+      circle(x,y,r,C.egg,C.eggline,2.2); circle(x,y,Math.max(5,r*.28),C.zygote); });
+  }
+  // nuclei
+  const N={x:E.x+16,y:E.y-6};
+  const merge = clamp((p4-.8)/.2);
+  if(p5<=0){
+    if(merge<1){ ctx.save(); ctx.globalAlpha=1-merge; circle(N.x,N.y,20,C.female); ctx.restore(); }
+    if(p2>0 && merge<1){ const M0={x:E.x-62,y:E.y}; const t=ease(clamp(p4/.8));
+      const sx=p4>0?lerp(M0.x,N.x-14,t):lerp(SP[0].Cc.x,M0.x,ease(p2)), sy=p4>0?lerp(M0.y,N.y,t):lerp(SP[0].Cc.y,M0.y,ease(p2));
+      ctx.save(); ctx.globalAlpha=1-merge; circle(sx,sy,p4>0?lerp(9,14,t):9,C.male); ctx.restore(); }
+    if(merge>0){ ctx.save(); ctx.globalAlpha=merge; circle(N.x,N.y,25,C.zygote); circle(N.x,N.y,25+6*Math.sin(clock*4),null,C.zygote,1.5); ctx.restore(); }
+  }
+  // sperm
+  SP.forEach((sp,i)=>{
+    let x,y,ang;
+    if(p1<=0){ const t=ease(p0); x=lerp(sp.s.x,sp.A.x,t); y=lerp(sp.s.y,sp.A.y,t)+Math.sin(clock*2.2+i)*7*(1-t);
+      const a0=Math.atan2(sp.A.y-sp.s.y,sp.A.x-sp.s.x); ang=lerpAng(a0,sp.a+Math.PI,clamp((p0-.6)/.4)); }
+    else { const t=ease(p1); x=lerp(sp.A.x,sp.Cc.x,t); y=lerp(sp.A.y,sp.Cc.y,t); ang=sp.a+Math.PI; }
+    if(i===0){
+      if(p2>0){ drawSperm(sp.Cc.x,sp.Cc.y,ang,0,1-p2,sp.ph);
+        if(p2<.5){ ctx.save(); ctx.globalAlpha=(.5-p2)*1.6; circle(sp.Cc.x+12,sp.Cc.y,8+p2*50,null,C.acro,3); ctx.restore(); } }
+      else drawSperm(x,y,ang,1,1,sp.ph);
+      return;
+    }
+    if(p3>0){ const t=ease(p3); const r=122+80*t; x=E.x+r*Math.cos(sp.a); y=E.y+r*Math.sin(sp.a);
+      drawSperm(x,y,ang,(1-.7*t)*(1-p5),(1-.7*t)*(1-p5),sp.ph); }
+    else drawSperm(x,y,ang,1,1,sp.ph);
+  });
+  // labels
+  const L=(k,f)=>{ if(stage===k){ f(clamp(p*4)); } };
+  L(0,a=>{ const s=SP[5]; const t=ease(p0); label('Sperm',150,470,lerp(s.s.x,s.A.x,t)-4,lerp(s.s.y,s.A.y,t)+4,'center',a*(p0>.15?1:0));
+    label('Egg cell',640,470,640,E.y+R-6,'center',a); label('Oviduct wall',820,86,820,52,'center',a); });
+  L(1,a=>{ label('Jelly coat',830,170,E.x+COAT*.72,E.y-COAT*.72,'left',a); label('Egg cell',640,470,640,E.y+R-6,'center',a); });
+  L(2,a=>{ label('Acrosome enzymes digest the jelly coat',300,110,SP[0].Cc.x-4,SP[0].Cc.y-6,'center',a);
+    label('Tail stays outside',300,450,SP[0].Cc.x-40,SP[0].Cc.y+6,'center',a*clamp(p2*2-.4)); });
+  L(3,a=>{ label('Coat changes: no more sperm can enter',800,140,E.x+COAT*.6,E.y-COAT*.8,'center',a); });
+  L(4,a=>{ if(merge<.5){ label('Sperm nucleus (23)',380,120,E.x-50+40*ease(clamp(p4/.8)),E.y-8,'center',a); label('Egg nucleus (23)',820,140,N.x+14,N.y-12,'center',a);}
+    else { label('Zygote nucleus (46)',820,140,N.x+18,N.y-16,'center',merge); bigText('Zygote',E.x,E.y+R+68,merge); } });
+  L(5,a=>{ const n=p5<1/3?2:p5<2/3?4:8; bigText(n+' cells',E.x,E.y+R+68,a); if(p5>.7) label('Embryo: a ball of cells',300,140,E.x-R*.6,E.y-R*.5,'center',clamp((p5-.7)*4)); });
+}
+
+/* ---------- plant scene ---------- */
+const OV={x:480,y:420}, OU={x:480,y:440};
+function tubeX(y){ return 480+5*Math.sin(y/22); }
+function drawPollen(x,y,r=10){ ctx.save(); ctx.translate(x,y); ctx.fillStyle=C.anther; for(let k=0;k<12;k++){ const a=k*Math.PI/6; ctx.beginPath(); ctx.arc(Math.cos(a)*r,Math.sin(a)*r,2.4,0,Math.PI*2); ctx.fill(); } circle(0,0,r,C.pollen,C.anther,1.5); ctx.restore(); }
+function drawPlant(){
+  const P=k=> k<stage?1 : k===stage?p:0;
+  const p0=P(0),p1=P(1),p2=P(2),p3=P(3),w=ease(P(4));
+  ctx.fillStyle=C.sky; ctx.fillRect(0,0,W,H);
+  // stem + receptacle
+  ctx.fillStyle=C.stem; ctx.fillRect(468,520,24,40); ellipse(480,522,92,22,0,C.stem);
+  // petals and stamens (wither)
+  ctx.save(); ctx.globalAlpha=1-w;
+  ellipse(320,400,160,58,-.55,C.petal); ellipse(640,400,160,58,.55,C.petal);
+  for(const [bx,ax] of [[390,250],[570,710]]){
+    ctx.strokeStyle=C.filament; ctx.lineWidth=6; ctx.lineCap='round'; ctx.beginPath(); ctx.moveTo(bx,505); ctx.quadraticCurveTo(ax+(bx<480?-10:10),330,ax,195); ctx.stroke();
+    ellipse(ax,160,21,36,0,C.anther,C['ovule-ink'],1.5);
+    ctx.fillStyle=C.pollen; for(let k=0;k<6;k++) circle(ax-8+(k%2)*16,140+Math.floor(k/2)*18,3.5,C.pollen);
+  }
+  ctx.restore();
+  // ovary
+  const orx=140+40*w, ory=95+32*w;
+  ellipse(OV.x,OV.y,orx,ory,0,C.carpel,C['carpel-ink'],2.5);
+  if(w>0){ ctx.save(); ctx.globalAlpha=w*.9; ellipse(OV.x,OV.y,orx,ory,0,C.fruit); ctx.restore(); }
+  ellipse(OV.x,OV.y+4,orx-16,ory-16,0,C.cavity);
+  // style + stigma
+  ctx.save(); ctx.globalAlpha=1-w;
+  ctx.fillStyle=C.carpel; ctx.fillRect(465,125,30,OV.y-ory+20-125);
+  ctx.strokeStyle=C['carpel-ink']; ctx.lineWidth=2; ctx.beginPath(); ctx.moveTo(465,128); ctx.lineTo(465,OV.y-ory+8); ctx.moveTo(495,128); ctx.lineTo(495,OV.y-ory+8); ctx.stroke();
+  circle(462,120,17,C.stigma); circle(498,120,17,C.stigma); circle(480,106,17,C.stigma);
+  ctx.restore();
+  // ovule
+  const urx=48+16*w, ury=58+16*w;
+  ctx.strokeStyle=C['ovule-ink']; ctx.lineWidth=4; ctx.beginPath(); ctx.moveTo(OU.x,OU.y+ury-4); ctx.lineTo(OU.x,OV.y+ory-18); ctx.stroke();
+  ellipse(OU.x,OU.y,urx,ury,0,C.ovule,C['ovule-ink'],2.5);
+  if(w>0){ ctx.save(); ctx.globalAlpha=w; ellipse(OU.x,OU.y,urx,ury,0,C.seed); ctx.restore(); }
+  ctx.fillStyle=C.cavity; ctx.fillRect(OU.x-6,OU.y-ury-3,12,12);
+  // tube
+  let tipY=104;
+  if(p1>0) tipY=lerp(104,338,ease(p1));
+  if(p2>0) tipY=lerp(338,OU.y-ury+8,ease(p2));
+  if(p1>0){ ctx.save(); ctx.globalAlpha=1-w; ctx.strokeStyle=C.tube; ctx.lineWidth=6; ctx.lineCap='round'; ctx.beginPath();
+    for(let y=104;y<=tipY;y+=3){ y===104?ctx.moveTo(tubeX(y),y):ctx.lineTo(tubeX(y),y);} ctx.stroke(); ctx.restore(); }
+  // pollen grain
+  if(p0>0){ const t=ease(p0), a={x:250,y:140}, c={x:340,y:-30}, b={x:480,y:92};
+    const x=(1-t)*(1-t)*a.x+2*(1-t)*t*c.x+t*t*b.x, y=(1-t)*(1-t)*a.y+2*(1-t)*t*c.y+t*t*b.y;
+    if(p0<1){ ctx.save(); ctx.setLineDash([4,7]); ctx.strokeStyle=C.muted; ctx.lineWidth=1.5; ctx.beginPath(); ctx.moveTo(a.x,a.y); for(let s=0;s<=t;s+=.02){ const xx=(1-s)*(1-s)*a.x+2*(1-s)*s*c.x+s*s*b.x, yy=(1-s)*(1-s)*a.y+2*(1-s)*s*c.y+s*s*b.y; ctx.lineTo(xx,yy);} ctx.stroke(); ctx.restore(); }
+    ctx.save(); ctx.globalAlpha=1-w; drawPollen(x,y); ctx.restore();
+    if(stage===0) label('Pollen grain',380,40,x-10,y-8,'right',clamp(p0*3));
+  }
+  // nuclei
+  const merge=clamp((p3-.75)/.25);
+  const F={x:OU.x,y:OU.y+10};
+  if(merge<1){ ctx.save(); ctx.globalAlpha=1-merge; circle(F.x,F.y,12,C.female); ctx.restore(); }
+  if(p1>0 && merge<1){ let mx=tubeX(tipY), my=tipY-4;
+    if(p3>0){ const t=ease(clamp(p3/.75)); mx=lerp(tubeX(OU.y-ury+8),F.x,t); my=lerp(OU.y-ury+4,F.y-6,t); }
+    ctx.save(); ctx.globalAlpha=1-merge; circle(mx,my,7.5,C.male); ctx.restore(); }
+  if(merge>0){ const r=14+8*w; ctx.save(); ctx.globalAlpha=merge; circle(F.x,F.y,r,C.zygote); circle(F.x,F.y,r+5+3*Math.sin(clock*4),null,C.zygote,1.5); ctx.restore(); }
+  // labels
+  const L=(k,f)=>{ if(stage===k) f(clamp(p*4)); };
+  L(0,a=>{ label('Anther',130,100,232,140,'right',a); label('Stigma',640,80,500,104,'left',a); });
+  L(1,a=>{ label('Pollen tube',650,230,tubeX(230)+6,230,'left',a); label('Style',380,250,464,250,'right',a); label('Male nucleus',650,300,tubeX(tipY)+8,tipY-4,'left',a); });
+  L(2,a=>{ label('Micropyle',660,350,OU.x+6,OU.y-ury+2,'left',a); label('Ovule',700,450,OU.x+urx,OU.y+10,'left',a); label('Ovary',260,450,OV.x-orx+2,OV.y+10,'right',a); });
+  L(3,a=>{ if(merge<.5){ label('Male nucleus',680,330,OU.x+8,OU.y-30+40*ease(clamp(p3/.75)),'left',a); label('Female nucleus',680,480,F.x+12,F.y+6,'left',a);} else label('Zygote',680,440,F.x+16,F.y,'left',merge); });
+  L(4,a=>{ label('Ovary → fruit',800,300,OV.x+orx*.75,OV.y-ory*.6,'center',a); label('Ovule → seed',820,480,OU.x+urx-4,OU.y+20,'left',a); label('Embryo',200,330,F.x-18,F.y,'right',a); });
+}
+
+/* ---------- UI ---------- */
+const $=id=>document.getElementById(id);
+function buildSteps(){
+  const ol=$('steps'); ol.innerHTML='';
+  SCENES[scene].forEach((s,i)=>{ const li=document.createElement('li'); const b=document.createElement('button');
+    b.innerHTML=`<span class="n">${i+1}</span>${s.t}`; b.onclick=()=>goTo(i); li.appendChild(b); ol.appendChild(li); });
+}
+function updateUI(){
+  const st=SCENES[scene][stage];
+  $('cStep').textContent=`Step ${stage+1} of ${SCENES[scene].length}`;
+  $('cTitle').textContent=st.t; $('cText').textContent=st.d; $('cTip').textContent=st.tip;
+  $('cEq').hidden=!st.eq; $('cEq').textContent=st.eq||'';
+  [...$('steps').querySelectorAll('button')].forEach((b,i)=>{ b.setAttribute('aria-pressed',String(i===stage)); b.classList.toggle('done',i<stage); });
+  $('prev').disabled=stage===0; $('next').disabled=stage===SCENES[scene].length-1;
+  const atEnd = stage===SCENES[scene].length-1 && p>=1;
+  $('play').textContent = playing ? 'Pause' : atEnd ? 'Replay' : 'Play';
+}
+function goTo(i){ stage=i; p=reduce?0.999:0; hold=0; if(reduce){p=1;playing=false;} else {playing=true;paused=false;} updateUI(); }
+function setScene(s){ scene=s; document.querySelectorAll('[data-scene]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.scene===s))); buildSteps(); goTo(0); }
+document.querySelectorAll('[data-scene]').forEach(b=>b.onclick=()=>setScene(b.dataset.scene));
+$('prev').onclick=()=>goTo(Math.max(0,stage-1));
+$('next').onclick=()=>goTo(Math.min(SCENES[scene].length-1,stage+1));
+$('play').onclick=()=>{
+  if(playing){ playing=false; paused=true; }
+  else { const last=SCENES[scene].length-1; if(stage===last&&p>=1){ goTo(0); return; } paused=false; playing=!reduce; if(reduce){ goTo(Math.min(last,stage+1)); return; } }
+  updateUI();
+};
+
+let lastT=performance.now();
+function frame(now){
+  const dt=Math.min(.05,(now-lastT)/1000); lastT=now;
+  if(!paused && !reduce) clock+=dt;
+  if(playing){
+    if(hold>0){ hold-=dt; if(hold<=0){ stage++; p=0; updateUI(); } }
+    else { p=Math.min(1,p+dt/SCENES[scene][stage].dur);
+      if(p>=1){ if(stage<SCENES[scene].length-1) hold=1.6; else { playing=false; updateUI(); } } }
+  }
+  $('cBar').style.width=(p*100)+'%';
+  scene==='human'?drawHuman():drawPlant();
+  requestAnimationFrame(frame);
+}
+buildSteps(); updateUI(); requestAnimationFrame(frame);
+</script>
+
+</body></html>

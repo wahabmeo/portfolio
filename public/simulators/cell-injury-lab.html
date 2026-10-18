@@ -1,0 +1,500 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>Cell Injury Lab</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700&family=Atkinson+Hyperlegible:wght@400;700&family=JetBrains+Mono:wght@400;600&display=swap">
+<style>
+/* Layout: a lab bench — microscope field on the left, insult controls on the right, readouts, trace and mechanism log below */
+:root{
+  --bg:#eceef3; --panel:#ffffff; --ink:#1c1e2a; --muted:#5b6074; --line:#d6d9e2;
+  --accent:#6b2a80; --accent-soft:#efe4f3;
+  --slide:#fbf5f7; --eosin:#efa2bb; --eosin-deep:#c2456f; --hema:#4a2470;
+  --mito:#d9805a; --er:#7a5aa8; --lipid:#fffdf2; --gly:#5b2c78;
+  --good:#2b8656; --warn:#b2740c; --bad:#c13838; --apo:#2f66bd;
+  --display:"Bricolage Grotesque", "Segoe UI", system-ui, sans-serif;
+  --body:"Atkinson Hyperlegible", "Segoe UI", system-ui, sans-serif;
+  --mono:"JetBrains Mono", ui-monospace, Menlo, monospace;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#111219; --panel:#1a1c26; --ink:#e7e8f0; --muted:#9ca1b6; --line:#2c2f3e;
+  --accent:#c99ae0; --accent-soft:#2a2135;
+  --slide:#1f1a23; --eosin:#b85f80; --eosin-deep:#f07aa2; --hema:#d6b8f0;
+  --mito:#e08f68; --er:#a98ad6; --lipid:#f4efd9; --gly:#d6b8f0;
+  --good:#4cc185; --warn:#e2a53c; --bad:#f06c6c; --apo:#6f9df2; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#111219; --panel:#1a1c26; --ink:#e7e8f0; --muted:#9ca1b6; --line:#2c2f3e;
+  --accent:#c99ae0; --accent-soft:#2a2135;
+  --slide:#1f1a23; --eosin:#b85f80; --eosin-deep:#f07aa2; --hema:#d6b8f0;
+  --mito:#e08f68; --er:#a98ad6; --lipid:#f4efd9; --gly:#d6b8f0;
+  --good:#4cc185; --warn:#e2a53c; --bad:#f06c6c; --apo:#6f9df2; color-scheme:dark}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:var(--body);font-size:15px;line-height:1.5}
+.wrap{max-width:1180px;margin:0 auto;padding-inline:16px;padding-block:20px 48px;display:grid;gap:16px}
+header h1{font-family:var(--display);font-weight:700;font-size:clamp(1.6rem,4vw,2.3rem);margin:0;letter-spacing:-.01em;text-wrap:balance}
+header p{margin:.25rem 0 0;color:var(--muted);max-width:68ch}
+.eyebrow{font-family:var(--mono);font-size:.72rem;letter-spacing:.12em;text-transform:uppercase;color:var(--accent)}
+.bench{display:grid;grid-template-columns:minmax(0,1.15fr) minmax(0,1fr);gap:16px}
+@media (max-width:820px){.bench{grid-template-columns:1fr}}
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:16px;min-width:0}
+.scope{position:relative;padding:0;overflow:hidden}
+#cell{display:block;width:100%;aspect-ratio:1/1;max-width:100%}
+.hud{position:absolute;inset:12px 12px auto 12px;display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap;pointer-events:none}
+.pill{font-family:var(--mono);font-size:.75rem;padding:4px 10px;border-radius:99px;border:1px solid currentColor;background:var(--panel);font-weight:600}
+.clock{font-family:var(--mono);font-size:.8rem;color:var(--muted);background:var(--panel);padding:4px 10px;border-radius:99px;border:1px solid var(--line);font-variant-numeric:tabular-nums}
+.legend{display:flex;flex-wrap:wrap;gap:6px 14px;padding:10px 14px;border-top:1px solid var(--line);font-size:.78rem;color:var(--muted)}
+.legend i{display:inline-block;width:10px;height:10px;border-radius:50%;margin-right:5px;vertical-align:-1px}
+.ctl{display:grid;gap:14px}
+label.f{display:grid;gap:4px;font-size:.85rem;color:var(--muted)}
+label.f b{color:var(--ink);font-weight:700}
+select,input[type=range]{width:100%}
+select{font:inherit;padding:8px;border-radius:8px;border:1px solid var(--line);background:var(--panel);color:var(--ink)}
+input[type=range]{accent-color:var(--accent)}
+.row{display:flex;gap:8px;flex-wrap:wrap}
+button{font:inherit;font-weight:700;padding:9px 14px;border-radius:8px;border:1px solid var(--line);background:var(--panel);color:var(--ink);cursor:pointer}
+button.primary{background:var(--accent);border-color:var(--accent);color:var(--panel)}
+button:focus-visible,select:focus-visible,input:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+button:disabled{opacity:.45;cursor:default}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chips button{font-weight:400;font-size:.8rem;padding:6px 10px;border-radius:99px;background:var(--accent-soft);border-color:transparent}
+.drugs{display:grid;gap:6px;font-size:.85rem}
+.drugs label{display:flex;gap:8px;align-items:flex-start}
+.drugs small{color:var(--muted);display:block}
+h2{font-family:var(--display);font-weight:500;font-size:1.1rem;margin:0 0 10px}
+.grid3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}
+@media (max-width:980px){.grid3{grid-template-columns:1fr}}
+.meter{display:grid;grid-template-columns:8.5rem minmax(0,1fr) 3.6rem;gap:8px;align-items:center;font-size:.82rem;margin-bottom:7px}
+.meter span:last-child{font-family:var(--mono);text-align:right;font-variant-numeric:tabular-nums;font-size:.78rem}
+.bar{height:8px;background:var(--line);border-radius:4px;overflow:hidden}
+.bar i{display:block;height:100%;width:0;border-radius:4px;transition:width .15s linear}
+#trace{width:100%;height:220px;display:block}
+.keys{display:flex;flex-wrap:wrap;gap:4px 12px;font-size:.75rem;color:var(--muted);margin-top:6px}
+.keys i{display:inline-block;width:14px;height:3px;margin-right:4px;vertical-align:3px}
+#log{list-style:none;margin:0;padding:0;max-height:380px;overflow:auto;display:grid;gap:8px}
+#log li{border-left:3px solid var(--line);padding:2px 0 2px 10px;font-size:.85rem}
+#log li b{display:block}
+#log li time{font-family:var(--mono);font-size:.72rem;color:var(--muted)}
+#log li.bad{border-color:var(--bad)} #log li.warn{border-color:var(--warn)} #log li.good{border-color:var(--good)} #log li.apo{border-color:var(--apo)}
+.empty{color:var(--muted);font-size:.85rem}
+table{width:100%;border-collapse:collapse;font-size:.85rem}
+th,td{text-align:left;padding:7px 8px;border-bottom:1px solid var(--line);vertical-align:top}
+th{font-family:var(--mono);font-size:.72rem;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);font-weight:600}
+.tw{overflow-x:auto}
+details summary{cursor:pointer;font-weight:700}
+details p,details li{color:var(--muted);font-size:.88rem;max-width:75ch}
+@media (prefers-reduced-motion:reduce){.bar i{transition:none}}
+</style>
+
+<div class="wrap">
+<header>
+  <div class="eyebrow">Pathology · Robbins ch. 2 · Cambridge 9700 extension</div>
+  <h1>Cell Injury Lab</h1>
+  <p>Choose an insult, set its severity and duration, and watch one cell move through reversible injury toward recovery, necrosis or apoptosis. Every change on the slide comes from the biochemistry in the readouts below.</p>
+</header>
+
+<section class="bench">
+  <div class="panel scope">
+    <canvas id="cell" aria-label="Animated cell under the microscope"></canvas>
+    <div class="hud"><span class="pill" id="status">Normal cell</span><span class="clock" id="clock">t = 0 min</span></div>
+    <div class="legend">
+      <span><i style="background:var(--mito)"></i>Mitochondria</span>
+      <span><i style="background:var(--er)"></i>Rough ER</span>
+      <span><i style="background:var(--gly)"></i>Glycogen</span>
+      <span><i style="background:var(--lipid);border:1px solid var(--muted)"></i>Lipid droplet</span>
+      <span><i style="background:var(--hema)"></i>Chromatin</span>
+    </div>
+  </div>
+
+  <div class="panel ctl">
+    <label class="f"><b>Insult</b>
+      <select id="insult">
+        <option value="ischemia">Ischemia → reperfusion (cardiac myocyte)</option>
+        <option value="hypoxia">Hypoxia, flow preserved (cardiac myocyte)</option>
+        <option value="toxin">CCl₄ toxicity (hepatocyte)</option>
+        <option value="radiation">Ionizing radiation (lymphocyte)</option>
+      </select>
+    </label>
+    <label class="f"><span><b>Severity</b> · <span id="sevTxt"></span></span>
+      <input type="range" id="sev" min="0.05" max="1" step="0.05" value="1"></label>
+    <label class="f" id="durWrap"><span><b>Duration</b> · <span id="durTxt"></span></span>
+      <input type="range" id="dur" min="5" max="120" step="5" value="30"></label>
+    <div class="drugs">
+      <label><input type="checkbox" id="dNac"><span>N-acetylcysteine<small>Antioxidant: scavenges ROS by ~60%</small></span></label>
+      <label><input type="checkbox" id="dCsa"><span>Cyclosporine A<small>Binds cyclophilin D, delays MPT pore opening</small></span></label>
+      <label><input type="checkbox" id="dZvad"><span>z-VAD (pan-caspase inhibitor)<small>Blocks caspases; watch the death mode switch</small></span></label>
+    </div>
+    <label class="f"><span><b>Speed</b> · <span id="spdTxt"></span></span>
+      <input type="range" id="spd" min="1" max="20" step="1" value="6"></label>
+    <div class="row">
+      <button class="primary" id="play">Run</button>
+      <button id="restore">Restore flow now</button>
+      <button id="reset">Reset</button>
+    </div>
+    <div>
+      <div class="eyebrow" style="margin-bottom:6px">Scenarios</div>
+      <div class="chips" id="presets"></div>
+    </div>
+  </div>
+</section>
+
+<section class="grid3">
+  <div class="panel"><h2>Cell state</h2><div id="meters"></div></div>
+  <div class="panel"><h2>Trace</h2><canvas id="trace"></canvas>
+    <div class="keys" id="keys"></div></div>
+  <div class="panel"><h2>Mechanism log</h2><ul id="log"></ul><p class="empty" id="logEmpty">Press Run. Each threshold the cell crosses is logged here with its mechanism.</p></div>
+</section>
+
+<section class="panel">
+  <h2>Reading the slide: necrosis vs apoptosis</h2>
+  <div class="tw"><table>
+    <thead><tr><th>Feature</th><th>Necrosis</th><th>Apoptosis</th></tr></thead>
+    <tbody>
+      <tr><td>Cell size</td><td>Enlarged (swelling)</td><td>Reduced (shrinkage)</td></tr>
+      <tr><td>Nucleus</td><td>Pyknosis → karyorrhexis → karyolysis</td><td>Chromatin condensation, fragmentation into nucleosome-sized pieces</td></tr>
+      <tr><td>Plasma membrane</td><td>Disrupted; contents leak (troponin, ALT, LDH)</td><td>Intact; phosphatidylserine flipped outward as an "eat me" signal</td></tr>
+      <tr><td>ATP</td><td>Depleted</td><td>Required (caspase cascade and apoptosome are energy-dependent)</td></tr>
+      <tr><td>Inflammation</td><td>Frequent: neutrophils arrive</td><td>None: macrophages engulf apoptotic bodies</td></tr>
+      <tr><td>Role</td><td>Always pathological</td><td>Often physiological; pathological after DNA damage</td></tr>
+    </tbody></table></div>
+</section>
+
+<section class="panel">
+  <details>
+    <summary>How the model works</summary>
+    <p>A set of coupled equations runs in simulated minutes. Oxygen drives mitochondrial ATP; when oxygen falls, anaerobic glycolysis consumes glycogen and produces lactate, lowering pH. Low ATP fails the Na⁺/K⁺-ATPase (Na⁺ and water enter, the cell swells) and the Ca²⁺ pumps (cytosolic Ca²⁺ rises). Calcium and reactive oxygen species damage mitochondria; past a threshold the mitochondrial permeability transition pore opens, which the model treats as the point of no return. Ca²⁺, ROS and leaking lysosomal enzymes damage the plasma membrane. Necrosis is called when the membrane fails or ATP stays collapsed after MPT.</p>
+    <p>During ischemia, ATP breaks down to hypoxanthine. On reperfusion, xanthine oxidase converts it with the returning oxygen into superoxide, causing an ROS burst and a Ca²⁺ surge. This is why a cell that was still salvageable can die after flow returns.</p>
+    <p>DNA damage stabilises p53, which drives BAX/BAK, cytochrome c release and caspase-9 → caspase-3. Apoptosis is called when caspase-3 activity is high and ATP is still available. If caspases are blocked, sustained death signalling diverts through RIPK1/RIPK3/MLKL into necroptosis, a programmed death with necrotic morphology.</p>
+    <p>Rates are tuned so that severe myocardial ischemia crosses the point of no return at about 30–40 minutes, in line with classic canine coronary occlusion studies. The numbers are teaching approximations, not measured values.</p>
+  </details>
+</section>
+</div>
+
+<script>
+const $=id=>document.getElementById(id);
+const clamp=(v,a=0,b=1)=>Math.max(a,Math.min(b,v));
+const INS={
+  ischemia:{leak:'Troponin I',sev:s=>Math.round(s*100)+'% coronary occlusion',dur:true,lab:'Ischemia'},
+  hypoxia:{leak:'Troponin I',sev:s=>'O₂ delivery −'+Math.round(s*70)+'%',dur:true,lab:'Hypoxia'},
+  toxin:{leak:'ALT',sev:s=>'CCl₄ ≈ '+(s*2).toFixed(1)+' mL/kg',dur:true,lab:'CCl₄'},
+  radiation:{leak:'LDH',sev:s=>(s*10).toFixed(1)+' Gy single dose',dur:false,lab:'Radiation'}
+};
+const PRESETS=[
+  {n:'Ischemia 15 min',i:'ischemia',s:1,d:15},
+  {n:'Ischemia 25 min + reperfusion',i:'ischemia',s:1,d:25},
+  {n:'Ischemia 30 min + reperfusion',i:'ischemia',s:1,d:30},
+  {n:'Same + cyclosporine + NAC',i:'ischemia',s:1,d:30,csa:1,nac:1},
+  {n:'Ischemia 60 min',i:'ischemia',s:1,d:60},
+  {n:'CCl₄ moderate dose',i:'toxin',s:.5,d:60},
+  {n:'Radiation 1 Gy',i:'radiation',s:.1},
+  {n:'Radiation 4 Gy',i:'radiation',s:.4},
+  {n:'4 Gy + caspase inhibitor',i:'radiation',s:.4,zvad:1}
+];
+const T_MAX=180;
+let S, hist, running=false, fired;
+const P=()=>({type:$('insult').value,s:+$('sev').value,nac:$('dNac').checked,csa:$('dCsa').checked,zvad:$('dZvad').checked});
+
+function init(){
+  const p=P();
+  S={t:0,ATP:1,glyc:1,lac:0,pH:7.2,Na:0,Ca:0.02,ROS:0.03,mito:0,mpt:false,mptT:null,lyso:0,mem:0,fat:0,dna:0,p53:0,casp:0,rip:0,hx:0,trop:0,
+     fate:null,phase:0,pnr:false,endAt:+$('dur').value,ended:false,lowO2:false};
+  if(p.type==='radiation'){S.dna=p.s;S.ROS=0.55*p.s;S.endAt=0}
+  hist=[];fired={};
+  $('log').innerHTML='';$('logEmpty').hidden=false;
+  running=false;$('play').textContent='Run';
+  updateLabels();render();
+}
+
+function ev(key,title,text,kind=''){
+  if(fired[key])return;fired[key]=1;
+  const li=document.createElement('li');li.className=kind;
+  li.innerHTML=`<time>t = ${S.t.toFixed(0)} min</time><b>${title}</b>${text}`;
+  $('log').prepend(li);$('logEmpty').hidden=true;
+}
+
+function step(dt){
+  const p=P(), s=p.s; S.t+=dt;
+  const active=S.t<S.endAt;
+  if(!active&&!S.ended&&p.type!=='radiation'&&S.t>0.1){S.ended=true;onEnd(p)}
+  let O2=1;
+  if(p.type==='ischemia'&&active)O2=1-s;
+  if(p.type==='hypoxia'&&active)O2=1-0.7*s;
+  if(S.fate==='necrosis'||S.fate==='necroptosis'){
+    S.phase=clamp(S.phase+dt/60);S.ATP*=Math.exp(-dt/4);S.mem=clamp(S.mem+dt*0.02);S.Ca=clamp(S.Ca+dt*0.02);
+    S.Na=clamp(S.Na+dt*0.01,0,1.2);S.trop+=dt*0.03*S.mem*(1+S.phase);S.ROS*=Math.exp(-dt/8);
+    nuclearEvents();return;
+  }
+  if(S.fate==='apoptosis'){S.phase=clamp(S.phase+dt/40);S.Na=Math.max(0,S.Na-dt*0.02);nuclearEvents();return}
+  const nac=p.nac?0.4:1, mptThr=p.csa?0.78:0.55;
+  // glycogen and anaerobic glycolysis
+  S.glyc=clamp(S.glyc+dt*(-0.045*(1-O2)*S.glyc*(S.pH>6.4?1:0.3)+0.008*O2*(1-S.glyc)*(S.ATP>0.6?1:0)));
+  const pHf=clamp((S.pH-6.2)/1.0);
+  const target=clamp(O2*(1-S.mito)*(S.mpt?0.15:1)+0.4*S.glyc*pHf*(1-O2));
+  S.ATP+=(target-S.ATP)*dt/3;
+  // lactate / pH
+  const wash=p.type==='hypoxia'?0.06:0;
+  S.lac=clamp(S.lac+dt*(0.06*(1-O2)*S.glyc-0.08*S.lac*O2-wash*S.lac),0,1.2);
+  S.pH=clamp(7.2-0.9*S.lac,6.2,7.2);
+  // purine breakdown (for reperfusion ROS)
+  S.hx=clamp(S.hx+dt*(0.03*(1-S.ATP)*(1-O2)-0.05*S.hx*O2),0,1.2);
+  // ionic failure
+  S.Na=clamp(S.Na+dt*(0.06*(1-S.ATP)+0.08*S.mem-0.1*S.ATP*S.Na),0,1.2);
+  S.Ca=clamp(S.Ca+dt*(0.05*(1-S.ATP)+0.15*S.mem+0.04*(S.mpt?1:0)-0.12*S.ATP*S.Ca));
+  // ROS
+  let src=0.15*0.03+0.02*S.mito;
+  if(p.type==='toxin'&&active)src+=0.15*(0.1+0.8*s);
+  S.ROS=clamp(S.ROS+dt*(src*nac-0.15*S.ROS));
+  // mitochondria
+  S.mito=clamp(S.mito+dt*(0.03*S.Ca*S.Ca+0.03*S.ROS-(S.ATP>0.5&&!S.mpt?0.006:0)));
+  if(!S.mpt&&S.mito>mptThr){S.mpt=true;S.mptT=S.t}
+  // lysosomes and membrane
+  if(S.pH<6.7&&S.ATP<0.25)S.lyso=clamp(S.lyso+dt*0.03);
+  S.mem=clamp(S.mem+dt*(0.012*S.Ca+0.035*S.ROS+0.02*(S.mpt?1:0)+0.04*S.lyso-(S.ATP>0.6&&S.mem<0.5?0.005:0)));
+  // fatty change (CCl4: impaired apoprotein synthesis)
+  if(p.type==='toxin')S.fat=clamp(S.fat+dt*(active?0.012*S.ROS*4:-0.002));
+  // DNA, p53, caspases
+  S.dna=clamp(S.dna+dt*(0.004*S.ROS-(S.dna<0.5?0.012:0.003)*S.ATP*S.dna));
+  S.p53=clamp(S.p53+dt*(0.08*S.dna-0.05*S.p53));
+  const drive=Math.max(0,S.p53-0.35)*0.08+(S.mpt?0:Math.max(0,S.mito-0.25)*0.03);
+  if(p.zvad){S.casp=clamp(S.casp-dt*0.05*S.casp);S.rip=clamp(S.rip+dt*drive*0.8)}
+  else S.casp=clamp(S.casp+dt*drive*(S.ATP>0.3?1:0.1)-dt*0.003*S.casp);
+  S.trop+=dt*0.03*Math.max(0,S.mem-0.15);
+  S.lowO2=O2<0.6;
+  thresholds(p);
+}
+
+function onEnd(p){
+  if(p.type==='ischemia'){
+    const burst=S.hx*1.0*(p.nac?0.4:1);
+    S.ROS=clamp(S.ROS+burst);S.Ca=clamp(S.Ca+0.25*S.mito);S.hx=0;
+    ev('rep','Reperfusion: flow restored',
+      burst>0.15?`Returning O₂ meets accumulated hypoxanthine. Xanthine oxidase generates superoxide (ROS burst ${Math.round(burst*100)}%), Ca²⁺ floods in through damaged membranes and neutrophils are recruited. Salvageable cells can be pushed past the point of no return.`
+      :'Short ischemia left little hypoxanthine, so the oxidative burst is small. ATP recovery may lag for hours (myocardial stunning).','warn');
+  } else if(p.type==='hypoxia') ev('rep','Oxygen delivery restored','Oxidative phosphorylation restarts. Because flow was preserved, lactate was washed out and injury is milder than ischemia of the same length.','good');
+  else if(p.type==='toxin') ev('rep','Toxin cleared','CYP2E1 stops producing CCl₃• radicals. Lipid peroxidation chains still propagate until antioxidants terminate them.','good');
+}
+
+function thresholds(p){
+  if(S.ATP<0.5)ev('atp','ATP below 50%','Oxidative phosphorylation is failing. The Na⁺/K⁺-ATPase slows: Na⁺ and water enter and the cell begins to swell (hydropic change).','warn');
+  if(S.glyc<0.5&&S.lowO2)ev('gly','Anaerobic glycolysis','Glycogen stores are being consumed to make ATP without oxygen. Lactic acid accumulates and pH falls.','warn');
+  if(S.pH<6.8)ev('ph','Intracellular acidosis (pH '+S.pH.toFixed(2)+')','Low pH causes nuclear chromatin clumping, one of the earliest light-microscopic signs of injury.','warn');
+  if(S.Na>0.45)ev('na','Reversible injury: ultrastructure','ER dilates and ribosomes detach (protein synthesis falls), plasma membrane blebs form, microvilli are lost, mitochondria swell.','warn');
+  if(S.Ca>0.5)ev('ca','Cytosolic Ca²⁺ overload','Ca²⁺ activates phospholipases (membrane damage), proteases (cytoskeleton breakdown), endonucleases (DNA fragmentation) and ATPases (more ATP loss).','bad');
+  if(p.type==='toxin'&&S.fat>0.3)ev('fat','Fatty change (steatosis)','Radicals damage the ER, so apoprotein synthesis falls. Triglycerides cannot be exported as lipoproteins and accumulate as droplets.','warn');
+  if(S.ROS>0.4)ev('ros','Oxidative stress','Hydroxyl and other radicals attack membrane lipids (lipid peroxidation), cross-link proteins and break DNA strands.','bad');
+  if(S.mpt)ev('mpt','Point of no return: MPT pore opens','The mitochondrial permeability transition pore opens. Membrane potential collapses and ATP cannot be regenerated even if oxygen returns. Amorphous Ca²⁺-rich densities appear in the mitochondrial matrix.','bad');
+  if(S.lyso>0.2)ev('lys','Lysosomal leak','Acidic pH and low ATP rupture lysosomal membranes. Acid hydrolases begin digesting the cell from within.','bad');
+  if(S.mem>0.45)ev('mem','Plasma membrane damage','Membrane integrity is failing. Intracellular enzymes begin to leak into the blood ('+INS[p.type].leak+').','bad');
+  if(S.p53>0.4)ev('p53','p53 stabilised','DNA damage activates ATM/ATR → p53. p53 arrests the cycle (p21) to allow repair; if damage persists it induces PUMA/NOXA → BAX/BAK.','apo');
+  if(S.casp>0.3)ev('cas','Intrinsic pathway engaged','Cytochrome c leaves mitochondria and joins Apaf-1 to form the apoptosome. Caspase-9 activates executioner caspase-3.','apo');
+  if(p.zvad&&S.rip>0.3)ev('rip','Caspases blocked: necroptosis signalling','With caspase-8 inhibited, RIPK1 and RIPK3 form the necrosome and phosphorylate MLKL.','bad');
+  // commitments
+  if(!S.pnr&&(S.mpt||S.mem>0.5||S.casp>0.5||S.rip>0.5))S.pnr=true;
+  if(S.rip>1){S.fate='necroptosis';S.phase=0;ev('nec2','Necroptosis','MLKL oligomers punch holes in the plasma membrane. Programmed, but with necrotic morphology and inflammation.','bad')}
+  else if(S.casp>=1&&S.ATP>0.25){S.fate='apoptosis';S.phase=0;ev('apo','Apoptosis committed','Caspase-3 cleaves the cytoskeleton and ICAD, releasing CAD to cut DNA between nucleosomes (the 180 bp ladder). Phosphatidylserine flips to the outer leaflet.','apo')}
+  else if(S.mem>0.7||(S.mpt&&S.ATP<0.15&&S.t-S.mptT>10)){S.fate='necrosis';S.phase=0;ev('nec','Necrosis','Membranes rupture and cell contents spill out. Denatured proteins make the cytoplasm more eosinophilic; enzymatic digestion follows.','bad')}
+  if(!S.fate&&S.ended&&!S.pnr&&S.ATP>0.8&&S.mem<0.2&&S.Na<0.15&&S.casp<0.2&&S.p53<0.3)ev('rec','Recovered','Ion gradients restored, swelling resolved. The injury was reversible.','good');
+  if(!S.fate&&p.type==='radiation'&&S.t>20&&S.dna<0.15&&S.casp<0.1)ev('rep2','DNA repaired','Damage was within repair capacity. p53 levels fall and the cell re-enters the cycle.','good');
+}
+function nuclearEvents(){
+  if(S.fate==='apoptosis'){
+    if(S.phase>0.3)ev('ak','Nuclear fragmentation','Condensed chromatin breaks into fragments; the cell buds into membrane-bound apoptotic bodies.','apo');
+    if(S.phase>0.75)ev('ph2','Phagocytosis without inflammation','Macrophages recognise phosphatidylserine and engulf the apoptotic bodies. No enzyme leak, no neutrophils.','apo');
+  } else {
+    if(S.phase>0.35)ev('pyk','Pyknosis','The nucleus shrinks and becomes dense and basophilic.','bad');
+    if(S.phase>0.6)ev('krx','Karyorrhexis','The pyknotic nucleus fragments.','bad');
+    if(S.phase>0.8)ev('kly','Karyolysis','DNase activity fades the chromatin until the nucleus disappears. Neutrophils infiltrate.','bad');
+  }
+}
+
+/* ---------- drawing ---------- */
+const tok=n=>getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+function sizeCanvas(cv){const d=window.devicePixelRatio||1,w=cv.clientWidth,h=cv.clientHeight;
+  if(cv.width!==Math.round(w*d)||cv.height!==Math.round(h*d)){cv.width=Math.round(w*d);cv.height=Math.round(h*d)}
+  const c=cv.getContext('2d');c.setTransform(d,0,0,d,0,0);return [c,w,h]}
+const rnd=(()=>{let x=7;return()=>{x=(x*16807)%2147483647;return x/2147483647}})();
+const MITO=[...Array(11)].map(()=>({a:rnd()*6.283,r:0.48+rnd()*0.34,rot:rnd()*3.14}));
+const GLY=[...Array(40)].map(()=>({a:rnd()*6.283,r:0.42+rnd()*0.5}));
+const LYS=[...Array(5)].map(()=>({a:rnd()*6.283,r:0.45+rnd()*0.3}));
+const LIP=[...Array(10)].map(()=>({a:rnd()*6.283,r:0.45+rnd()*0.35,z:0.6+rnd()*0.6}));
+const BLEB=[0.3,1.4,2.3,3.4,4.3,5.3];
+const DEB=[...Array(26)].map(()=>({a:rnd()*6.283,r:1.05+rnd()*0.5,z:rnd()}));
+const FR=[...Array(6)].map(()=>({a:rnd()*6.283,r:rnd()*0.5}));
+
+function render(){drawCell();drawTrace();drawMeters();
+  const st=$('status');let txt,col;
+  if(S.fate==='necrosis'){txt='Necrosis';col='--bad'}
+  else if(S.fate==='necroptosis'){txt='Necroptosis';col='--bad'}
+  else if(S.fate==='apoptosis'){txt='Apoptosis';col='--apo'}
+  else if(S.pnr){txt='Irreversible: point of no return';col='--bad'}
+  else if(fired.rec||fired.rep2){txt='Recovered';col='--good'}
+  else if(S.ATP<0.8||S.Na>0.15||S.p53>0.2||S.ROS>0.2){txt='Reversible injury';col='--warn'}
+  else {txt='Normal cell';col='--good'}
+  st.textContent=txt;st.style.color=tok(col);
+  $('clock').textContent=`t = ${S.t.toFixed(0)} min${S.t<S.endAt&&P().type!=='radiation'?' · insult on':''}`;
+  $('restore').disabled=!(P().type==='ischemia'||P().type==='hypoxia')||S.t>=S.endAt;
+}
+
+function drawCell(){
+  const [c,W,H]=sizeCanvas($('cell'));const now=performance.now()/1000;
+  c.fillStyle=tok('--slide');c.fillRect(0,0,W,H);
+  const cx=W/2,cy=H/2+8,base=Math.min(W,H)*0.27;
+  const nec=(S.fate==='necrosis'||S.fate==='necroptosis')?S.phase:0, apo=S.fate==='apoptosis'?S.phase:0;
+  const eos=tok('--eosin'),eosD=tok('--eosin-deep'),hema=tok('--hema');
+  if(apo>0.65){drawBodies(c,cx,cy,base,(apo-0.65)/0.35,eos,eosD,hema);return}
+  let R=base*(1+0.2*clamp(S.Na))*(1-0.32*clamp(apo*1.6));
+  const body=()=>{c.beginPath();for(let i=0;i<=90;i++){const a=i/90*6.283;
+    const r=R*(1+0.025*Math.sin(6*a+now*0.6)+0.07*apo*Math.sin(9*a+1)+0.04*nec*Math.sin(13*a));
+    const x=cx+r*Math.cos(a),y=cy+r*Math.sin(a);i?c.lineTo(x,y):c.moveTo(x,y)}c.closePath()};
+  const nb=Math.round(clamp((S.Na-0.3)*9,0,6))+Math.round(apo*8);
+  const blebs=[];for(let i=0;i<Math.min(nb,6);i++){const a=BLEB[i]+0.05*Math.sin(now+i);blebs.push([cx+R*0.97*Math.cos(a),cy+R*0.97*Math.sin(a),R*(0.1+0.05*Math.sin(i*2))])}
+  // debris & neutrophils for necrosis
+  if(nec>0.45){c.fillStyle=eosD;DEB.forEach(d=>{c.globalAlpha=0.5*clamp((nec-0.45)*3);c.beginPath();c.arc(cx+R*d.r*Math.cos(d.a),cy+R*d.r*Math.sin(d.a),1.5+d.z*2.5,0,6.283);c.fill()});c.globalAlpha=1}
+  // membrane
+  c.lineWidth=3;c.strokeStyle=eosD;
+  if(S.mem>0.45)c.setLineDash([10,4+22*S.mem]);
+  blebs.forEach(b=>{c.beginPath();c.arc(b[0],b[1],b[2],0,6.283);c.stroke()});body();c.stroke();c.setLineDash([]);
+  c.fillStyle=eos;c.globalAlpha=0.55+0.4*nec;
+  blebs.forEach(b=>{c.beginPath();c.arc(b[0],b[1],b[2],0,6.283);c.fill()});body();c.fill();c.globalAlpha=1;
+  // organelles (clipped)
+  c.save();body();c.clip();
+  const P2=(a,r)=>[cx+R*r*Math.cos(a),cy+R*r*Math.sin(a)];
+  const fade=1-nec*0.8;c.globalAlpha=fade;
+  // glycogen
+  c.fillStyle=tok('--gly');const ng=Math.round(GLY.length*S.glyc*(1-nec));
+  for(let i=0;i<ng;i++){const [x,y]=P2(GLY[i].a,GLY[i].r);c.beginPath();c.arc(x,y,1.6,0,6.283);c.fill()}
+  // ER
+  const er=tok('--er'),dil=clamp(S.Na*1.2+nec*0.5);
+  for(let k=0;k<4;k++){const a0=k*1.57+0.4,len=0.9;
+    if(dil<0.3){for(const off of [0.55,0.6]){c.strokeStyle=er;c.lineWidth=1.6;c.beginPath();c.arc(cx,cy,R*off,a0,a0+len);c.stroke()}
+      c.fillStyle=er;for(let j=0;j<9;j++){const a=a0+j*len/8;const [x,y]=P2(a,0.64);c.beginPath();c.arc(x,y,1.3,0,6.283);c.fill()}}
+    else{c.strokeStyle=er;c.lineWidth=1.4;for(let j=0;j<5;j++){const a=a0+j*len/4;const [x,y]=P2(a,0.58);c.beginPath();c.arc(x,y,2+dil*R*0.045,0,6.283);c.stroke()}
+      c.fillStyle=er;for(let j=0;j<8;j++){const [x,y]=P2(a0+j*0.13+0.5,0.7+0.1*Math.sin(j*3));c.beginPath();c.arc(x,y,1.2,0,6.283);c.fill()}}}
+  // mitochondria
+  const sw=clamp(S.mito*1.2+S.Na*0.3);
+  MITO.forEach(m=>{const [x,y]=P2(m.a,m.r);c.save();c.translate(x,y);c.rotate(m.rot);
+    const w=R*0.13*(1+0.4*sw)*(1-0.3*apo),h=R*0.055*(1+1.4*sw);
+    c.fillStyle=tok('--mito');c.beginPath();c.ellipse(0,0,w,h,0,0,6.283);c.fill();
+    c.strokeStyle=tok('--slide');c.lineWidth=1;c.globalAlpha=fade*clamp(1-S.mito*1.3);
+    for(let j=-2;j<=2;j++){c.beginPath();c.moveTo(j*w*0.3,-h*0.7);c.lineTo(j*w*0.3,h*0.2);c.stroke()}
+    c.globalAlpha=fade;
+    if(S.mpt||nec>0){c.fillStyle=hema;c.beginPath();c.arc(0,0,Math.max(2,h*0.35),0,6.283);c.fill()}
+    c.restore()});
+  // lysosomes
+  LYS.forEach(l=>{const [x,y]=P2(l.a,l.r);if(S.lyso>0.15){c.fillStyle=eosD;c.globalAlpha=0.25*S.lyso*fade;c.beginPath();c.arc(x,y,R*0.12*S.lyso+4,0,6.283);c.fill();c.globalAlpha=fade}
+    c.fillStyle=hema;c.beginPath();c.arc(x,y,3,0,6.283);c.fill()});
+  // lipid
+  const nl=Math.round(LIP.length*S.fat);
+  for(let i=0;i<nl;i++){const [x,y]=P2(LIP[i].a,LIP[i].r);c.fillStyle=tok('--lipid');c.strokeStyle=tok('--muted');c.lineWidth=0.8;c.beginPath();c.arc(x,y,R*0.07*LIP[i].z,0,6.283);c.fill();c.stroke()}
+  c.globalAlpha=1;
+  drawNucleus(c,cx,cy,R,nec,apo,hema,now);
+  c.restore();
+  if(nec>0.4)drawNeutrophils(c,cx,cy,R,nec,hema,eos);
+}
+function drawNucleus(c,cx,cy,R,nec,apo,hema,now){
+  let nr=R*0.3;
+  if(apo>0){nr*=1-0.2*apo;
+    c.fillStyle=tok('--panel');c.globalAlpha=0.5;c.beginPath();c.arc(cx,cy,nr,0,6.283);c.fill();c.globalAlpha=1;
+    c.fillStyle=hema;
+    if(apo<0.3){c.beginPath();c.arc(cx,cy,nr,0.4,3.0);c.arc(cx,cy-nr*0.1,nr*0.75,3.0,0.4,true);c.fill();
+      c.beginPath();c.arc(cx,cy,nr,3.6,5.6);c.arc(cx,cy+nr*0.1,nr*0.75,5.6,3.6,true);c.fill()}
+    else FR.forEach((f,i)=>{c.beginPath();c.arc(cx+nr*f.r*1.6*Math.cos(f.a),cy+nr*f.r*1.6*Math.sin(f.a),nr*0.22,0,6.283);c.fill()});
+    return}
+  if(nec>0.8){c.fillStyle=hema;c.globalAlpha=0.35*(1-(nec-0.8)/0.2);c.beginPath();c.arc(cx,cy,nr*0.9,0,6.283);c.fill();c.globalAlpha=1;return}
+  if(nec>0.6){c.fillStyle=hema;FR.forEach(f=>{c.beginPath();c.arc(cx+nr*f.r*1.4*Math.cos(f.a),cy+nr*f.r*1.4*Math.sin(f.a),nr*0.16,0,6.283);c.fill()});return}
+  if(nec>0.35){c.fillStyle=hema;c.beginPath();c.arc(cx,cy,nr*0.55,0,6.283);c.fill();return}
+  // envelope + chromatin
+  c.fillStyle=hema;c.globalAlpha=0.28;c.beginPath();c.arc(cx,cy,nr,0,6.283);c.fill();
+  c.globalAlpha=1;c.strokeStyle=hema;c.lineWidth=2;c.stroke();
+  const clump=clamp((7.2-S.pH)/0.8+nec*2);
+  for(let i=0;i<14;i++){const a=i*2.4,r=nr*(0.2+0.6*((i*37)%10)/10);
+    c.globalAlpha=0.5+0.5*clump;c.beginPath();c.arc(cx+r*Math.cos(a),cy+r*Math.sin(a),1.5+clump*4,0,6.283);c.fill()}
+  c.globalAlpha=1;c.beginPath();c.arc(cx+nr*0.2,cy-nr*0.15,nr*0.18,0,6.283);c.fill();
+}
+function drawNeutrophils(c,cx,cy,R,nec,hema,eos){
+  const k=clamp((nec-0.4)/0.6);
+  [[-2.4,0],[0.6,1],[2.2,2]].forEach(([a,i])=>{const d=R*(2.1-0.9*k);const x=cx+d*Math.cos(a),y=cy+d*Math.sin(a);
+    c.fillStyle=eos;c.globalAlpha=0.6;c.beginPath();c.arc(x,y,R*0.17,0,6.283);c.fill();c.globalAlpha=1;
+    c.fillStyle=hema;for(let j=0;j<3;j++){c.beginPath();c.arc(x+(j-1)*R*0.07,y+(j%2)*R*0.04,R*0.045,0,6.283);c.fill()}});
+}
+function drawBodies(c,cx,cy,base,k,eos,eosD,hema){
+  const R=base*0.68;
+  const mx=cx+base*(2.0-1.1*k),my=cy;
+  for(let i=0;i<5;i++){const a=i*1.256+0.3,d=R*(0.3+0.7*Math.min(1,k*2));
+    let x=cx+d*Math.cos(a),y=cy+d*Math.sin(a);
+    if(k>0.6){const e=(k-0.6)/0.4;x+= (mx-x)*e*0.85;y+=(my-y)*e*0.85}
+    c.fillStyle=eos;c.strokeStyle=eosD;c.lineWidth=2;c.beginPath();c.arc(x,y,R*0.26,0,6.283);c.fill();c.stroke();
+    c.fillStyle=hema;c.beginPath();c.arc(x+2,y-2,R*0.09,0,6.283);c.fill()}
+  c.fillStyle=tok('--muted');c.globalAlpha=0.22;c.beginPath();
+  for(let i=0;i<=60;i++){const a=i/60*6.283,r=base*0.75*(1+0.12*Math.sin(5*a+performance.now()/700));const x=mx+r*Math.cos(a),y=my+r*Math.sin(a);i?c.lineTo(x,y):c.moveTo(x,y)}
+  c.fill();c.globalAlpha=0.55;c.fillStyle=hema;c.beginPath();c.ellipse(mx+base*0.3,my,base*0.18,base*0.28,0,0,6.283);c.fill();c.globalAlpha=1;
+  c.fillStyle=tok('--muted');c.font='12px '+tok('--mono');c.fillText('macrophage',mx-base*0.2,my+base*0.95);
+}
+
+const SER=[{k:'ATP',n:'ATP',c:'--good'},{k:'Ca',n:'Ca²⁺',c:'--warn'},{k:'ROS',n:'ROS',c:'--bad'},{k:'mem',n:'Membrane damage',c:'--eosin-deep'},{k:'casp',n:'Caspase-3',c:'--apo'}];
+$('keys').innerHTML=SER.map(s=>`<span><i style="background:var(${s.c})"></i>${s.n}</span>`).join('')+'<span><i style="background:var(--muted)"></i>Insult ends</span>';
+function drawTrace(){
+  const [c,W,H]=sizeCanvas($('trace'));c.clearRect(0,0,W,H);
+  const l=30,r=8,t=8,b=22,x=v=>l+(W-l-r)*v/T_MAX,y=v=>t+(H-t-b)*(1-v);
+  c.strokeStyle=tok('--line');c.lineWidth=1;c.fillStyle=tok('--muted');c.font='10px '+tok('--mono');
+  [0,0.5,1].forEach(v=>{c.beginPath();c.moveTo(l,y(v));c.lineTo(W-r,y(v));c.stroke();c.fillText(Math.round(v*100)+'%',0,y(v)+3)});
+  [0,30,60,90,120,150,180].forEach(m=>c.fillText(m,x(m)-6,H-6));
+  if(P().type!=='radiation'){c.strokeStyle=tok('--muted');c.setLineDash([3,3]);c.beginPath();c.moveTo(x(S.endAt),t);c.lineTo(x(S.endAt),H-b);c.stroke();c.setLineDash([])}
+  SER.forEach(s=>{c.strokeStyle=tok(s.c);c.lineWidth=2;c.beginPath();hist.forEach((h,i)=>{i?c.lineTo(x(h.t),y(h[s.k])):c.moveTo(x(h.t),y(h[s.k]))});c.stroke()});
+}
+const MET=[
+  {k:'ATP',n:'ATP',f:v=>Math.round(v*100)+'%',good:1},
+  {k:'glyc',n:'Glycogen',f:v=>Math.round(v*100)+'%',good:1},
+  {k:'pH',n:'Cytosolic pH',f:v=>v.toFixed(2),norm:v=>(v-6.2)/1.0,good:1},
+  {k:'Na',n:'Na⁺ / water',f:v=>'+'+Math.round(v*100)+'%'},
+  {k:'Ca',n:'Cytosolic Ca²⁺',f:v=>Math.round(v*100)+'%'},
+  {k:'ROS',n:'ROS',f:v=>Math.round(v*100)+'%'},
+  {k:'mito',n:'Mito damage',f:v=>Math.round(v*100)+'%'},
+  {k:'mem',n:'Membrane damage',f:v=>Math.round(v*100)+'%'},
+  {k:'dna',n:'DNA damage',f:v=>Math.round(v*100)+'%'},
+  {k:'p53',n:'p53',f:v=>Math.round(v*100)+'%'},
+  {k:'casp',n:'Caspase-3',f:v=>Math.round(v*100)+'%',apo:1},
+  {k:'trop',n:'Leaked enzyme',f:v=>(v*10).toFixed(1),norm:v=>v/3}
+];
+$('meters').innerHTML=MET.map(m=>`<div class="meter"><span id="n_${m.k}">${m.n}</span><span class="bar"><i id="b_${m.k}"></i></span><span id="v_${m.k}"></span></div>`).join('');
+function drawMeters(){
+  $('n_trop').textContent=INS[P().type].leak;
+  MET.forEach(m=>{const v=S[m.k],n=clamp(m.norm?m.norm(v):v);
+    const bad=m.good?1-n:n;const col=m.apo?'--apo':bad>0.6?'--bad':bad>0.3?'--warn':'--good';
+    const b=$('b_'+m.k);b.style.width=(n*100)+'%';b.style.background=tok(col);$('v_'+m.k).textContent=m.f(v)});
+}
+
+function updateLabels(){
+  const p=P(),ins=INS[p.type];
+  $('sevTxt').textContent=ins.sev(p.s);
+  $('durTxt').textContent=$('dur').value+' min';
+  $('durWrap').hidden=!ins.dur;
+  $('spdTxt').textContent=$('spd').value+' sim-min / s';
+}
+
+let last=performance.now(),acc=0;
+function loop(now){
+  const dtR=Math.min(0.1,(now-last)/1000);last=now;
+  if(running&&!(S.fate&&S.phase>=1)&&S.t<T_MAX){
+    let m=dtR*(+$('spd').value);
+    while(m>0){const d=Math.min(0.05,m);step(d);m-=d;
+      if(S.t-(hist.length?hist[hist.length-1].t:-1)>=0.5)hist.push({t:S.t,ATP:S.ATP,Ca:S.Ca,ROS:S.ROS,mem:S.mem,casp:S.casp})}
+    if(S.t>=T_MAX||(S.fate&&S.phase>=1)){running=false;$('play').textContent='Run'}
+  }
+  render();requestAnimationFrame(loop);
+}
+
+$('play').onclick=()=>{if(S.t>=T_MAX||(S.fate&&S.phase>=1))init();running=!running;$('play').textContent=running?'Pause':'Run'};
+$('reset').onclick=init;
+$('restore').onclick=()=>{S.endAt=S.t;};
+$('insult').onchange=()=>{const d={ischemia:[1,30],hypoxia:[.8,60],toxin:[.5,60],radiation:[.4,0]}[$('insult').value];$('sev').value=d[0];if(d[1])$('dur').value=d[1];init()};
+$('sev').oninput=()=>{updateLabels();if(S.t===0)init()};
+$('dur').oninput=()=>{updateLabels();if(!S.ended)S.endAt=Math.max(S.t,+$('dur').value)};
+$('spd').oninput=updateLabels;
+['dNac','dCsa','dZvad'].forEach(id=>$(id).onchange=()=>{if(S.t===0)init()});
+$('presets').innerHTML=PRESETS.map((p,i)=>`<button data-i="${i}">${p.n}</button>`).join('');
+$('presets').onclick=e=>{const b=e.target.closest('button');if(!b)return;const p=PRESETS[b.dataset.i];
+  $('insult').value=p.i;$('sev').value=p.s;if(p.d)$('dur').value=p.d;
+  $('dNac').checked=!!p.nac;$('dCsa').checked=!!p.csa;$('dZvad').checked=!!p.zvad;
+  init();running=true;$('play').textContent='Pause'};
+init();requestAnimationFrame(loop);
+</script>
+
+</body></html>

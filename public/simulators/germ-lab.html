@@ -1,0 +1,409 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>Germ Lab 10.3–10.4</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;800&family=Atkinson+Hyperlegible:wght@400;700&family=JetBrains+Mono:wght@500&display=swap">
+<style>
+/* Layout: a lab bench — sticky tab rail of class activities, one activity on screen at a time, big tap targets for projector/touch */
+:root{
+  --bg:#EEF3EF; --surface:#FFFFFF; --ink:#1B2928; --muted:#5A6B68; --line:#CFDAD5;
+  --accent:#C93C63; --teal:#17807A; --amber:#D98A1C; --ok:#2E8A4A; --bad:#C2412F;
+  --agar:#F6E9C4; --chip:#E3ECE7;
+  --display:"Baloo 2","Trebuchet MS",system-ui,sans-serif;
+  --body:"Atkinson Hyperlegible",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --mono:"JetBrains Mono",ui-monospace,Menlo,Consolas,monospace;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#111917; --surface:#1A2422; --ink:#E6EFEC; --muted:#9DB0AB; --line:#2E3C39;
+  --accent:#F06A8E; --teal:#4CC2B9; --amber:#F2B04E; --ok:#5CC57A; --bad:#F07562;
+  --agar:#3A3320; --chip:#24312E; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#111917; --surface:#1A2422; --ink:#E6EFEC; --muted:#9DB0AB; --line:#2E3C39;
+  --accent:#F06A8E; --teal:#4CC2B9; --amber:#F2B04E; --ok:#5CC57A; --bad:#F07562;
+  --agar:#3A3320; --chip:#24312E; color-scheme:dark}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:var(--body);font-size:17px;line-height:1.5;padding-inline:16px;padding-block:0 48px}
+.wrap{max-width:1040px;margin:0 auto}
+header{padding-block:22px 10px;display:flex;flex-wrap:wrap;align-items:baseline;gap:6px 18px}
+h1{font-family:var(--display);font-weight:800;font-size:clamp(28px,5vw,44px);line-height:1.05;margin:0;text-wrap:balance}
+h1 span{color:var(--accent)}
+.sub{color:var(--muted);margin:0;font-size:15px}
+h2{font-family:var(--display);font-weight:800;font-size:clamp(24px,3.6vw,32px);margin:0 0 4px;line-height:1.1;text-wrap:balance}
+h3{font-family:var(--display);font-weight:600;font-size:20px;margin:0 0 6px}
+nav{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--bg);padding-block:8px;display:flex;gap:6px;overflow-x:auto;border-bottom:1px solid var(--line)}
+nav button{flex:0 0 auto;font:700 14px var(--body);border:1px solid var(--line);background:var(--surface);color:var(--ink);padding:8px 12px;border-radius:999px;cursor:pointer;white-space:nowrap}
+nav button .t{font-family:var(--mono);font-size:11px;color:var(--muted);margin-left:6px;font-weight:500}
+nav button[aria-selected="true"]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+nav button[aria-selected="true"] .t{color:var(--bg);opacity:.75}
+button:focus-visible{outline:3px solid var(--amber);outline-offset:2px}
+section{padding-block:22px}
+.lead{max-width:65ch;color:var(--muted);margin:4px 0 18px}
+.tag{display:inline-block;font:500 11px var(--mono);letter-spacing:.08em;text-transform:uppercase;color:var(--teal);margin-bottom:6px}
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:18px}
+.grid{display:grid;gap:14px}
+@media(min-width:760px){.g2{grid-template-columns:1fr 1fr}.g3{grid-template-columns:repeat(3,1fr)}}
+.btn{font:700 15px var(--body);border:0;border-radius:10px;padding:10px 16px;cursor:pointer;background:var(--accent);color:#fff}
+.btn.ghost{background:var(--chip);color:var(--ink)}
+.row{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.small{font-size:14px;color:var(--muted)}
+
+/* sorting cards */
+.cards{display:grid;gap:10px;grid-template-columns:repeat(auto-fill,minmax(190px,1fr))}
+.card{background:var(--surface);border:2px solid var(--line);border-radius:12px;padding:12px;display:flex;flex-direction:column;gap:8px;min-width:0}
+.card .q{font-weight:700}
+.card .choices{display:flex;flex-wrap:wrap;gap:6px}
+.card .choices button{flex:1 1 auto;font:700 13px var(--body);padding:7px 8px;border-radius:8px;border:1px solid var(--line);background:var(--chip);color:var(--ink);cursor:pointer}
+.card.right{border-color:var(--ok)} .card.wrong{border-color:var(--bad)}
+.card .fb{font-size:13.5px;color:var(--muted)} .card.right .fb b{color:var(--ok)} .card.wrong .fb b{color:var(--bad)}
+.score{font:500 15px var(--mono);font-variant-numeric:tabular-nums;background:var(--agar);padding:6px 12px;border-radius:8px}
+
+/* simulator */
+.sim{display:grid;gap:16px}
+@media(min-width:820px){.sim{grid-template-columns:1.1fr 1fr}}
+.dish{position:relative;aspect-ratio:1;max-width:100%;border-radius:50%;background:radial-gradient(circle at 40% 35%,var(--agar),color-mix(in srgb,var(--agar) 70%,var(--amber)));border:10px solid color-mix(in srgb,var(--line) 70%,var(--surface));overflow:hidden}
+.dish canvas{width:100%;height:100%;display:block}
+.temps{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:8px}
+.temps button{text-align:left;border:2px solid var(--line);background:var(--surface);color:var(--ink);border-radius:10px;padding:8px 10px;cursor:pointer;font:400 13px var(--body)}
+.temps button b{display:block;font:800 18px var(--display)}
+.temps button[aria-pressed="true"]{border-color:var(--accent);background:color-mix(in srgb,var(--accent) 10%,var(--surface))}
+.readout{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:6px}
+.readout div{background:var(--chip);border-radius:10px;padding:10px}
+.readout small{display:block;font:500 11px var(--mono);letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+.readout strong{font:800 26px var(--display);font-variant-numeric:tabular-nums}
+input[type=range]{width:100%;accent-color:var(--accent)}
+.verdict{margin-top:10px;padding:10px 12px;border-radius:10px;font-weight:700}
+
+/* bins */
+.bins{display:grid;gap:12px;grid-template-columns:repeat(auto-fit,minmax(230px,1fr))}
+.bin{border:2px dashed var(--line);border-radius:12px;padding:12px;min-height:110px}
+.bin h3{display:flex;justify-content:space-between}
+.bin ul{list-style:none;padding:0;margin:8px 0 0;display:flex;flex-direction:column;gap:6px}
+.bin li{font-size:14px;background:var(--chip);border-radius:8px;padding:6px 8px}
+.bin li.no{outline:2px solid var(--bad)}
+.deck{display:flex;flex-direction:column;gap:10px;align-items:flex-start;margin:14px 0}
+.stmt{font:800 20px var(--display);background:var(--surface);border:2px solid var(--ink);border-radius:12px;padding:12px 16px;max-width:65ch}
+
+/* quiz */
+.qz{display:flex;flex-direction:column;gap:14px}
+.qz .item{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:14px}
+.qz .item p{margin:0 0 8px;font-weight:700}
+.qz .opts{display:grid;gap:6px}
+@media(min-width:700px){.qz .opts{grid-template-columns:1fr 1fr}}
+.qz .opts button{text-align:left;font:400 15px var(--body);padding:9px 12px;border-radius:9px;border:1px solid var(--line);background:var(--chip);color:var(--ink);cursor:pointer}
+.qz .opts button.c{background:color-mix(in srgb,var(--ok) 22%,var(--surface));border-color:var(--ok)}
+.qz .opts button.x{background:color-mix(in srgb,var(--bad) 18%,var(--surface));border-color:var(--bad)}
+.qz .ex{font-size:14px;color:var(--muted);margin-top:8px}
+details{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:12px 14px}
+details+details{margin-top:10px}
+summary{cursor:pointer;font-weight:700}
+.marks{font:500 12px var(--mono);color:var(--teal)}
+table{border-collapse:collapse;width:100%;font-size:15px}
+.tw{overflow-x:auto}
+th,td{text-align:left;padding:8px 10px;border-bottom:1px solid var(--line);vertical-align:top}
+th{font:500 11px var(--mono);letter-spacing:.07em;text-transform:uppercase;color:var(--muted)}
+a{color:var(--teal);font-weight:700}
+.links{display:grid;gap:10px}
+.links .panel p{margin:4px 0 0;font-size:14.5px;color:var(--muted)}
+@media(prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+
+<div class="wrap">
+<header>
+  <h1>Germ Lab <span>10.3–10.4</span></h1>
+  <p class="sub">Safe food · fighting disease together · 40-minute lesson</p>
+</header>
+
+<nav role="tablist" id="tabs">
+  <button role="tab" data-t="risk" aria-selected="true">1 Risky foods<span class="t">5′</span></button>
+  <button role="tab" data-t="grow">2 Bacteria simulator<span class="t">8′</span></button>
+  <button role="tab" data-t="rules">3 Hygiene detective<span class="t">5′</span></button>
+  <button role="tab" data-t="levels">4 Who is responsible?<span class="t">6′</span></button>
+  <button role="tab" data-t="waste">5 Landfill or fire?<span class="t">6′</span></button>
+  <button role="tab" data-t="quiz">6 Assessment<span class="t">10′</span></button>
+  <button role="tab" data-t="words">Key words</button>
+  <button role="tab" data-t="vids">Videos &amp; demos</button>
+</nav>
+
+<!-- 1 -->
+<section id="risk">
+  <span class="tag">Starter · 10.3</span>
+  <h2>High risk or low risk?</h2>
+  <p class="lead">Class votes with hands up (high) or arms crossed (low), then tap the answer. Bacteria love moist, protein-rich food that is eaten raw, undercooked or kept warm.</p>
+  <div class="row" style="margin-bottom:12px"><span class="score" id="riskScore">0 / 0</span><button class="btn ghost" id="riskReset">Reset</button></div>
+  <div class="cards" id="riskCards"></div>
+</section>
+
+<!-- 2 -->
+<section id="grow" hidden>
+  <span class="tag">Simulation · 10.3</span>
+  <h2>How fast can one bacterium become millions?</h2>
+  <p class="lead">Pick a temperature, press Play, and watch the dish. Ask the class to predict the number at 8 hours before you run it. At body temperature some bacteria divide about every 20 minutes.</p>
+  <div class="sim">
+    <div class="dish"><canvas id="dish" width="600" height="600" aria-label="Petri dish showing bacteria"></canvas></div>
+    <div class="panel">
+      <h3>Where is the food kept?</h3>
+      <div class="temps" id="temps"></div>
+      <div style="margin-top:14px">
+        <label for="time" class="small">Time since food was contaminated: <b id="tLabel">0 h 0 min</b></label>
+        <input type="range" id="time" min="0" max="480" step="10" value="0">
+      </div>
+      <div class="row"><button class="btn" id="play">▶ Play 8 hours</button><button class="btn ghost" id="restart">Reset</button></div>
+      <div class="readout">
+        <div><small>Bacteria</small><strong id="count">1</strong></div>
+        <div><small>Divisions</small><strong id="gens">0</strong></div>
+      </div>
+      <div class="verdict" id="verdict"></div>
+      <p class="small" style="margin-bottom:0">Model numbers are simplified for class. Real doubling times depend on the species and the food.</p>
+    </div>
+  </div>
+</section>
+
+<!-- 3 -->
+<section id="rules" hidden>
+  <span class="tag">Apply · 10.3</span>
+  <h2>Hygiene detective</h2>
+  <p class="lead">The textbook gives three rules of good food hygiene. Which rule does each kitchen action follow? Pairs discuss for 20 seconds, then tap.</p>
+  <div class="row" style="margin-bottom:12px"><span class="score" id="rulesScore">0 / 0</span><button class="btn ghost" id="rulesReset">Reset</button></div>
+  <div class="cards" id="rulesCards"></div>
+</section>
+
+<!-- 4 -->
+<section id="levels" hidden>
+  <span class="tag">Sort · 10.4</span>
+  <h2>Personal, community or worldwide?</h2>
+  <p class="lead">The fight against disease has three levels. Read each action aloud and let teams shout their answer before you tap.</p>
+  <div class="row" style="margin-bottom:12px"><span class="score" id="levelsScore">0 / 0</span><button class="btn ghost" id="levelsReset">Reset</button></div>
+  <div class="cards" id="levelsCards"></div>
+</section>
+
+<!-- 5 -->
+<section id="waste" hidden>
+  <span class="tag">Compare · 10.4</span>
+  <h2>Landfill or incineration?</h2>
+  <p class="lead">One statement at a time. Is it about burying refuse in a landfill site, or burning it in an incinerator? Is it a good point or a bad point?</p>
+  <div class="row"><span class="score" id="wasteScore">0 / 0</span><button class="btn ghost" id="wasteReset">Reset</button></div>
+  <div class="deck">
+    <div class="stmt" id="stmt"></div>
+    <div class="row" id="wasteBtns">
+      <button class="btn" style="background:var(--teal)" data-a="landfill">Landfill</button>
+      <button class="btn" style="background:var(--amber);color:#1B2928" data-a="incinerator">Incinerator</button>
+    </div>
+    <div class="small" id="wasteFb"></div>
+  </div>
+  <div class="bins">
+    <div class="bin"><h3>Landfill <span class="small" id="lfN">0</span></h3><ul id="lfList"></ul></div>
+    <div class="bin"><h3>Incinerator <span class="small" id="inN">0</span></h3><ul id="inList"></ul></div>
+  </div>
+</section>
+
+<!-- 6 -->
+<section id="quiz" hidden>
+  <span class="tag">Assessment · 10.3 + 10.4</span>
+  <h2>Exit quiz</h2>
+  <p class="lead">Part A: 10 multiple-choice questions (1 mark each). Students write A–D in their books, then you reveal. Part B: written questions with a mark scheme.</p>
+  <div class="row" style="margin-bottom:12px"><span class="score" id="quizScore">0 / 10</span><button class="btn ghost" id="quizReset">Reset</button></div>
+  <div class="qz" id="qz"></div>
+  <h3 style="margin-top:24px">Part B · Written questions <span class="marks">10 marks</span></h3>
+  <div id="partB"></div>
+</section>
+
+<!-- words -->
+<section id="words" hidden>
+  <span class="tag">Language support</span>
+  <h2>Key words in three languages</h2>
+  <p class="lead">Keep this on the board for students who need it. Use English in answers.</p>
+  <div class="tw panel" style="padding:6px"><table>
+    <thead><tr><th>English</th><th>Русский</th><th>Кыргызча</th><th>Meaning</th></tr></thead>
+    <tbody id="gloss"></tbody></table></div>
+</section>
+
+<!-- vids -->
+<section id="vids" hidden>
+  <span class="tag">Extra resources</span>
+  <h2>Videos and live demos</h2>
+  <p class="lead">These open in a new tab. Check each one before class; school internet may block some sites.</p>
+  <div class="links grid g2">
+    <div class="panel"><a href="https://content.wellcomecollection.org/works/kf2sk7nv" target="_blank" rel="noopener">The germ who came to dinner</a><p>Old-style cartoon film on how food bacteria spread in the kitchen. Covers Salmonella, Clostridium and Staphylococcus, and control by temperature and cleanliness. Play a 2–3 minute clip; the retro style gets laughs.</p></div>
+    <div class="panel"><a href="https://curiousabout.glasgowsciencecentre.org/the-human-body/exhibitions/microbes-and-mates-salmonella/" target="_blank" rel="noopener">Microbes and mates: Salmonella</a><p>Short animation from Glasgow Science Centre and University of St Andrews on Salmonella and handwashing.</p></div>
+    <div class="panel"><a href="https://foodafactoflife.org.uk/11-14-years/cooking/hygiene-and-safety/" target="_blank" rel="noopener">Food a Fact of Life: Hygiene and safety</a><p>Links the Food Standards Agency "Bacteria Bites Business" video on the 4 Cs (cleaning, cooking, chilling, cross-contamination), plus free worksheets.</p></div>
+    <div class="panel"><a href="https://subjecttoclimate.org/resource/solid-waste-disposal" target="_blank" rel="noopener">Khan Academy: Solid waste disposal</a><p>About 8 minutes, animated, landfill vs incineration. Show the first 3 minutes for 10.4.</p></div>
+    <div class="panel"><a href="https://thenational.academy/pupils/lessons/waste-and-recycling/video" target="_blank" rel="noopener">Oak National Academy: Waste and recycling</a><p>Teacher-led video comparing landfill with incinerators, including methane risk from landfill.</p></div>
+    <div class="panel"><h3>Live demo: the glitter handshake</h3><p>Before class put a little glitter (or flour, or Glo Germ lotion with a UV torch) on your hand. Shake hands with three students at the door. At minute 20, ask everyone to check hands, desks and pens. Then let two students wash: one quickly with water, one for 20 seconds with soap. Compare.</p></div>
+    <div class="panel"><h3>Live demo: pepper and soap</h3><p>Shake black pepper ("bacteria") onto a bowl of water. A student dips a dry finger in: pepper sticks. Dip a soapy finger in: the pepper rushes away. Takes one minute and always gets a reaction.</p></div>
+  </div>
+</section>
+</div>
+
+<script>
+const $=s=>document.querySelector(s);
+/* tabs */
+const tabs=[...document.querySelectorAll('#tabs button')];
+function show(id){tabs.forEach(b=>b.setAttribute('aria-selected',b.dataset.t===id));document.querySelectorAll('section').forEach(s=>s.hidden=s.id!==id);if(id==='grow')draw();}
+tabs.forEach(b=>b.onclick=()=>show(b.dataset.t));
+if(location.hash&&document.getElementById(location.hash.slice(1)))show(location.hash.slice(1));
+
+/* generic sorting cards */
+function sorter(boxId,scoreId,resetId,items,choices){
+  const box=$(boxId);let right=0,done=0;
+  function render(){box.innerHTML='';right=0;done=0;upd();
+    items.forEach(it=>{const c=document.createElement('div');c.className='card';
+      c.innerHTML=`<div class="q">${it.q}</div><div class="choices">${choices.map(ch=>`<button data-c="${ch}">${ch}</button>`).join('')}</div><div class="fb"></div>`;
+      c.querySelectorAll('button').forEach(b=>b.onclick=()=>{if(c.dataset.done)return;c.dataset.done=1;done++;
+        const ok=b.dataset.c===it.a;if(ok)right++;c.classList.add(ok?'right':'wrong');
+        c.querySelector('.fb').innerHTML=`<b>${ok?'Correct.':'Answer: '+it.a+'.'}</b> ${it.why}`;upd();});
+      box.appendChild(c);});}
+  function upd(){$(scoreId).textContent=`${right} / ${done}`;}
+  $(resetId).onclick=render;render();
+}
+sorter('#riskCards','#riskScore','#riskReset',[
+ {q:'Undercooked chicken',a:'High risk',why:'Poultry often carries Salmonella; the centre may not get hot enough.'},
+ {q:'Ice cream made with raw eggs',a:'High risk',why:'Raw eggs can carry Salmonella and the mix is never cooked.'},
+ {q:'Freshly roasted meat, eaten hot',a:'Low risk',why:'Thorough cooking kills bacteria. This is answer C in the textbook question.'},
+ {q:'Cooked rice left out overnight',a:'High risk',why:'Bacterial spores survive cooking and multiply in warm rice.'},
+ {q:'Shellfish (mussels, raw crab)',a:'High risk',why:'Shellfish filter dirty water and are often eaten lightly cooked.'},
+ {q:'Dry crackers from a sealed packet',a:'Low risk',why:'Bacteria need water to grow. Dry food is a poor home for them.'},
+ {q:'Custard kept warm on a buffet',a:'High risk',why:'Egg + milk + warm = a perfect bacteria incubator.'},
+ {q:'Boiled water that was cooled with a lid',a:'Low risk',why:'Boiling kills microbes, and the lid stops new contamination.'}
+],['High risk','Low risk']);
+
+sorter('#rulesCards','#rulesScore','#rulesReset',[
+ {q:'Washing hands after using the toilet',a:'Avoid contamination',why:'Stops bacteria from your gut reaching the food.'},
+ {q:'Keeping raw meat on the bottom shelf of the fridge',a:'Avoid contamination',why:'Raw meat juices cannot drip onto cooked food.'},
+ {q:'Putting leftovers in the fridge within an hour',a:'Stop them multiplying',why:'Cold slows bacterial reproduction. It does not kill them.'},
+ {q:'Heating soup until it is boiling',a:'Kill them',why:'High temperature destroys bacteria.'},
+ {q:'Using a different board for raw meat and salad',a:'Avoid contamination',why:'Prevents cross-contamination between foods.'},
+ {q:'Freezing meat until you need it',a:'Stop them multiplying',why:'Bacteria become inactive in the freezer but survive. Cook well after defrosting.'},
+ {q:'Cooking a burger until the middle is no longer pink',a:'Kill them',why:'Bacteria mixed through minced meat must be killed in the centre.'},
+ {q:'Covering food at a picnic',a:'Avoid contamination',why:'Flies carry bacteria from waste onto food.'}
+],['Avoid contamination','Stop them multiplying','Kill them']);
+
+sorter('#levelsCards','#levelsScore','#levelsReset',[
+ {q:'Not smoking',a:'Personal',why:'An individual choice that lowers your own risk of disease.'},
+ {q:'Treating sewage before it reaches rivers',a:'Community',why:'Local services keep the shared water supply safe.'},
+ {q:'The smallpox vaccination programme',a:'Worldwide',why:'A WHO-coordinated effort eliminated smallpox.'},
+ {q:'Collecting rubbish from homes every week',a:'Community',why:'Refuse removal is a local health service.'},
+ {q:'Eating a balanced diet',a:'Personal',why:'Good nutrition helps your own body resist disease.'},
+ {q:'Draining swamps to reduce malaria',a:'Worldwide',why:'The textbook lists this among WHO successes.'},
+ {q:'Inspecting hygiene in restaurants',a:'Community',why:'Monitoring standards of health and hygiene is a community job.'},
+ {q:'Washing hands before cooking',a:'Personal',why:'Good personal hygiene is the individual\'s responsibility.'},
+ {q:'Better diet for mothers and babies to cut infant deaths',a:'Worldwide',why:'One of the WHO successes in the textbook.'}
+],['Personal','Community','Worldwide']);
+
+/* waste */
+const W=[
+ {s:'Can help fill old quarry workings (land reclamation)',a:'landfill',g:1},
+ {s:'May give off toxic fumes, especially from burning plastics',a:'incinerator',g:0},
+ {s:'Attracts pests such as flies, rats and gulls',a:'landfill',g:0},
+ {s:'Heat produced can warm nearby homes',a:'incinerator',g:1},
+ {s:'Wastes can seep out and pollute groundwater',a:'landfill',g:0},
+ {s:'Uses only a small area, so valuable land is saved',a:'incinerator',g:1},
+ {s:'Bacteria decompose waste and make biogas for fuel',a:'landfill',g:1},
+ {s:'Very expensive to build',a:'incinerator',g:0},
+ {s:'Marshes and heathland may be used up as dumps',a:'landfill',g:0},
+ {s:'Fuel must be burned to start the process',a:'incinerator',g:0},
+ {s:'Less risk of disease because there is nothing for pests to eat',a:'incinerator',g:1},
+ {s:'Lorries compress rubbish so a lot fits in a deep pit',a:'landfill',g:1}
+];
+let wi=0,wr=0;
+function wasteRender(){
+  if(wi>=W.length){$('#stmt').textContent='All sorted! Which method would you choose for Jalal-Abad, and why?';$('#wasteBtns').hidden=true;return;}
+  $('#wasteBtns').hidden=false;$('#stmt').textContent=W[wi].s;}
+document.querySelectorAll('#wasteBtns button').forEach(b=>b.onclick=()=>{
+  const it=W[wi];const ok=b.dataset.a===it.a;if(ok)wr++;
+  const li=document.createElement('li');li.textContent=(it.g?'＋ ':'－ ')+it.s;if(!ok)li.className='no';
+  (it.a==='landfill'?$('#lfList'):$('#inList')).appendChild(li);
+  $('#lfN').textContent=$('#lfList').children.length;$('#inN').textContent=$('#inList').children.length;
+  $('#wasteFb').textContent=(ok?'Correct: ':'Not quite: ')+(it.a==='landfill'?'Landfill':'Incinerator')+(it.g?' advantage.':' disadvantage.');
+  wi++;$('#wasteScore').textContent=`${wr} / ${wi}`;wasteRender();});
+$('#wasteReset').onclick=()=>{wi=0;wr=0;$('#lfList').innerHTML='';$('#inList').innerHTML='';$('#lfN').textContent=0;$('#inN').textContent=0;$('#wasteFb').textContent='';$('#wasteScore').textContent='0 / 0';wasteRender();};
+wasteRender();
+
+/* simulator */
+const T=[
+ {k:'freezer',n:'−18 °C',d:'Freezer',gen:Infinity,kill:false},
+ {k:'fridge',n:'4 °C',d:'Fridge',gen:Infinity,kill:false},
+ {k:'room',n:'22 °C',d:'Kitchen table',gen:60,kill:false},
+ {k:'body',n:'37 °C',d:'Warm lunchbox',gen:20,kill:false},
+ {k:'cook',n:'75 °C',d:'Cooked thoroughly',gen:Infinity,kill:true}
+];
+let cur=T[3],timer=null;
+const tempsBox=$('#temps');
+T.forEach(t=>{const b=document.createElement('button');b.innerHTML=`<b>${t.n}</b>${t.d}`;b.setAttribute('aria-pressed',t===cur);
+  b.onclick=()=>{cur=t;[...tempsBox.children].forEach((x,i)=>x.setAttribute('aria-pressed',T[i]===cur));draw();};tempsBox.appendChild(b);});
+function countAt(m){if(cur.kill)return m>=2?0:1;if(!isFinite(cur.gen))return 1;return Math.pow(2,Math.floor(m/cur.gen));}
+const fmt=n=>n>=1e6?(n/1e6).toFixed(1)+' million':n.toLocaleString('en-GB');
+let seed=[];for(let i=0;i<2600;i++){const r=Math.sqrt(Math.random())*0.46,a=Math.random()*Math.PI*2;seed.push([0.5+r*Math.cos(a),0.5+r*Math.sin(a),Math.random()*Math.PI]);}
+function draw(){
+  const m=+$('#time').value;$('#tLabel').textContent=`${Math.floor(m/60)} h ${m%60} min`;
+  const n=countAt(m);$('#count').textContent=fmt(n);
+  $('#gens').textContent=cur.kill||!isFinite(cur.gen)?0:Math.floor(m/cur.gen);
+  const cv=$('#dish'),x=cv.getContext('2d');x.clearRect(0,0,600,600);
+  const cs=getComputedStyle(document.documentElement);const col=cs.getPropertyValue('--accent').trim();
+  const shown=Math.min(n,2600);
+  const size=n>2600?Math.min(10,6+Math.log10(n/2600)*1.5):9;
+  x.fillStyle=col;
+  for(let i=0;i<shown;i++){const[px,py,rot]=seed[i];x.save();x.translate(px*600,py*600);x.rotate(rot);x.beginPath();x.ellipse(0,0,size,size*0.45,0,0,Math.PI*2);x.fill();x.restore();}
+  if(n>2600){x.globalAlpha=Math.min(0.55,Math.log10(n/2600)*0.12);x.beginPath();x.arc(300,300,280,0,Math.PI*2);x.fill();x.globalAlpha=1;}
+  const v=$('#verdict');let msg,c;
+  if(cur.kill){msg=m>=2?'All bacteria killed. Safe to eat, as long as it is not contaminated again.':'Heating up…';c='--ok';}
+  else if(!isFinite(cur.gen)){msg='Bacteria are still alive, but they cannot multiply. Cold does not kill them.';c='--teal';}
+  else if(n>=1e6){msg='Danger! Harmful numbers of bacteria. This food could make you ill.';c='--bad';}
+  else if(n>=1000){msg='Numbers rising fast. Keep watching…';c='--amber';}
+  else{msg='Only a few bacteria so far.';c='--teal';}
+  v.textContent=msg;v.style.background=`color-mix(in srgb,var(${c}) 18%,var(--surface))`;v.style.color=`var(${c})`;
+}
+$('#time').oninput=draw;
+$('#play').onclick=()=>{clearInterval(timer);$('#time').value=0;timer=setInterval(()=>{const t=$('#time');t.value=+t.value+10;draw();if(+t.value>=480)clearInterval(timer);},matchMedia('(prefers-reduced-motion: reduce)').matches?20:180);};
+$('#restart').onclick=()=>{clearInterval(timer);$('#time').value=0;draw();};
+draw();
+
+/* quiz */
+const Q=[
+ {p:'Which food is least likely to cause food poisoning?',o:['Raw crabmeat','Ice cream','Roast meat','Raw fish'],a:2,e:'Roast meat has been cooked thoroughly, which kills bacteria.'},
+ {p:'Which bacterium makes the most deadly nerve toxin?',o:['Salmonella','Clostridium botulinum','Listeria monocytogenes','Staphylococcus'],a:1,e:'Clostridium botulinum is found in soil, fish and meat.'},
+ {p:'Symptoms of food poisoning usually develop…',o:['within 5 minutes','8–36 hours after eating','after 2 weeks','only after 1 month'],a:1,e:'Bacteria need time to multiply or release toxins in the body.'},
+ {p:'Keeping food in a fridge helps because it…',o:['kills all bacteria','slows down bacterial reproduction','adds oxygen to the food','makes toxins harmless'],a:1,e:'Cold stops bacteria multiplying, but they survive.'},
+ {p:'Diarrhoea and vomiting are dangerous mainly because they can cause…',o:['dehydration','high blood sugar','broken bones','vitamin overdose'],a:0,e:'The body loses water and salts very quickly.'},
+ {p:'Which is a community responsibility?',o:['Not smoking','Taking regular exercise','Treating sewage','Eating a balanced diet'],a:2,e:'The other three are personal responsibilities.'},
+ {p:'Which disease was eliminated by a WHO vaccination programme?',o:['Malaria','Smallpox','Influenza','Cholera'],a:1,e:'A well-coordinated worldwide programme eliminated smallpox.'},
+ {p:'An advantage of landfill is that it…',o:['never attracts pests','can be used for land reclamation','produces no gas','takes very little space'],a:1,e:'Landfill can fill old quarries, then the land is reused.'},
+ {p:'Plastic and glass are described as…',o:['biodegradable','inert','pathogenic','organic'],a:1,e:'Microbes cannot decompose them, so they last for a very long time.'},
+ {p:'A disadvantage of incineration is that it…',o:['attracts rats and gulls','may produce toxic fumes','pollutes groundwater by seepage','uses up marshland'],a:1,e:'Burning plastics in particular can release toxic fumes. The others are landfill problems.'}
+];
+let qs=0;
+function quiz(){const box=$('#qz');box.innerHTML='';qs=0;$('#quizScore').textContent='0 / 10';
+  Q.forEach((q,i)=>{const d=document.createElement('div');d.className='item';
+    d.innerHTML=`<p>${i+1}. ${q.p}</p><div class="opts">${q.o.map((o,j)=>`<button data-j="${j}">${'ABCD'[j]}&nbsp; ${o}</button>`).join('')}</div><div class="ex" hidden></div>`;
+    d.querySelectorAll('button').forEach(b=>b.onclick=()=>{if(d.dataset.done)return;d.dataset.done=1;const j=+b.dataset.j;
+      d.querySelectorAll('button')[q.a].classList.add('c');if(j!==q.a)b.classList.add('x');else qs++;
+      const ex=d.querySelector('.ex');ex.hidden=false;ex.textContent=q.e;$('#quizScore').textContent=`${qs} / 10`;});
+    box.appendChild(d);});}
+$('#quizReset').onclick=quiz;quiz();
+const B=[
+ {q:'1. One of the symptoms of food poisoning is diarrhoea. Explain what causes this condition and suggest why it is so dangerous.',m:3,a:['Bacteria or their toxins irritate / damage the lining of the intestine (1)','so less water is absorbed, giving watery faeces (1)','dangerous because large losses of water and salts lead to dehydration, which can kill, especially young children (1)']},
+ {q:'2. Give the three principles of good food hygiene, with one example of each.',m:3,a:['Avoid contamination, e.g. wash hands, clean utensils, cover food (1)','Prevent bacteria multiplying, e.g. refrigerate food, do not leave food warm (1)','Destroy bacteria, e.g. cook food thoroughly (1)']},
+ {q:'3. Suggest two steps an individual can take to reduce the risk of a named disease.',m:2,a:['e.g. Food poisoning: wash hands before preparing food (1); cook meat thoroughly / store cooked and raw food separately (1)','Accept other diseases with matching steps, e.g. lung cancer: do not smoke; cholera: boil drinking water']},
+ {q:'4. State two responsibilities of a community health service.',m:2,a:['Any two (1 each): providing safe drinking water; treating sewage; removing refuse; providing medical care for the unwell; monitoring standards of health and hygiene']}
+];
+$('#partB').innerHTML=B.map(b=>`<details><summary>${b.q} <span class="marks">[${b.m}]</span></summary><ul>${b.a.map(x=>`<li>${x}</li>`).join('')}</ul></details>`).join('')+
+ '<p class="small" style="margin-top:12px">Homework (textbook Q3–4 on p.115): name one viral and one bacterial STI, and for one of them say how individuals, communities and scientists worldwide help control it.</p>';
+
+/* glossary */
+const G=[
+ ['food poisoning','пищевое отравление','тамак-аштан уулануу','illness from eating food with harmful microbes or toxins'],
+ ['pathogen','патоген','патоген (оору козгогуч)','a microorganism that causes disease'],
+ ['toxin','токсин, яд','токсин, уу','a poison made by a living organism'],
+ ['contamination','загрязнение, заражение','булгануу','harmful microbes getting into food or water'],
+ ['diarrhoea','диарея, понос','ич өткөк','frequent watery faeces'],
+ ['vomiting','рвота','кусуу','bringing food back up through the mouth'],
+ ['dehydration','обезвоживание','суусуздануу','dangerous loss of water from the body'],
+ ['hygiene','гигиена','гигиена','keeping clean to prevent disease'],
+ ['refuse','бытовые отходы, мусор','таштанды','rubbish, waste'],
+ ['landfill','свалка, полигон','таштанды полигону','burying refuse in the ground'],
+ ['incineration','сжигание','өрттөө','burning refuse at high temperature'],
+ ['biodegradable','биоразлагаемый','биологиялык жол менен ажыроочу','can be broken down by microbes'],
+ ['vaccination','вакцинация, прививка','эмдөө','giving a vaccine to protect against a disease']
+];
+$('#gloss').innerHTML=G.map(r=>`<tr><td><b>${r[0]}</b></td><td>${r[1]}</td><td>${r[2]}</td><td>${r[3]}</td></tr>`).join('');
+</script>
+
+</body></html>

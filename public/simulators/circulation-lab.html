@@ -1,0 +1,430 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>Circulation Lab</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600&family=Nunito+Sans:wght@400;700&display=swap">
+<style>
+/* Layout: lab-bench tabs; each tab = an interactive stage plus a side panel of readouts and questions */
+:root{
+  --bg:#F7F4EE; --panel:#FFFFFF; --fg:#1E2747; --muted:#535C7A; --line:#E1E3EE; --soft:#EEF0F6;
+  --oxy:#C8344A; --deoxy:#2F5D9E; --cap:#7C5BA8; --good:#2E7D4F; --bad:#B3261E; --heart:#8E1E30;
+  --display:'Fredoka','Trebuchet MS',Arial,sans-serif; --body:'Nunito Sans','Segoe UI',Arial,sans-serif;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#141A30; --panel:#1E2645; --fg:#EEF1FA; --muted:#AEB6D3; --line:#323C63; --soft:#28315A;
+  --oxy:#E8586D; --deoxy:#7FA8E6; --cap:#B39AE0; --good:#6BCB8F; --bad:#F2867D; --heart:#C9465C; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#141A30; --panel:#1E2645; --fg:#EEF1FA; --muted:#AEB6D3; --line:#323C63; --soft:#28315A;
+  --oxy:#E8586D; --deoxy:#7FA8E6; --cap:#B39AE0; --good:#6BCB8F; --bad:#F2867D; --heart:#C9465C; color-scheme:dark}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--fg);font-family:var(--body);font-size:16px;line-height:1.5}
+.wrap{max-width:1180px;margin:0 auto;padding-inline:20px;padding-block:24px 48px}
+header{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:12px;margin-bottom:18px}
+.eyebrow{font-size:13px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--oxy);margin:0}
+h1{font-family:var(--display);font-weight:600;font-size:clamp(28px,4.5vw,44px);line-height:1.05;margin:4px 0 0;text-wrap:balance}
+h2{font-family:var(--display);font-weight:600;font-size:24px;margin:0;text-wrap:balance}
+h3{font-size:16px;margin:0}
+p{margin:0}
+.tabs{display:flex;flex-wrap:wrap;gap:6px;margin:8px 0 18px;border-bottom:2px solid var(--line)}
+.tab{font:700 15px var(--body);color:var(--muted);background:none;border:none;padding:10px 14px;border-bottom:3px solid transparent;margin-bottom:-2px;cursor:pointer;border-radius:8px 8px 0 0}
+.tab[aria-selected="true"]{color:var(--fg);border-bottom-color:var(--oxy)}
+.tab:hover{background:var(--soft)}
+button:focus-visible,input:focus-visible,select:focus-visible{outline:3px solid var(--deoxy);outline-offset:2px}
+.stage{display:grid;grid-template-columns:minmax(0,1.6fr) minmax(0,1fr);gap:20px;align-items:start}
+@media (max-width:820px){.stage{grid-template-columns:1fr}}
+.canvas-box{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:10px;min-width:0}
+canvas{display:block;width:100%;height:auto;border-radius:10px}
+.side{display:flex;flex-direction:column;gap:14px;min-width:0}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:16px;display:flex;flex-direction:column;gap:10px}
+.lead{color:var(--muted)}
+.controls{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin-top:10px}
+.btn{font:700 15px var(--body);border:2px solid var(--oxy);background:var(--oxy);color:#fff;padding:8px 16px;border-radius:999px;cursor:pointer}
+.btn.ghost{background:transparent;color:var(--fg);border-color:var(--line)}
+.seg{display:inline-flex;border:2px solid var(--line);border-radius:999px;overflow:hidden}
+.seg button{font:700 14px var(--body);border:none;background:transparent;color:var(--muted);padding:8px 14px;cursor:pointer}
+.seg button[aria-pressed="true"]{background:var(--fg);color:var(--bg)}
+label.chk{display:flex;align-items:center;gap:6px;font-weight:700;font-size:14px}
+.read{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+.stat{background:var(--soft);border-radius:12px;padding:10px;min-width:0}
+.stat b{display:block;font-family:var(--display);font-size:20px;font-weight:600;font-variant-numeric:tabular-nums}
+.stat span{font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;font-weight:700}
+.meter{height:10px;border-radius:99px;background:var(--line);overflow:hidden}
+.meter i{display:block;height:100%;background:var(--oxy);transition:width .2s}
+.q{border-left:4px solid var(--deoxy);padding-left:12px;font-size:15px}
+.q b{color:var(--deoxy)}
+.pill{display:inline-block;font-size:12px;font-weight:700;padding:3px 10px;border-radius:999px;background:var(--soft);color:var(--muted)}
+.svgbox{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:10px}
+.svgbox svg{width:100%;height:auto;display:block}
+.namegrid{display:grid;grid-template-columns:1fr;gap:8px}
+.namerow{display:grid;grid-template-columns:32px minmax(0,1fr) 28px;align-items:center;gap:8px}
+.num{width:28px;height:28px;border-radius:50%;background:var(--fg);color:var(--bg);display:grid;place-items:center;font-weight:700;font-size:14px}
+select{font:15px var(--body);color:var(--fg);background:var(--panel);border:2px solid var(--line);border-radius:10px;padding:6px 8px;width:100%}
+.mark{font-weight:700;font-size:13px}
+.ok{color:var(--good)} .no{color:var(--bad)}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+
+<div class="wrap">
+  <header>
+    <div>
+      <p class="eyebrow">IGCSE Biology · 9.2</p>
+      <h1>Circulation Lab</h1>
+    </div>
+    <p class="lead" style="max-width:46ch">Five interactive models for the circulatory system. Each one has questions to answer in your notebook.</p>
+  </header>
+
+  <div class="tabs" role="tablist" aria-label="Simulations">
+    <button class="tab" role="tab" id="t-dbl" aria-controls="p-dbl" aria-selected="true">Double circulation</button>
+    <button class="tab" role="tab" id="t-ves" aria-controls="p-ves" aria-selected="false">Vessel explorer</button>
+    <button class="tab" role="tab" id="t-val" aria-controls="p-val" aria-selected="false">Vein valves</button>
+    <button class="tab" role="tab" id="t-prs" aria-controls="p-prs" aria-selected="false">Blood pressure</button>
+    <button class="tab" role="tab" id="t-nam" aria-controls="p-nam" aria-selected="false">Name the vessels</button>
+  </div>
+
+  <!-- 1 DOUBLE CIRCULATION -->
+  <section id="p-dbl" role="tabpanel" aria-labelledby="t-dbl" class="stage">
+    <div class="canvas-box">
+      <canvas id="cDbl" width="800" height="560" aria-label="Animation of blood flowing through the heart, lungs and body"></canvas>
+      <div class="controls">
+        <div class="seg" role="group" aria-label="Circulation type">
+          <button id="mMam" aria-pressed="true">Human: double</button>
+          <button id="mFish" aria-pressed="false">Fish: single</button>
+        </div>
+        <button class="btn" id="dPlay">Pause</button>
+        <label class="chk" for="follow"><input type="checkbox" id="follow" checked> Follow one cell</label>
+      </div>
+    </div>
+    <div class="side">
+      <div class="card" aria-live="polite">
+        <h2>Tracked cell</h2>
+        <div class="read">
+          <div class="stat"><span>Now in</span><b id="where">Aorta</b></div>
+          <div class="stat"><span>Blood is</span><b id="oxyState">Oxygenated</b></div>
+        </div>
+        <p class="small lead">Blood pressure here</p>
+        <div class="meter" aria-hidden="true"><i id="pBar" style="width:80%"></i></div>
+        <p class="lead">Complete circuits: <b id="laps">0</b> · Last circuit took <b id="lapT">–</b></p>
+      </div>
+      <div class="card">
+        <p class="q"><b>Q1</b> Follow the cell. List, in order, every vessel and organ it passes through in one circuit.</p>
+        <p class="q"><b>Q2</b> Switch to the fish. Where does the blood slow down? Why?</p>
+        <p class="q"><b>Q3</b> Compare the circuit times. Explain why mammals need a double circulation.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- 2 VESSEL EXPLORER -->
+  <section id="p-ves" role="tabpanel" aria-labelledby="t-ves" class="stage" hidden>
+    <div class="canvas-box">
+      <canvas id="cVes" width="800" height="440" aria-label="Cross-sections of an artery, a vein and a capillary. Click one to learn about it"></canvas>
+      <div class="controls"><span class="pill">Click a vessel to explore it</span><label class="chk" for="vesLab"><input type="checkbox" id="vesLab" checked> Show labels</label></div>
+    </div>
+    <div class="side">
+      <div class="card" id="vesInfo" aria-live="polite">
+        <h2>Artery</h2>
+        <p class="lead">Click any of the three vessels.</p>
+      </div>
+      <div class="card">
+        <p class="q"><b>Q1</b> Watch the artery wall. Why does it stretch and spring back?</p>
+        <p class="q"><b>Q2</b> Why are red cells in a capillary in single file?</p>
+        <p class="q"><b>Q3</b> Draw and label a cross-section of each vessel.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- 3 VALVES -->
+  <section id="p-val" role="tabpanel" aria-labelledby="t-val" class="stage" hidden>
+    <div class="canvas-box">
+      <canvas id="cVal" width="800" height="520" aria-label="A leg vein with valves, squeezed by muscles"></canvas>
+      <div class="controls">
+        <button class="btn" id="squeeze">Squeeze muscles (hold)</button>
+        <label class="chk" for="autoWalk"><input type="checkbox" id="autoWalk"> Walking</label>
+        <label class="chk" for="faulty"><input type="checkbox" id="faulty"> Faulty valves</label>
+      </div>
+    </div>
+    <div class="side">
+      <div class="card" aria-live="polite">
+        <h2>Getting blood back up the leg</h2>
+        <p class="lead">Blood in leg veins is at low pressure and must travel upwards. Leg muscles squeeze the vein; valves stop the blood falling back.</p>
+        <div class="read">
+          <div class="stat"><span>Returned to heart</span><b id="returned">0</b></div>
+          <div class="stat"><span>Valves</span><b id="valveState">Closed</b></div>
+        </div>
+      </div>
+      <div class="card">
+        <p class="q"><b>Q1</b> Squeeze, then let go. What do the valves do each time?</p>
+        <p class="q"><b>Q2</b> Turn on faulty valves and walk. What happens to the blood in the lower vein?</p>
+        <p class="q"><b>Q3</b> Why do people who stand still for hours sometimes faint or get swollen ankles?</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- 4 PRESSURE -->
+  <section id="p-prs" role="tabpanel" aria-labelledby="t-prs" class="stage" hidden>
+    <div class="canvas-box">
+      <canvas id="cPrs" width="800" height="460" aria-label="Graph of blood pressure falling from the aorta to the vena cava"></canvas>
+      <div class="controls"><span class="pill">The line pulses with each heartbeat</span><button class="btn ghost" id="prsPlay">Pause</button></div>
+    </div>
+    <div class="side">
+      <div class="card">
+        <h2>Pressure around the system</h2>
+        <p class="lead">Approximate pressures in a resting adult, in mmHg (millimetres of mercury).</p>
+        <p>Pressure is <b>highest and pulsing</b> in the aorta and arteries, drops sharply across the small arteries and capillaries, and is <b>lowest and steady</b> in the veins.</p>
+      </div>
+      <div class="card">
+        <p class="q"><b>Q1</b> Where is the biggest drop in pressure?</p>
+        <p class="q"><b>Q2</b> Why do the pressure swings disappear before the capillaries?</p>
+        <p class="q"><b>Q3</b> Use the graph to explain why veins need valves but arteries do not.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- 5 NAME THE VESSELS -->
+  <section id="p-nam" role="tabpanel" aria-labelledby="t-nam" class="stage" hidden>
+    <div class="svgbox">
+      <svg viewBox="0 0 600 640" role="img" aria-label="Diagram of the main blood vessels with numbered labels 1 to 9">
+        <g style="fill:none;stroke-linecap:round;stroke-linejoin:round">
+          <!-- organs -->
+          <rect x="170" y="30" width="260" height="90" rx="40" style="fill:var(--soft);stroke:var(--line);stroke-width:2"/>
+          <rect x="400" y="250" width="150" height="80" rx="34" style="fill:var(--soft);stroke:var(--line);stroke-width:2"/>
+          <rect x="380" y="380" width="150" height="70" rx="30" style="fill:var(--soft);stroke:var(--line);stroke-width:2"/>
+          <ellipse cx="160" cy="500" rx="36" ry="48" style="fill:var(--soft);stroke:var(--line);stroke-width:2"/>
+          <ellipse cx="440" cy="530" rx="36" ry="48" style="fill:var(--soft);stroke:var(--line);stroke-width:2"/>
+          <!-- veins (behind) -->
+          <path d="M270 620 V200" style="stroke:var(--deoxy);stroke-width:14"/>
+          <path d="M282 170 L230 120" style="stroke:var(--deoxy);stroke-width:12"/>
+          <path d="M400 300 H270" style="stroke:var(--deoxy);stroke-width:9"/>
+          <path d="M450 380 V330" style="stroke:var(--cap);stroke-width:10"/>
+          <path d="M196 490 H270" style="stroke:var(--deoxy);stroke-width:8"/>
+          <path d="M404 545 H270" style="stroke:var(--deoxy);stroke-width:8"/>
+          <!-- arteries (front) -->
+          <path d="M318 170 L370 120" style="stroke:var(--oxy);stroke-width:12"/>
+          <path d="M330 200 V620" style="stroke:var(--oxy);stroke-width:14"/>
+          <path d="M330 270 H400" style="stroke:var(--oxy);stroke-width:8"/>
+          <path d="M330 415 H380" style="stroke:var(--oxy);stroke-width:8"/>
+          <path d="M330 510 H196" style="stroke:var(--oxy);stroke-width:8"/>
+          <path d="M330 520 H404" style="stroke:var(--oxy);stroke-width:8"/>
+          <!-- heart -->
+          <rect x="262" y="150" width="38" height="70" rx="14" style="fill:var(--deoxy)"/>
+          <rect x="300" y="150" width="38" height="70" rx="14" style="fill:var(--oxy)"/>
+        </g>
+        <g style="font:700 15px var(--body);fill:var(--muted)">
+          <text x="300" y="70" text-anchor="middle">Lungs</text>
+          <text x="300" y="138" text-anchor="middle" style="fill:var(--fg)">Heart</text>
+          <text x="475" y="295" text-anchor="middle">Liver</text>
+          <text x="455" y="420" text-anchor="middle">Gut</text>
+          <text x="160" y="575" text-anchor="middle">Kidney</text>
+          <text x="440" y="605" text-anchor="middle">Kidney</text>
+          <text x="300" y="636" text-anchor="middle">to and from legs</text>
+        </g>
+        <g id="tags" style="font:700 14px var(--body)"></g>
+      </svg>
+    </div>
+    <div class="side">
+      <div class="card">
+        <h2>Name the vessels</h2>
+        <p class="lead">Choose a name for each number, then check. Red = oxygenated, blue = deoxygenated, purple = food-rich blood from the gut.</p>
+        <div class="namegrid" id="names"></div>
+        <div class="controls"><button class="btn" id="checkNames">Check answers</button><button class="btn ghost" id="resetNames">Reset</button><span id="nameScore" class="mark" aria-live="polite"></span></div>
+      </div>
+    </div>
+  </section>
+</div>
+
+<script>
+(function(){
+const reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
+const css=n=>getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+function prep(c){const W=+c.getAttribute('width'),H=+c.getAttribute('height');const d=Math.min(2,window.devicePixelRatio||1);c.width=W*d;c.height=H*d;const x=c.getContext('2d');x.setTransform(d,0,0,d,0,0);c.dataset.w=W;c.dataset.h=H;return{x,W,H}}
+function pt(c,e){const r=c.getBoundingClientRect();return{x:(e.clientX-r.left)*(+c.dataset.w)/r.width,y:(e.clientY-r.top)*(+c.dataset.h)/r.height}}
+function mixc(o){const a=[0x2F,0x5D,0x9E],b=[0xC8,0x34,0x4A];return 'rgb('+a.map((v,i)=>Math.round(v+(b[i]-v)*o))+')'}
+
+/* tabs */
+const tabs=[...document.querySelectorAll('.tab')];let active='p-dbl';
+function show(t){tabs.forEach(b=>{const on=b===t;b.setAttribute('aria-selected',on);document.getElementById(b.getAttribute('aria-controls')).hidden=!on});active=t.getAttribute('aria-controls');try{localStorage.setItem('cl-tab',t.id)}catch(e){}}
+tabs.forEach(b=>b.addEventListener('click',()=>show(b)));
+document.querySelector('.tabs').addEventListener('keydown',e=>{const i=tabs.indexOf(document.activeElement);if(i<0)return;let j=e.key==='ArrowRight'?i+1:e.key==='ArrowLeft'?i-1:null;if(j===null)return;j=(j+tabs.length)%tabs.length;tabs[j].focus();show(tabs[j])});
+try{const s=localStorage.getItem('cl-tab');if(s&&document.getElementById(s))show(document.getElementById(s))}catch(e){}
+
+/* ===== 1. Double / single circulation ===== */
+const cD=document.getElementById('cDbl');const D=prep(cD);
+// segment: points, name, speed (px/s), pressure 0-1, oxy: 'low'|'high'|'up'|'down', cap: bool, label pos
+const MAM=[
+ {p:[[370,250],[160,250],[160,80],[250,80]],n:'Pulmonary artery',v:150,pr:.45,o:'low',lab:[60,170,'Pulmonary artery']},
+ {p:[[250,80],[550,80]],n:'Lung capillaries',v:55,pr:.25,o:'up',cap:1},
+ {p:[[550,80],[640,80],[640,250],[430,250]],n:'Pulmonary vein',v:110,pr:.15,o:'high',lab:[650,170,'Pulmonary vein']},
+ {p:[[430,250],[430,310]],n:'Left side of heart',v:60,pr:1,o:'high',heart:1},
+ {p:[[430,310],[640,310],[640,480],[550,480]],n:'Aorta',v:230,pr:1,o:'high',lab:[650,400,'Aorta']},
+ {p:[[550,480],[250,480]],n:'Body capillaries',v:55,pr:.35,o:'down',cap:1},
+ {p:[[250,480],[160,480],[160,310],[370,310]],n:'Vena cava',v:100,pr:.08,o:'low',lab:[60,400,'Vena cava']},
+ {p:[[370,310],[370,250]],n:'Right side of heart',v:60,pr:.45,o:'low',heart:1}
+];
+const FISH=[
+ {p:[[130,300],[130,80],[250,80]],n:'Artery to gills',v:200,pr:.9,o:'low',lab:[40,180,'Artery to gills']},
+ {p:[[250,80],[550,80]],n:'Gill capillaries',v:50,pr:.45,o:'up',cap:1},
+ {p:[[550,80],[640,80],[640,480],[550,480]],n:'Artery to body',v:70,pr:.3,o:'high',lab:[650,280,'Artery to body (low pressure)']},
+ {p:[[550,480],[250,480]],n:'Body capillaries',v:30,pr:.15,o:'down',cap:1},
+ {p:[[250,480],[130,480],[130,330]],n:'Vein',v:55,pr:.05,o:'low',lab:[40,410,'Vein']},
+ {p:[[130,330],[130,300]],n:'Heart',v:50,pr:.9,o:'low',heart:1}
+];
+function build(segs){let total=0;segs.forEach(s=>{s.parts=[];s.len=0;for(let i=0;i<s.p.length-1;i++){const a=s.p[i],b=s.p[i+1],l=Math.hypot(b[0]-a[0],b[1]-a[1]);s.parts.push({a,b,l});s.len+=l}total+=s.len});return segs}
+build(MAM);build(FISH);
+let mode=MAM,dOn=!reduce,follow=true,clock=0,lapStart=0,laps=0;
+function posOn(s,d){for(const q of s.parts){if(d<=q.l){const t=d/q.l;return[q.a[0]+(q.b[0]-q.a[0])*t,q.a[1]+(q.b[1]-q.a[1])*t]}d-=q.l}const l=s.parts[s.parts.length-1];return l.b}
+function oxyOf(s,t){return s.o==='low'?.1:s.o==='high'?1:s.o==='up'?.1+.9*t:1-.9*t}
+let cellsD=[];function seed(){cellsD=[];const n=40;const tot=mode.reduce((a,s)=>a+s.len,0);for(let i=0;i<n;i++){let d=i*tot/n,k=0;while(d>mode[k].len){d-=mode[k].len;k++}cellsD.push({k,d})}laps=0;lapStart=clock;document.getElementById('laps').textContent='0';document.getElementById('lapT').textContent='–'}
+seed();
+function stepCell(c,dt){const s=mode[c.k];c.d+=s.v*dt;while(c.d>mode[c.k].len){c.d-=mode[c.k].len;c.k=(c.k+1)%mode.length;if(c===cellsD[0]&&c.k===0){laps++;const t=clock-lapStart;lapStart=clock;document.getElementById('laps').textContent=laps;document.getElementById('lapT').textContent=t.toFixed(1)+' s'}}}
+function drawDbl(dt){
+ const {x,W,H}=D;clock+=dOn?dt:0;x.fillStyle=css('--panel');x.fillRect(0,0,W,H);
+ const fish=mode===FISH;
+ x.fillStyle=css('--soft');x.beginPath();x.roundRect(240,35,320,90,28);x.fill();x.beginPath();x.roundRect(240,435,320,90,28);x.fill();
+ x.lineCap='round';x.lineJoin='round';
+ for(const s of mode){if(s.heart)continue;x.strokeStyle=s.cap?css('--cap'):(s.o==='high'?css('--oxy'):css('--deoxy'));x.lineWidth=s.cap?6:18;x.globalAlpha=s.cap?.5:.35;x.beginPath();x.moveTo(...s.p[0]);for(let i=1;i<s.p.length;i++)x.lineTo(...s.p[i]);x.stroke();
+   if(s.cap){x.lineWidth=2;for(let k=0;k<3;k++){x.beginPath();const y0=s.p[0][1];for(let X=260;X<=540;X+=10)x.lineTo(X,y0-22+k*22+Math.sin(X/18+k)*7);x.stroke()}}x.globalAlpha=1}
+ // heart
+ const beat=(clock*1.2)%1,sq=beat<.2?Math.sin(beat/.2*Math.PI):0;
+ x.save();
+ if(fish){x.fillStyle=css('--heart');x.beginPath();x.roundRect(100-sq*4,280-sq*4,60+sq*8,80+sq*8,18);x.fill();x.fillStyle='#fff';x.font='700 13px Nunito Sans, Arial';x.textAlign='center';x.fillText('HEART',130,325)}
+ else{x.fillStyle=css('--deoxy');x.beginPath();x.roundRect(340-sq*4,225-sq*4,60+sq*4,110+sq*8,16);x.fill();x.fillStyle=css('--oxy');x.beginPath();x.roundRect(400,225-sq*4,60+sq*4,110+sq*8,16);x.fill();
+   x.fillStyle='#fff';x.font='700 12px Nunito Sans, Arial';x.textAlign='center';x.fillText('RIGHT',370,284);x.fillText('LEFT',430,284)}
+ x.restore();
+ // cells
+ for(const c of cellsD){if(dOn)stepCell(c,dt)}
+ cellsD.forEach((c,i)=>{const s=mode[c.k];const [px,py]=posOn(s,c.d);const o=oxyOf(s,c.d/s.len);x.fillStyle=mixc(o);x.beginPath();x.ellipse(px,py,7,5,0,0,7);x.fill();
+   if(i===0&&follow){x.strokeStyle=css('--fg');x.lineWidth=3;x.beginPath();x.arc(px,py,13,0,7);x.stroke()}});
+ // labels
+ x.fillStyle=css('--fg');x.font='600 18px Fredoka, Arial';x.textAlign='center';x.fillText(fish?'GILLS':'LUNGS',400,30);x.fillText('BODY',400,550);
+ x.font='700 13px Nunito Sans, Arial';x.fillStyle=css('--muted');
+ for(const s of mode){if(!s.lab)continue;const [lx,ly,t]=s.lab;x.textAlign=lx<400?'center':'left';const words=t.split(' ');let line='',yy=ly;for(const w of words){if(x.measureText(line+w).width>110&&line){x.fillText(line.trim(),lx,yy);yy+=16;line=''}line+=w+' '}x.fillText(line.trim(),lx,yy)}
+ // readouts
+ const c0=cellsD[0],s0=mode[c0.k];document.getElementById('where').textContent=s0.n;const o=oxyOf(s0,c0.d/s0.len);document.getElementById('oxyState').textContent=o>.6?'Oxygenated':o<.3?'Deoxygenated':'Changing';document.getElementById('pBar').style.width=(s0.pr*100)+'%';
+}
+function setMode(m){mode=m;document.getElementById('mMam').setAttribute('aria-pressed',m===MAM);document.getElementById('mFish').setAttribute('aria-pressed',m===FISH);seed()}
+document.getElementById('mMam').onclick=()=>setMode(MAM);document.getElementById('mFish').onclick=()=>setMode(FISH);
+document.getElementById('dPlay').textContent=dOn?'Pause':'Play';
+document.getElementById('dPlay').onclick=e=>{dOn=!dOn;e.target.textContent=dOn?'Pause':'Play'};
+document.getElementById('follow').onchange=e=>follow=e.target.checked;
+
+/* ===== 2. Vessel explorer ===== */
+const cV=document.getElementById('cVes');const V=prep(cV);let vSel='artery',vT=0,vLab=true;
+const vInfo={
+ artery:['Artery','Carries blood <b>away</b> from the heart at <b>high pressure</b>.',['<b>Thick wall</b> of muscle and elastic tissue withstands high pressure.','<b>Elastic tissue</b> stretches as each surge arrives, then recoils. This evens out the flow and is the pulse you can feel.','<b>Narrow lumen</b> keeps the pressure high.','No valves (except where arteries leave the heart).']],
+ vein:['Vein','Carries blood <b>towards</b> the heart at <b>low pressure</b>.',['<b>Thin wall</b> with little muscle or elastic tissue, because pressure is low.','<b>Wide lumen</b> gives little resistance to the slow flow.','<b>Valves</b> stop blood flowing backwards.','Nearby muscles squeeze veins to push blood along.']],
+ cap:['Capillary','Links arteries to veins. This is where substances are <b>exchanged</b> with the tissues.',['Wall only <b>one cell thick</b>, giving a short diffusion distance.','Very narrow: red cells pass in <b>single file</b>, slowly, giving time for exchange.','Millions of capillaries give a <b>huge surface area</b>.','Every cell in the body is close to a capillary.']]};
+function vCard(){const [n,f,l]=vInfo[vSel];document.getElementById('vesInfo').innerHTML=`<h2>${n}</h2><p>${f}</p><ul style="margin:0;padding-left:20px;display:flex;flex-direction:column;gap:6px">${l.map(i=>`<li>${i}</li>`).join('')}</ul>`}
+vCard();
+function drawVes(dt){
+ const {x,W,H}=V;vT+=dt;x.fillStyle=css('--panel');x.fillRect(0,0,W,H);
+ const beat=(vT*1.1)%1,pulse=beat<.25?Math.sin(beat/.25*Math.PI):0;
+ const centers={artery:[140,200],vein:[400,200],cap:[660,200]};
+ for(const k in centers){const [cx,cy]=centers[k];if(k===vSel){x.fillStyle=css('--soft');x.beginPath();x.roundRect(cx-125,30,250,370,20);x.fill()}}
+ // artery
+ let [cx,cy]=centers.artery;const g=1+pulse*.06;
+ x.fillStyle='#EBD3C2';x.beginPath();x.arc(cx,cy,100*g,0,7);x.fill();
+ x.fillStyle='#D5677A';x.beginPath();x.arc(cx,cy,88*g,0,7);x.fill();
+ x.strokeStyle='#F2C3CB';x.lineWidth=2;for(let r=50;r<86;r+=9){x.beginPath();x.arc(cx,cy,r*g,0,7);x.stroke()}
+ x.fillStyle='#F6D7DC';x.beginPath();x.arc(cx,cy,44*g,0,7);x.fill();
+ x.fillStyle='#C8344A';x.beginPath();x.arc(cx,cy,40*g,0,7);x.fill();
+ // vein
+ [cx,cy]=centers.vein;x.save();x.translate(cx,cy);x.scale(1,.78);
+ x.fillStyle='#E5DCD0';x.beginPath();x.arc(0,0,105,0,7);x.fill();x.fillStyle='#8FA9D8';x.beginPath();x.arc(0,0,97,0,7);x.fill();
+ x.fillStyle='#DCE6F5';x.beginPath();x.arc(0,0,88,0,7);x.fill();x.fillStyle='#5F82BF';x.beginPath();x.arc(0,0,85,0,7);x.fill();x.restore();
+ // capillary (magnified)
+ [cx,cy]=centers.cap;x.fillStyle='#E7DDF3';x.beginPath();x.arc(cx,cy,48,0,7);x.fill();x.fillStyle=css('--panel');x.beginPath();x.arc(cx,cy,40,0,7);x.fill();
+ x.fillStyle='#7C5BA8';for(const a of [0.3,2.4,4.3]){x.beginPath();x.ellipse(cx+Math.cos(a)*44,cy+Math.sin(a)*44,9,4,a+Math.PI/2,0,7);x.fill()}
+ const off=Math.sin(vT*1.5)*4;x.fillStyle='#C8344A';x.beginPath();x.arc(cx+off,cy,26,0,7);x.fill();x.fillStyle='#E07384';x.beginPath();x.arc(cx+off,cy,11,0,7);x.fill();
+ // side view of capillary, single file
+ x.strokeStyle='#B39AE0';x.lineWidth=3;x.beginPath();x.moveTo(560,300);x.lineTo(760,300);x.moveTo(560,330);x.lineTo(760,330);x.stroke();
+ for(let i=0;i<6;i++){const px=560+((vT*30+i*36)%200);x.fillStyle='#C8344A';x.beginPath();x.ellipse(px,315,11,10,0,0,7);x.fill()}
+ // titles
+ x.fillStyle=css('--fg');x.font='600 20px Fredoka, Arial';x.textAlign='center';x.fillText('Artery',140,345);x.fillText('Vein',400,345);x.fillText('Capillary',660,270);
+ x.font='12px Nunito Sans, Arial';x.fillStyle=css('--muted');x.fillText('(magnified far more)',660,288);x.fillText('side view: cells in single file',660,352);
+ if(vLab){x.font='700 12px Nunito Sans, Arial';x.textAlign='left';x.fillStyle=css('--fg');
+   const L=(t,x1,y1,x2,y2)=>{x.strokeStyle=css('--muted');x.lineWidth=1;x.beginPath();x.moveTo(x1,y1);x.lineTo(x2,y2);x.stroke();x.fillText(t,x2+3,y2+4)};
+   L('thick muscle + elastic',190,150,215,70);L('narrow lumen',150,210,190,385);L('thin wall',470,150,470,60);L('wide lumen',420,220,440,385);L('wall 1 cell thick',700,170,700,90)}
+}
+cV.addEventListener('click',e=>{const p=pt(cV,e);vSel=p.x<270?'artery':p.x<530?'vein':'cap';vCard()});
+document.getElementById('vesLab').onchange=e=>vLab=e.target.checked;
+
+/* ===== 3. Valves ===== */
+const cL=document.getElementById('cVal');const Lv=prep(cL);
+const vx=400,vTop=40,vBot=500,valves=[360,200];let squeezing=false,walkT=0,returned=0;
+let drops=Array.from({length:70},(_,i)=>({y:vBot-10-(i*6.3)%440,dx:(Math.random()-.5)*28,v:0}));
+const sq=document.getElementById('squeeze');
+['pointerdown'].forEach(ev=>sq.addEventListener(ev,()=>squeezing=true));['pointerup','pointerleave','pointercancel'].forEach(ev=>sq.addEventListener(ev,()=>squeezing=false));
+sq.addEventListener('keydown',e=>{if(e.key===' '||e.key==='Enter'){e.preventDefault();squeezing=true}});sq.addEventListener('keyup',()=>squeezing=false);
+function drawVal(dt){
+ const {x,W,H}=Lv;x.fillStyle=css('--panel');x.fillRect(0,0,W,H);
+ const walk=document.getElementById('autoWalk').checked,faulty=document.getElementById('faulty').checked;
+ if(walk)walkT+=dt;const push=squeezing||(walk&&(walkT%1.6)<.8);
+ const squeeze=push?1:0;
+ // muscles
+ const bulge=squeeze*18;x.fillStyle='#D99AA3';
+ x.beginPath();x.ellipse(vx-120+bulge*.5,280,70+bulge,170,0,0,7);x.fill();x.beginPath();x.ellipse(vx+120-bulge*.5,280,70+bulge,170,0,0,7);x.fill();
+ x.fillStyle=css('--fg');x.font='700 13px Nunito Sans, Arial';x.textAlign='center';x.fillText('muscle',vx-140,285);x.fillText('muscle',vx+140,285);
+ // vein walls
+ const half=faulty?46:38,narrow=half-squeeze*14;
+ x.fillStyle='#DCE6F5';x.beginPath();x.moveTo(vx-half,vTop);x.lineTo(vx-half,180);x.lineTo(vx-narrow,230);x.lineTo(vx-narrow,340);x.lineTo(vx-(faulty?60:half),390);x.lineTo(vx-(faulty?60:half),vBot);x.lineTo(vx+(faulty?60:half),vBot);x.lineTo(vx+(faulty?60:half),390);x.lineTo(vx+narrow,340);x.lineTo(vx+narrow,230);x.lineTo(vx+half,180);x.lineTo(vx+half,vTop);x.closePath();x.fill();
+ x.strokeStyle=css('--deoxy');x.lineWidth=4;x.stroke();
+ // drops
+ const net=push?-1:1;
+ for(const d of drops){
+   const target=push?-140:(faulty?90:40);d.v+= (target-d.v)*Math.min(1,dt*4);
+   let ny=d.y+d.v*dt;
+   if(!faulty&&d.v>0){for(const vy of valves){if(d.y<=vy&&ny>vy-2)ny=Math.min(ny,vy-4-Math.abs(d.dx)%6)}}
+   if(ny>vBot-8)ny=vBot-8-Math.random()*4;
+   d.y=ny;if(d.y<vTop){d.y=vBot-8;returned++;document.getElementById('returned').textContent=returned}
+   const w=d.y>390&&faulty?52:(d.y>230&&d.y<340?narrow:half)-8;const px=vx+Math.max(-w,Math.min(w,d.dx));
+   x.fillStyle='#4F6FAF';x.beginPath();x.arc(px,d.y,6,0,7);x.fill()}
+ // valves
+ const open=push||faulty;
+ for(const vy of valves){x.strokeStyle=css('--fg');x.lineWidth=5;x.lineCap='round';
+   const ang=open?(faulty?.45:1.15):.15;x.beginPath();x.moveTo(vx-half,vy+28);x.lineTo(vx-half+Math.cos(-ang)*half,vy+28-Math.sin(ang)*30-(open?0:22));x.stroke();
+   x.beginPath();x.moveTo(vx+half,vy+28);x.lineTo(vx+half-Math.cos(-ang)*half,vy+28-Math.sin(ang)*30-(open?0:22));x.stroke()}
+ x.fillStyle=css('--muted');x.font='700 13px Nunito Sans, Arial';x.textAlign='left';x.fillText('valve',vx+half+10,valves[0]+10);x.fillText('valve',vx+half+10,valves[1]+10);
+ x.textAlign='center';x.fillStyle=css('--fg');x.font='600 16px Fredoka, Arial';x.fillText('↑ to the heart',vx,26);x.fillText('from the foot',vx,H-4);
+ document.getElementById('valveState').textContent=faulty?'Leaking':(push?'Open':'Closed');
+}
+
+/* ===== 4. Pressure ===== */
+const cP=document.getElementById('cPrs');const P=prep(cP);let pOn=!reduce,pT=0;
+const regions=['Aorta','Arteries','Arterioles','Capillaries','Venules','Veins','Vena cava'];
+// mean pressure and pulse amplitude at x fraction
+function meanAt(f){const pts=[[0,100],[.17,95],[.28,85],[.43,35],[.57,18],[.71,12],[.86,6],[1,2]];for(let i=0;i<pts.length-1;i++){if(f<=pts[i+1][0]){const t=(f-pts[i][0])/(pts[i+1][0]-pts[i][0]);return pts[i][1]+(pts[i+1][1]-pts[i][1])*t}}return 2}
+function ampAt(f){return f<.3?20-f*10:Math.max(0,20*(1-(f-.3)/.13))}
+function drawPrs(dt){
+ const {x,W,H}=P;if(pOn)pT+=dt;x.fillStyle=css('--panel');x.fillRect(0,0,W,H);
+ const L=70,R=W-20,T=30,B=H-80,yv=v=>B-(v/130)*(B-T);
+ x.strokeStyle=css('--line');x.lineWidth=1;x.fillStyle=css('--muted');x.font='12px Nunito Sans, Arial';x.textAlign='right';
+ for(let v=0;v<=120;v+=20){x.beginPath();x.moveTo(L,yv(v));x.lineTo(R,yv(v));x.stroke();x.fillText(v,L-8,yv(v)+4)}
+ x.save();x.translate(18,(T+B)/2);x.rotate(-Math.PI/2);x.textAlign='center';x.font='700 13px Nunito Sans, Arial';x.fillText('Pressure (mmHg)',0,0);x.restore();
+ // envelope
+ x.beginPath();for(let i=0;i<=200;i++){const f=i/200;x.lineTo(L+f*(R-L),yv(meanAt(f)+ampAt(f)))}for(let i=200;i>=0;i--){const f=i/200;x.lineTo(L+f*(R-L),yv(meanAt(f)-ampAt(f)))}x.closePath();x.fillStyle=css('--oxy');x.globalAlpha=.15;x.fill();x.globalAlpha=1;
+ // live line
+ x.beginPath();for(let i=0;i<=300;i++){const f=i/300;const ph=Math.sin((pT*1.2-f*1.5)*Math.PI*2);x.lineTo(L+f*(R-L),yv(meanAt(f)+ampAt(f)*ph))}x.strokeStyle=css('--oxy');x.lineWidth=3;x.stroke();
+ // region labels
+ x.fillStyle=css('--fg');x.font='700 12px Nunito Sans, Arial';x.textAlign='center';
+ regions.forEach((r,i)=>{const f=(i+.5)/regions.length;const X=L+f*(R-L);x.fillText(r,X,B+22);x.strokeStyle=css('--line');x.beginPath();x.moveTo(L+(i+1)/regions.length*(R-L),T);x.lineTo(L+(i+1)/regions.length*(R-L),B);x.stroke()});
+ x.fillStyle=css('--muted');x.font='12px Nunito Sans, Arial';x.fillText('← away from heart',L+90,B+50);x.fillText('back to heart →',R-90,B+50);
+}
+document.getElementById('prsPlay').textContent=pOn?'Pause':'Play';
+document.getElementById('prsPlay').onclick=e=>{pOn=!pOn;e.target.textContent=pOn?'Pause':'Play'};
+
+/* ===== 5. Name the vessels ===== */
+const tagsPos=[[256,145,'Pulmonary artery'],[344,145,'Pulmonary vein'],[330,590,'Aorta'],[270,590,'Vena cava'],[368,270,'Hepatic artery'],[372,300,'Hepatic vein'],[450,356,'Hepatic portal vein'],[372,520,'Renal artery'],[232,490,'Renal vein']];
+const gT=document.getElementById('tags');gT.innerHTML=tagsPos.map((t,i)=>`<g><circle cx="${t[0]}" cy="${t[1]}" r="13" style="fill:var(--fg)"/><text x="${t[0]}" y="${t[1]+5}" text-anchor="middle" style="fill:var(--bg)">${i+1}</text></g>`).join('');
+const names=tagsPos.map(t=>t[2]);const sorted=[...names].sort();
+const box=document.getElementById('names');
+box.innerHTML=names.map((n,i)=>`<div class="namerow"><span class="num">${i+1}</span><select id="v${i}" aria-label="Vessel ${i+1}"><option value="">Choose…</option>${sorted.map(s=>`<option>${s}</option>`).join('')}</select><span class="mark" id="m${i}"></span></div>`).join('');
+document.getElementById('checkNames').onclick=()=>{let s=0;names.forEach((n,i)=>{const v=document.getElementById('v'+i).value;const ok=v===n;if(ok)s++;const m=document.getElementById('m'+i);m.textContent=v?(ok?'✓':'✗'):'';m.className='mark '+(ok?'ok':'no');m.setAttribute('aria-label',ok?'correct':'incorrect')});document.getElementById('nameScore').textContent=`${s} / ${names.length} correct`+(s===names.length?'. Excellent!':'')};
+document.getElementById('resetNames').onclick=()=>{names.forEach((n,i)=>{document.getElementById('v'+i).value='';document.getElementById('m'+i).textContent=''});document.getElementById('nameScore').textContent=''};
+
+/* loop */
+let last=performance.now();
+function frame(now){const dt=Math.min(.05,(now-last)/1000);last=now;
+ if(active==='p-dbl')drawDbl(dt);else if(active==='p-ves')drawVes(reduce?0:dt);else if(active==='p-val')drawVal(dt);else if(active==='p-prs')drawPrs(dt);
+ requestAnimationFrame(frame)}
+requestAnimationFrame(frame);
+})();
+</script>
+
+</body></html>

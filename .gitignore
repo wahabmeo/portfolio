@@ -1,0 +1,6 @@
+node_modules/
+dist/
+.claude/
+*.log
+vite.config.js.timestamp-*
+.DS_Store

@@ -1,0 +1,431 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>Phagocyte &amp; Clotting Lab</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: one classroom "bench" — header, tab strip, one simulation at a time with a big stage and a narration panel beside it. Palette borrowed from an H&E-stained slide. */
+:root{
+  --glass:#f7f3f5;      /* slide glass */
+  --panel:#ffffff;
+  --ink:#24202e;
+  --muted:#6a6275;
+  --line:#e3dae2;
+  --eosin:#c43d6a;      /* cytoplasm pink, accent */
+  --eosin-soft:#f6d9e3;
+  --haem:#3d3f94;       /* nucleus purple-blue */
+  --haem-soft:#dfe0f4;
+  --bact:#1f8a78;       /* bacterium stain */
+  --enz:#d98a1c;        /* enzyme / lysosome */
+  --ok:#2e8a4f; --bad:#c2402f;
+  --cyto:rgba(196,61,106,.16);
+  --f-display:"Bricolage Grotesque", "Segoe UI", system-ui, sans-serif;
+  --f-body:"Atkinson Hyperlegible", "Segoe UI", system-ui, sans-serif;
+  --f-mono:"IBM Plex Mono", ui-monospace, Menlo, monospace;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --glass:#16131d;--panel:#211c2a;--ink:#f0eaf2;--muted:#a69db1;--line:#3a3245;
+  --eosin:#ee6f98;--eosin-soft:#4a2433;--haem:#9ea2f2;--haem-soft:#2c2d55;--bact:#4cc9b0;--enz:#f2b04c;
+  --ok:#5fcf86;--bad:#f07a68;--cyto:rgba(238,111,152,.18);color-scheme:dark}}
+:root[data-theme="dark"]{
+  --glass:#16131d;--panel:#211c2a;--ink:#f0eaf2;--muted:#a69db1;--line:#3a3245;
+  --eosin:#ee6f98;--eosin-soft:#4a2433;--haem:#9ea2f2;--haem-soft:#2c2d55;--bact:#4cc9b0;--enz:#f2b04c;
+  --ok:#5fcf86;--bad:#f07a68;--cyto:rgba(238,111,152,.18);color-scheme:dark}
+
+*{box-sizing:border-box}
+body{background:var(--glass);color:var(--ink);font-family:var(--f-body);font-size:17px;line-height:1.55;padding-inline:16px;padding-block:20px 48px}
+.wrap{max-width:1120px;margin:0 auto;display:flex;flex-direction:column;gap:20px}
+header{display:flex;flex-wrap:wrap;align-items:end;justify-content:space-between;gap:12px}
+.eyebrow{font-family:var(--f-mono);font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--eosin)}
+h1{font-family:var(--f-display);font-weight:800;font-size:clamp(28px,4.5vw,44px);line-height:1.05;margin:4px 0 0;text-wrap:balance}
+h2{font-family:var(--f-display);font-weight:700;font-size:24px;margin:0;text-wrap:balance}
+h3{font-family:var(--f-display);font-weight:700;font-size:19px;margin:0}
+p{margin:0}
+.ru-toggle{display:flex;align-items:center;gap:8px;font-size:15px;color:var(--muted);cursor:pointer;user-select:none}
+.ru-toggle input{width:18px;height:18px;accent-color:var(--eosin)}
+.ru{display:none;font-family:var(--f-mono);font-size:.78em;color:var(--haem);background:var(--haem-soft);padding:1px 6px;border-radius:4px;margin-left:4px;white-space:nowrap}
+body.show-ru .ru{display:inline}
+
+nav.tabs{display:flex;gap:6px;flex-wrap:wrap;border-bottom:2px solid var(--line)}
+nav.tabs button{font:600 16px var(--f-display);background:none;border:0;color:var(--muted);padding:10px 14px;border-bottom:3px solid transparent;margin-bottom:-2px;cursor:pointer}
+nav.tabs button[aria-selected="true"]{color:var(--ink);border-color:var(--eosin)}
+nav.tabs button:focus-visible,.btn:focus-visible,.card-btn:focus-visible,.seg button:focus-visible{outline:3px solid var(--haem);outline-offset:2px}
+nav.tabs .n{font-family:var(--f-mono);font-size:13px;color:var(--eosin);margin-right:6px}
+
+.sim{display:grid;grid-template-columns:minmax(0,1.6fr) minmax(0,1fr);gap:20px;align-items:start}
+@media (max-width:820px){.sim{grid-template-columns:1fr}}
+.stage{background:var(--panel);border:1px solid var(--line);border-radius:10px;overflow:hidden}
+canvas{display:block;width:100%;height:auto}
+.controls{display:flex;flex-wrap:wrap;gap:8px;align-items:center;padding:12px;border-top:1px solid var(--line)}
+.btn{font:700 15px var(--f-body);border-radius:8px;border:1px solid var(--line);background:var(--glass);color:var(--ink);padding:9px 16px;cursor:pointer}
+.btn.primary{background:var(--eosin);border-color:var(--eosin);color:#fff}
+.btn:disabled{opacity:.4;cursor:default}
+.dots{display:flex;gap:6px;margin-left:auto}
+.dots span{width:10px;height:10px;border-radius:50%;background:var(--line)}
+.dots span.on{background:var(--eosin)}
+
+.panel{display:flex;flex-direction:column;gap:14px;min-width:0}
+.box{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:16px 18px;display:flex;flex-direction:column;gap:8px}
+.step-no{font-family:var(--f-mono);font-size:13px;color:var(--muted)}
+.think{border-left:4px solid var(--haem);background:var(--haem-soft);border-radius:0 8px 8px 0;padding:10px 14px;font-size:16px}
+.think b{font-family:var(--f-display)}
+.keyfacts{margin:0;padding-left:20px;display:flex;flex-direction:column;gap:4px;font-size:16px}
+.muted{color:var(--muted);font-size:15px}
+
+/* clotting */
+.order-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:10px;padding:14px}
+.card-btn{font:16px/1.35 var(--f-body);text-align:left;background:var(--glass);color:var(--ink);border:1.5px solid var(--line);border-radius:8px;padding:12px;cursor:pointer;min-height:64px}
+.card-btn.done{background:var(--eosin-soft);border-color:var(--eosin);cursor:default}
+.card-btn.done::before{content:attr(data-pos) ". ";font-family:var(--f-mono);font-weight:500;color:var(--eosin)}
+.card-btn.wrong{animation:shake .35s;border-color:var(--bad)}
+@keyframes shake{25%{transform:translateX(-5px)}75%{transform:translateX(5px)}}
+.status{padding:0 14px 14px;font-size:16px;min-height:28px}
+.amp{padding:16px;display:flex;flex-direction:column;gap:14px}
+.amp-ctrl{display:flex;flex-wrap:wrap;gap:16px;align-items:center}
+.amp-ctrl label{font-size:15px;color:var(--muted);display:flex;align-items:center;gap:8px}
+input[type=range]{accent-color:var(--eosin);width:140px}
+input[type=text]{font:16px var(--f-mono);padding:7px 10px;border:1px solid var(--line);border-radius:6px;background:var(--glass);color:var(--ink);width:170px}
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:8px;overflow:hidden}
+.seg button{font:500 14px var(--f-mono);background:var(--glass);color:var(--ink);border:0;padding:7px 12px;cursor:pointer}
+.seg button[aria-pressed="true"]{background:var(--haem);color:#fff}
+.rows{display:flex;flex-direction:column;gap:6px;font-family:var(--f-mono);font-size:14px}
+.row{display:grid;grid-template-columns:72px minmax(0,1fr) auto;gap:10px;align-items:center;opacity:.25;transition:opacity .3s}
+.row.lit{opacity:1}
+.bar{height:16px;background:var(--eosin);border-radius:3px;width:0;transition:width .5s ease-out}
+.row .num{font-variant-numeric:tabular-nums;text-align:right;white-space:nowrap}
+.result{font-size:17px}
+.result strong{font-family:var(--f-display);font-size:22px;color:var(--eosin)}
+
+/* sort */
+.sort-card{padding:22px;display:flex;flex-direction:column;gap:16px;min-height:260px}
+.statement{font-family:var(--f-display);font-weight:600;font-size:clamp(20px,2.6vw,26px);line-height:1.25;text-wrap:balance}
+.choices{display:flex;flex-wrap:wrap;gap:10px}
+.choices .btn{flex:1 1 200px;padding:14px}
+.choices .btn.def{border-color:var(--haem);color:var(--haem)}
+.choices .btn.esc{border-color:var(--bact);color:var(--bact)}
+.feedback{font-size:16px;padding:10px 14px;border-radius:8px}
+.feedback.ok{background:color-mix(in srgb,var(--ok) 14%,transparent)}
+.feedback.no{background:color-mix(in srgb,var(--bad) 14%,transparent)}
+.score{font-family:var(--f-mono);font-size:14px;color:var(--muted)}
+.tally{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.tally ul{margin:4px 0 0;padding-left:18px;font-size:15px}
+.tally .col{min-width:0}
+.tally .t-def{color:var(--haem)} .tally .t-esc{color:var(--bact)}
+@media (max-width:500px){.tally{grid-template-columns:1fr}}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+
+<div class="wrap">
+  <header>
+    <div>
+      <div class="eyebrow">IGCSE Biology · Defence against disease</div>
+      <h1>Phagocyte &amp; Clotting Lab</h1>
+    </div>
+    <label class="ru-toggle"><input type="checkbox" id="ru-on"> Show key words in Russian</label>
+  </header>
+
+  <nav class="tabs" role="tablist">
+    <button role="tab" id="tab-engulf" aria-selected="true" data-sec="engulf"><span class="n">1</span>Phagocytosis</button>
+    <button role="tab" id="tab-clot" aria-selected="false" data-sec="clot"><span class="n">2</span>Blood clotting</button>
+    <button role="tab" id="tab-sort" aria-selected="false" data-sec="sort"><span class="n">3</span>Defend or escape?</button>
+  </nav>
+
+  <!-- 1 PHAGOCYTOSIS -->
+  <section id="engulf" class="sim">
+    <div class="stage">
+      <canvas id="cv" width="700" height="340" aria-label="Animated phagocyte engulfing a bacterium"></canvas>
+      <div class="controls">
+        <button class="btn" id="p-back">◀ Back</button>
+        <button class="btn primary" id="p-next">Next step ▶</button>
+        <button class="btn" id="p-play">Play all</button>
+        <div class="dots" id="p-dots"></div>
+      </div>
+    </div>
+    <div class="panel">
+      <div class="box">
+        <div class="step-no" id="p-no">Step 1 of 6</div>
+        <h2 id="p-title"></h2>
+        <p id="p-text"></p>
+      </div>
+      <div class="think" id="p-think"></div>
+      <div class="box">
+        <h3>Key words</h3>
+        <ul class="keyfacts">
+          <li><b>Phagocyte</b><span class="ru">фагоцит</span> – a white blood cell that engulfs pathogens</li>
+          <li><b>Pathogen</b><span class="ru">патоген</span> – a microorganism that causes disease</li>
+          <li><b>Engulf</b><span class="ru">поглощать</span> – flow around and enclose</li>
+          <li><b>Digestive enzymes</b><span class="ru">пищеварительные ферменты</span> – break the pathogen down</li>
+          <li><b>Vacuole</b><span class="ru">вакуоль</span> – the sac that holds the pathogen</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- 2 CLOTTING -->
+  <section id="clot" class="sim" hidden>
+    <div class="panel">
+      <div class="stage">
+        <div style="padding:16px 16px 0;display:flex;flex-direction:column;gap:4px">
+          <h2>Put the clotting steps in order</h2>
+          <p class="muted">Tap the card that happens <b>first</b>, then the next one.</p>
+        </div>
+        <div class="order-grid" id="order"></div>
+        <div class="status" id="order-status"></div>
+        <div class="controls"><button class="btn" id="order-reset">Shuffle again</button></div>
+      </div>
+      <div class="stage">
+        <div class="amp">
+          <div>
+            <h2>The amplification cascade</h2>
+            <p class="muted">Each enzyme molecule switches on many molecules in the next step. Predict, then run it.</p>
+          </div>
+          <div class="amp-ctrl">
+            <label>Steps <input type="range" id="a-steps" min="1" max="6" value="5"> <b id="a-steps-v" style="font-family:var(--f-mono)">5</b></label>
+            <label>Each step × <span class="seg" id="a-fac"><button data-f="10" aria-pressed="false">10</button><button data-f="100" aria-pressed="true">100</button><button data-f="1000" aria-pressed="false">1000</button></span></label>
+          </div>
+          <div class="amp-ctrl">
+            <label for="a-guess">My prediction</label>
+            <input type="text" id="a-guess" placeholder="e.g. 500" inputmode="numeric">
+            <button class="btn primary" id="a-run">Run cascade</button>
+          </div>
+          <div class="rows" id="a-rows"></div>
+          <p class="result" id="a-result"></p>
+        </div>
+      </div>
+    </div>
+    <div class="panel">
+      <div class="box">
+        <h3>Why clot?</h3>
+        <ul class="keyfacts">
+          <li>Stops <b>blood loss</b> (so blood pressure does not fall too low)</li>
+          <li>Stops <b>pathogens</b> entering the wound</li>
+          <li>A scab protects new skin while it grows</li>
+        </ul>
+      </div>
+      <div class="box">
+        <h3>Key words</h3>
+        <ul class="keyfacts">
+          <li><b>Platelets</b><span class="ru">тромбоциты</span> – cell fragments that start clotting</li>
+          <li><b>Fibrinogen</b><span class="ru">фибриноген</span> – soluble plasma protein</li>
+          <li><b>Fibrin</b><span class="ru">фибрин</span> – insoluble threads that form a mesh</li>
+          <li><b>Clot</b><span class="ru">сгусток крови</span> · <b>Scab</b><span class="ru">струп</span></li>
+        </ul>
+      </div>
+      <div class="think"><b>Think:</b> When could a blood clot be dangerous? (Hint: a clot inside a blood vessel to the heart or brain.)</div>
+    </div>
+  </section>
+
+  <!-- 3 SORT -->
+  <section id="sort" class="sim" hidden>
+    <div class="stage">
+      <div class="sort-card">
+        <div class="score" id="s-score"></div>
+        <div class="statement" id="s-text"></div>
+        <div class="choices">
+          <button class="btn def" id="s-def">🛡 Helps the phagocyte</button>
+          <button class="btn esc" id="s-esc">🦠 Helps the pathogen escape</button>
+        </div>
+        <div class="feedback" id="s-fb" hidden></div>
+        <div><button class="btn primary" id="s-next" hidden>Next card ▶</button></div>
+      </div>
+    </div>
+    <div class="panel">
+      <div class="box">
+        <h3>Your sorted cards</h3>
+        <div class="tally">
+          <div class="col"><b class="t-def">Phagocyte feature → function</b><ul id="t-def"></ul></div>
+          <div class="col"><b class="t-esc">Pathogen escape</b><ul id="t-esc"></ul></div>
+        </div>
+      </div>
+      <div class="think"><b>Exam tip:</b> “Structure related to function” answers need two parts: the <i>feature</i> and <i>what it lets the cell do</i>.</div>
+    </div>
+  </section>
+</div>
+
+<script>
+// ---------- tabs ----------
+const tabs=[...document.querySelectorAll('nav.tabs button')];
+function show(id){tabs.forEach(t=>{const on=t.dataset.sec===id;t.setAttribute('aria-selected',on);document.getElementById(t.dataset.sec).hidden=!on});if(id==='engulf'&&typeof sizeCanvas==='function')sizeCanvas();}
+tabs.forEach(t=>t.addEventListener('click',()=>show(t.dataset.sec)));
+const h=location.hash.slice(1); if(['engulf','clot','sort'].includes(h)) show(h);
+document.getElementById('ru-on').addEventListener('change',e=>document.body.classList.toggle('show-ru',e.target.checked));
+
+// ---------- phagocytosis ----------
+const STEPS=[
+ {t:"A pathogen enters the tissue",x:"Bacteria get in through a cut in the skin. The phagocyte is nearby in the tissue, outside the blood vessel.",q:"<b>Think:</b> How does the skin normally stop pathogens getting in?"},
+ {t:"Chemical attraction",x:"The infected tissue and the bacteria release chemicals. The phagocyte moves towards the highest concentration of these chemicals.",q:"<b>Think:</b> Why do many phagocytes collect at a wound?"},
+ {t:"Recognition",x:"The phagocyte recognises the bacterium as foreign. Receptors on its membrane detect molecules (antigens) on the pathogen surface.",q:"<b>Think:</b> Why must a phagocyte not engulf the body's own cells?"},
+ {t:"Engulfing",x:"The flexible cell membrane flows around the bacterium. Extensions of cytoplasm (pseudopodia) surround it.",q:"<b>Think:</b> Which feature of the membrane makes this possible?"},
+ {t:"Enzymes poured into the sac",x:"The bacterium is now enclosed in a sac (vacuole). Small sacs (lysosomes) fuse with it and pour in digestive enzymes.",q:"<b>Think:</b> Why are the enzymes kept inside sacs, not loose in the cytoplasm?"},
+ {t:"Pathogen destroyed",x:"The enzymes digest the bacterium. The phagocyte can absorb the soluble products and use them in its own metabolism.",q:"<b>Think:</b> Pus contains many dead phagocytes. Why might a phagocyte die?"}
+];
+const K=[
+ {px:170,bx:560,arm:0,vac:0,enz:0,dig:0,chem:0,rec:0},
+ {px:265,bx:560,arm:0,vac:0,enz:0,dig:0,chem:1,rec:0},
+ {px:430,bx:560,arm:.12,vac:0,enz:0,dig:0,chem:.4,rec:1},
+ {px:440,bx:555,arm:1,vac:0,enz:0,dig:0,chem:0,rec:0},
+ {px:440,bx:478,arm:0,vac:1,enz:1,dig:0,chem:0,rec:0},
+ {px:440,bx:478,arm:0,vac:1,enz:1,dig:1,chem:0,rec:0}
+];
+const cv=document.getElementById('cv'),cx=cv.getContext('2d');
+const reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
+let target=0,cur=0,playing=null;
+const dotsEl=document.getElementById('p-dots');
+STEPS.forEach(()=>dotsEl.appendChild(document.createElement('span')));
+function setStep(n){
+  target=Math.max(0,Math.min(STEPS.length-1,n));
+  const s=STEPS[target];
+  document.getElementById('p-no').textContent=`Step ${target+1} of ${STEPS.length}`;
+  document.getElementById('p-title').textContent=s.t;
+  document.getElementById('p-text').textContent=s.x;
+  document.getElementById('p-think').innerHTML=s.q;
+  [...dotsEl.children].forEach((d,i)=>d.classList.toggle('on',i<=target));
+  document.getElementById('p-back').disabled=target===0;
+  document.getElementById('p-next').disabled=target===STEPS.length-1;
+}
+document.getElementById('p-next').onclick=()=>{stopPlay();setStep(target+1)};
+document.getElementById('p-back').onclick=()=>{stopPlay();setStep(target-1)};
+function stopPlay(){if(playing){clearInterval(playing);playing=null;document.getElementById('p-play').textContent='Play all'}}
+document.getElementById('p-play').onclick=()=>{
+  if(playing){stopPlay();return}
+  setStep(0);cur=0;document.getElementById('p-play').textContent='Pause';
+  playing=setInterval(()=>{if(target>=STEPS.length-1){stopPlay();return}setStep(target+1)},3200);
+};
+setStep(0);
+
+function sizeCanvas(){const w=cv.clientWidth;const dpr=window.devicePixelRatio||1;cv.width=w*dpr;cv.height=w*340/700*dpr;}
+addEventListener('resize',sizeCanvas);
+const lerp=(a,b,t)=>a+(b-a)*t;
+function frameState(t){const i=Math.floor(t),f=t-i,a=K[i],b=K[Math.min(i+1,K.length-1)];const o={};for(const k in a)o[k]=lerp(a[k],b[k],f);return o;}
+const chemP=Array.from({length:40},(_,i)=>({s:Math.random(),y:(Math.random()-.5)*220,sp:.12+Math.random()*.15}));
+const lyso=[[-55,-48],[-10,55],[25,-58],[-60,40]];
+const frags=Array.from({length:14},()=>({a:Math.random()*6.28,r:10+Math.random()*60}));
+function col(n){return getComputedStyle(document.documentElement).getPropertyValue(n).trim()}
+
+function draw(time){
+  const T=time/1000;
+  const sp=reduce?1:.045; cur+= (target-cur)*sp; if(Math.abs(target-cur)<.002)cur=target;
+  const S=frameState(Math.max(0,Math.min(K.length-1,cur)));
+  const W=cv.width,H=cv.height,sc=W/700; cx.setTransform(sc,0,0,sc,0,0); cx.clearRect(0,0,700,340);
+  const C={eos:col('--eosin'),cyto:col('--cyto'),haem:col('--haem'),bact:col('--bact'),enz:col('--enz'),muted:col('--muted'),line:col('--line')};
+  const cy=170;
+  // capillary wall top
+  cx.fillStyle=C.eos; cx.globalAlpha=.18; cx.fillRect(0,0,700,26); cx.globalAlpha=1;
+  cx.fillStyle=C.muted; cx.font='12px "IBM Plex Mono", monospace'; cx.fillText('capillary wall',10,18); cx.fillText('infected tissue',10,330);
+  // chemicals
+  if(S.chem>.01){cx.fillStyle=C.enz;chemP.forEach(p=>{const prog=((p.s+T*p.sp*(reduce?0:1))%1);const x=lerp(S.bx-20,S.px+40,prog),y=cy+p.y*(.3+prog*.7);cx.globalAlpha=S.chem*(1-prog)*.9;cx.beginPath();cx.arc(x,y,2.6,0,6.28);cx.fill();});cx.globalAlpha=1}
+  // phagocyte blob
+  const R=95,a1=lerp(.9,.5,S.arm),amp=75*S.arm, wob=reduce?0:1;
+  cx.beginPath();
+  for(let i=0;i<=120;i++){const th=i/120*Math.PI*2;let r=R+4*Math.sin(th*5+T*1.3)*wob+3*Math.sin(th*3-T)*wob;
+    let d1=Math.atan2(Math.sin(th-a1),Math.cos(th-a1)),d2=Math.atan2(Math.sin(th+a1),Math.cos(th+a1));
+    r+=amp*Math.exp(-((d1/.26)**2))+amp*Math.exp(-((d2/.26)**2));
+    const x=S.px+r*Math.cos(th),y=cy+r*Math.sin(th);i?cx.lineTo(x,y):cx.moveTo(x,y);}
+  cx.closePath(); cx.fillStyle=C.cyto; cx.fill(); cx.strokeStyle=C.eos; cx.lineWidth=2.5; cx.stroke();
+  // lobed nucleus
+  cx.fillStyle=C.haem; cx.globalAlpha=.85;
+  [[-42,-14,20,15],[-22,12,19,14],[-50,22,16,13]].forEach(([dx,dy,rx,ry])=>{cx.beginPath();cx.ellipse(S.px+dx,cy+dy,rx,ry,.4,0,6.28);cx.fill()});
+  cx.globalAlpha=1;
+  // lysosomes
+  const vx=S.px+38;
+  lyso.forEach(([dx,dy],i)=>{const tx=lerp(S.px+dx,vx+dx*.35,S.enz),ty=lerp(cy+dy,cy+dy*.35,S.enz);cx.globalAlpha=1-S.enz*.85;cx.fillStyle=C.enz;cx.beginPath();cx.arc(tx,ty,7,0,6.28);cx.fill();});
+  cx.globalAlpha=1;
+  // vacuole
+  if(S.vac>.01){cx.globalAlpha=S.vac;cx.strokeStyle=C.eos;cx.lineWidth=2;cx.setLineDash([5,4]);cx.beginPath();cx.arc(vx,cy,44,0,6.28);cx.stroke();cx.setLineDash([]);
+    cx.fillStyle=C.enz;for(let i=0;i<18;i++){const a=i*2.4+T*(reduce?0:.8),r=18+ (i%5)*5;cx.globalAlpha=S.enz*.8;cx.beginPath();cx.arc(vx+Math.cos(a)*r,cy+Math.sin(a)*r,2,0,6.28);cx.fill()}
+    cx.globalAlpha=1}
+  // bacterium
+  const bA=1-S.dig;
+  if(bA>.02){cx.save();cx.translate(S.bx,cy);cx.rotate(reduce?0:Math.sin(T*.7)*.06);const sh=lerp(1,.4,S.dig);cx.scale(sh,sh);cx.globalAlpha=bA;
+    cx.fillStyle=C.bact;cx.beginPath();cx.roundRect(-30,-13,60,26,13);cx.fill();
+    cx.strokeStyle=C.bact;cx.lineWidth=2;for(let i=0;i<8;i++){const x=-24+i*7;cx.beginPath();cx.moveTo(x,-13);cx.lineTo(x,-19);cx.moveTo(x,13);cx.lineTo(x,19);cx.stroke()}
+    if(S.rec>.01){cx.globalAlpha=S.rec*(.5+.5*Math.sin(T*5));cx.strokeStyle=C.haem;cx.lineWidth=3;cx.beginPath();cx.roundRect(-38,-24,76,48,24);cx.stroke()}
+    cx.restore();cx.globalAlpha=1}
+  // digested fragments spreading
+  if(S.dig>.01){cx.fillStyle=C.bact;frags.forEach(f=>{const r=f.r*S.dig;cx.globalAlpha=S.dig*(1-S.dig*.5);cx.beginPath();cx.arc(vx+Math.cos(f.a)*r,cy+Math.sin(f.a)*r,2.4,0,6.28);cx.fill()});cx.globalAlpha=1}
+  // labels
+  cx.fillStyle=C.muted;cx.font='13px "Atkinson Hyperlegible", sans-serif';
+  cx.fillText('phagocyte',S.px-40,cy+R+30);
+  cx.fillText('lobed nucleus',S.px-95,cy-50);
+  if(bA>.3 && S.vac<.5)cx.fillText('bacterium',S.bx-28,cy-32);
+  if(S.vac>.5)cx.fillText('vacuole + enzymes',vx-20,cy-56);
+  requestAnimationFrame(draw);
+}
+if(!CanvasRenderingContext2D.prototype.roundRect){CanvasRenderingContext2D.prototype.roundRect=function(x,y,w,h,r){this.moveTo(x+r,y);this.arcTo(x+w,y,x+w,y+h,r);this.arcTo(x+w,y+h,x,y+h,r);this.arcTo(x,y+h,x,y,r);this.arcTo(x,y,x+w,y,r);this.closePath();}}
+sizeCanvas(); requestAnimationFrame(draw);
+
+// ---------- clotting order ----------
+const ORDER=["A blood vessel is damaged (cut)","Platelets collect at the wound and release chemicals (enzymes)","Soluble fibrinogen is changed into insoluble fibrin","Fibrin threads form a mesh across the wound","The mesh traps red blood cells, making a clot","The clot dries and hardens into a scab"];
+let nextIdx=0;
+function buildOrder(){
+  nextIdx=0;const g=document.getElementById('order');g.innerHTML='';
+  const sh=ORDER.map((t,i)=>({t,i})).sort(()=>Math.random()-.5);
+  sh.forEach(o=>{const b=document.createElement('button');b.className='card-btn';b.textContent=o.t;b.onclick=()=>{
+    if(b.classList.contains('done'))return;
+    if(o.i===nextIdx){b.classList.add('done');b.dataset.pos=nextIdx+1;nextIdx++;
+      document.getElementById('order-status').textContent=nextIdx===ORDER.length?'✅ Correct order! The clot stops blood loss and keeps pathogens out.':`Good – ${nextIdx} of ${ORDER.length} in place.`;}
+    else{b.classList.remove('wrong');void b.offsetWidth;b.classList.add('wrong');document.getElementById('order-status').textContent='Not yet – what has to happen before that?';}
+  };g.appendChild(b)});
+  document.getElementById('order-status').textContent='';
+}
+document.getElementById('order-reset').onclick=buildOrder; buildOrder();
+
+// ---------- amplification ----------
+let fac=100n;
+const stepsIn=document.getElementById('a-steps');
+stepsIn.oninput=()=>{document.getElementById('a-steps-v').textContent=stepsIn.value;resetRows()};
+document.querySelectorAll('#a-fac button').forEach(b=>b.onclick=()=>{document.querySelectorAll('#a-fac button').forEach(x=>x.setAttribute('aria-pressed',x===b));fac=BigInt(b.dataset.f);resetRows()});
+const fmt=n=>n.toString().replace(/\B(?=(\d{3})+(?!\d))/g,',');
+const NAMES=[[18,'quintillion'],[15,'quadrillion'],[12,'trillion'],[9,'billion'],[6,'million'],[3,'thousand']];
+function words(e){for(const [g,n] of NAMES)if(e>=g)return `${fmt(10n**BigInt(e-g))} ${n}`;return fmt(10n**BigInt(e))}
+function resetRows(){
+  const n=+stepsIn.value,rows=document.getElementById('a-rows');rows.innerHTML='';
+  for(let i=0;i<=n;i++){const r=document.createElement('div');r.className='row';r.innerHTML=`<span>${i===0?'signal':'step '+i}</span><div><div class="bar"></div></div><span class="num">?</span>`;rows.appendChild(r)}
+  document.getElementById('a-result').textContent='';
+}
+resetRows();
+document.getElementById('a-run').onclick=()=>{
+  const n=+stepsIn.value,rows=[...document.querySelectorAll('#a-rows .row')];const facE=fac.toString().length-1,maxE=facE*n;
+  rows.forEach((r,i)=>setTimeout(()=>{const v=fac**BigInt(i);r.classList.add('lit');r.querySelector('.num').textContent=fmt(v);r.querySelector('.bar').style.width=((i*facE+1)/(maxE+1)*100)+'%';
+    if(i===n){const g=document.getElementById('a-guess').value.replace(/[^\d]/g,'');const e=maxE;
+      let msg=`One signal molecule → <strong>${fmt(v)}</strong> product molecules (${words(e)}, or 1 × 10<sup>${e}</sup>).`;
+      if(g){const gv=BigInt(g);msg+= gv===v?' 🎯 Your prediction was exactly right!':` Your prediction was ${fmt(gv)}. ${gv<v?'The real number is much bigger – each step multiplies, it does not add.':'Check: multiply by '+fac+' once for each step.'}`}
+      msg+=` <br><span class="muted">Bar length uses a log scale: each step is ${fac}× bigger, too big to draw to normal scale.</span>`;
+      document.getElementById('a-result').innerHTML=msg;}
+  },reduce?0:i*450));
+};
+
+// ---------- sort ----------
+const CARDS=[
+ {t:"The nucleus is long and lobed",d:1,f:"Lobed nucleus → the phagocyte can squeeze out between the cells of the capillary wall."},
+ {t:"Hiding inside the host's own cells, e.g. Plasmodium in liver cells",d:0,f:"Inside a host cell, the pathogen is not seen as foreign, so it is not engulfed."},
+ {t:"Sacs (lysosomes) full of powerful digestive enzymes",d:1,f:"Lysosomes → enzymes can be poured onto the pathogen to digest it."},
+ {t:"Living in places with no phagocytes, e.g. inside the gut",d:0,f:"Phagocytes do not patrol the gut cavity, so the pathogen is not attacked there."},
+ {t:"A flexible cell membrane that can change shape",d:1,f:"Flexible membrane → it can flow around and engulf the pathogen."},
+ {t:"Releasing toxins that kill the phagocyte",d:0,f:"Toxins kill phagocytes – these dead phagocytes form pus."},
+ {t:"Receptors that detect chemicals and foreign antigens",d:1,f:"Receptors → it moves towards infection and recognises pathogens."},
+ {t:"A slippery capsule around the bacterium",d:0,f:"A capsule makes the bacterium hard for the phagocyte to grip and engulf."}
+];
+let sIdx=0,sScore=0,deck=[];
+function sStart(){deck=[...CARDS].sort(()=>Math.random()-.5);sIdx=0;sScore=0;document.getElementById('t-def').innerHTML='';document.getElementById('t-esc').innerHTML='';sShow()}
+function sShow(){
+  const fb=document.getElementById('s-fb'),nx=document.getElementById('s-next');fb.hidden=true;nx.hidden=true;
+  ['s-def','s-esc'].forEach(id=>document.getElementById(id).disabled=false);
+  if(sIdx>=deck.length){document.getElementById('s-text').textContent=`Finished! You scored ${sScore} out of ${deck.length}.`;document.getElementById('s-score').textContent='';
+    ['s-def','s-esc'].forEach(id=>document.getElementById(id).disabled=true);nx.textContent='Play again';nx.hidden=false;nx.onclick=sStart;return}
+  document.getElementById('s-score').textContent=`Card ${sIdx+1} of ${deck.length} · Score ${sScore}`;
+  document.getElementById('s-text').textContent=deck[sIdx].t;
+}
+function sAnswer(def){
+  const c=deck[sIdx],ok=(c.d===1)===def;if(ok)sScore++;
+  const fb=document.getElementById('s-fb');fb.hidden=false;fb.className='feedback '+(ok?'ok':'no');
+  fb.innerHTML=(ok?'<b>Correct.</b> ':'<b>Not quite.</b> ')+c.f;
+  ['s-def','s-esc'].forEach(id=>document.getElementById(id).disabled=true);
+  const li=document.createElement('li');li.textContent=c.f;document.getElementById(c.d?'t-def':'t-esc').appendChild(li);
+  const nx=document.getElementById('s-next');nx.textContent='Next card ▶';nx.hidden=false;nx.onclick=()=>{sIdx++;sShow()};
+}
+document.getElementById('s-def').onclick=()=>sAnswer(true);
+document.getElementById('s-esc').onclick=()=>sAnswer(false);
+sStart();
+</script>
+
+</body></html>

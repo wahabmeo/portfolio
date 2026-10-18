@@ -1,0 +1,580 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>Cells at Work</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&family=JetBrains+Mono:wght@500&display=swap">
+<style>
+/* Layout: a microscope bench. Tab strip of four "slides", each a live specimen (canvas) beside its control knobs, with a Predict-Observe-Explain card underneath. Palette = histology stains: eosin pink, haematoxylin violet, chlorophyll green on slide-glass neutrals. */
+:root{
+  --bg:#f4f2f6; --panel:#ffffff; --panel2:#ebe7f0; --fg:#211b2e; --muted:#5f5872; --line:#d6d0df;
+  --eosin:#c2255c; --eosin-soft:#f9dce6; --hema:#4a3a96; --hema-soft:#e4e0f6;
+  --chloro:#2f8a3a; --chloro-soft:#dcf0d9; --o2:#1f7fd1; --amber:#d48a00; --bad:#c62828; --good:#2e7d32;
+  --spec:#fbfaf7; --spec-line:#cfc8d8; --plasma:#f6e8b5; --mucus:rgba(200,190,90,.35);
+  --display:"Bricolage Grotesque","Segoe UI",system-ui,sans-serif;
+  --body:"Atkinson Hyperlegible","Segoe UI",system-ui,sans-serif;
+  --mono:"JetBrains Mono",ui-monospace,Menlo,Consolas,monospace;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#15121c; --panel:#1e1a28; --panel2:#2a2537; --fg:#ece8f3; --muted:#a59db8; --line:#3a3449;
+  --eosin:#ef6b96; --eosin-soft:#43202f; --hema:#a596f0; --hema-soft:#2e2850;
+  --chloro:#6cc46f; --chloro-soft:#1f3a22; --o2:#5fb2ff; --amber:#f0b23a; --bad:#ff6b6b; --good:#7bd389;
+  --spec:#1a1724; --spec-line:#3b3550; --plasma:#4a4223; --mucus:rgba(200,190,90,.22); color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#15121c; --panel:#1e1a28; --panel2:#2a2537; --fg:#ece8f3; --muted:#a59db8; --line:#3a3449;
+  --eosin:#ef6b96; --eosin-soft:#43202f; --hema:#a596f0; --hema-soft:#2e2850;
+  --chloro:#6cc46f; --chloro-soft:#1f3a22; --o2:#5fb2ff; --amber:#f0b23a; --bad:#ff6b6b; --good:#7bd389;
+  --spec:#1a1724; --spec-line:#3b3550; --plasma:#4a4223; --mucus:rgba(200,190,90,.22); color-scheme:dark}
+*{box-sizing:border-box}
+html,body{background:var(--bg);color:var(--fg)}
+body{font-family:var(--body);font-size:16px;line-height:1.5}
+.wrap{max-width:1180px;margin:0 auto;padding-inline:20px;padding-block:22px 40px}
+header{display:flex;flex-wrap:wrap;align-items:end;justify-content:space-between;gap:12px 24px;margin-bottom:18px}
+h1{font-family:var(--display);font-weight:800;font-size:clamp(2rem,4.4vw,3.1rem);line-height:1;margin:0;letter-spacing:-.02em;text-wrap:balance}
+h1 em{font-style:normal;color:var(--eosin)}
+.sub{color:var(--muted);margin:6px 0 0;max-width:60ch}
+.tag{font-family:var(--mono);font-size:.78rem;color:var(--muted);letter-spacing:.06em;text-transform:uppercase}
+nav{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:16px;border-bottom:2px solid var(--line);padding-bottom:0}
+nav button{font:700 1rem var(--display);background:none;border:0;color:var(--muted);padding:10px 14px 12px;cursor:pointer;border-bottom:4px solid transparent;margin-bottom:-2px;display:flex;align-items:center;gap:8px}
+nav button .dot{width:12px;height:12px;border-radius:50%;background:var(--c)}
+nav button[aria-selected="true"]{color:var(--fg);border-bottom-color:var(--c)}
+nav button:focus-visible,button:focus-visible,input:focus-visible{outline:3px solid var(--hema);outline-offset:2px}
+.panel{display:grid;grid-template-columns:minmax(0,1fr) 300px;gap:18px}
+@media (max-width:860px){.panel{grid-template-columns:minmax(0,1fr)}}
+.stage{background:var(--spec);border:1px solid var(--line);border-radius:14px;overflow:hidden;min-width:0}
+.stage canvas{display:block;width:100%;touch-action:manipulation}
+.stage .cap{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;padding:8px 14px;border-top:1px solid var(--line);font-size:.86rem;color:var(--muted);background:var(--panel)}
+.readouts{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin-top:12px}
+.ro{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:8px 12px}
+.ro b{display:block;font-family:var(--mono);font-size:1.25rem;font-variant-numeric:tabular-nums;color:var(--fg)}
+.ro span{font-size:.78rem;color:var(--muted);text-transform:uppercase;letter-spacing:.05em}
+.ro.state-bad b{color:var(--bad)} .ro.state-good b{color:var(--good)} .ro.state-warn b{color:var(--amber)}
+aside.ctrl{display:flex;flex-direction:column;gap:14px;min-width:0}
+.group{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:12px 14px;display:flex;flex-direction:column;gap:10px}
+.group h3{margin:0;font:700 .8rem var(--mono);text-transform:uppercase;letter-spacing:.08em;color:var(--muted)}
+.seg{display:flex;background:var(--panel2);border-radius:9px;padding:3px;gap:3px}
+.seg button{flex:1;font:700 .9rem var(--body);border:0;background:none;color:var(--muted);padding:7px 6px;border-radius:7px;cursor:pointer}
+.seg button[aria-pressed="true"]{background:var(--panel);color:var(--fg);box-shadow:0 1px 3px rgba(0,0,0,.15)}
+.lbl{display:flex;justify-content:space-between;font-size:.92rem;font-weight:700}
+.lbl output{font-family:var(--mono);font-weight:500;color:var(--muted)}
+input[type=range]{width:100%;accent-color:var(--accentc,var(--hema))}
+.btns{display:flex;gap:8px;flex-wrap:wrap}
+.btn{font:700 .95rem var(--body);border:2px solid var(--fg);background:var(--fg);color:var(--bg);padding:9px 14px;border-radius:9px;cursor:pointer;flex:1}
+.btn.ghost{background:none;color:var(--fg);border-color:var(--line)}
+.poe{margin-top:16px;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+@media (max-width:700px){.poe{grid-template-columns:minmax(0,1fr)}}
+.poe div{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:12px 14px;min-width:0}
+.poe h4{margin:0 0 4px;font:800 1.05rem var(--display)}
+.poe p{margin:0;font-size:.95rem}
+.poe .k{font:500 .72rem var(--mono);color:var(--muted);letter-spacing:.08em;text-transform:uppercase}
+.reveal{margin-top:8px;font:700 .85rem var(--body);background:var(--panel2);border:0;color:var(--fg);padding:6px 10px;border-radius:7px;cursor:pointer}
+.ans{margin-top:8px;padding:8px 10px;border-radius:8px;background:var(--chloro-soft);font-size:.92rem}
+.legend{display:flex;flex-wrap:wrap;gap:6px 14px;font-size:.82rem;color:var(--muted)}
+.legend i{display:inline-block;width:10px;height:10px;border-radius:50%;margin-right:5px;vertical-align:-1px}
+/* quiz */
+.quiz{max-width:760px}
+.qcard{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:22px}
+.qcard .clue{font:700 clamp(1.25rem,2.6vw,1.6rem)/1.3 var(--display);margin:6px 0 18px;text-wrap:balance}
+.opts{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+@media (max-width:520px){.opts{grid-template-columns:minmax(0,1fr)}}
+.opts button{font:700 1.05rem var(--body);padding:14px;border-radius:12px;border:2px solid var(--line);background:var(--panel);color:var(--fg);cursor:pointer;text-align:left;display:flex;gap:10px;align-items:center}
+.opts button .dot{width:14px;height:14px;border-radius:50%;background:var(--c);flex:none}
+.opts button.right{border-color:var(--good);background:var(--chloro-soft)}
+.opts button.wrong{border-color:var(--bad);opacity:.7}
+.fb{margin-top:14px;min-height:3em}
+.score{display:flex;gap:6px;margin-top:14px}
+.score i{flex:1;height:8px;border-radius:4px;background:var(--panel2)}
+.score i.ok{background:var(--good)} .score i.no{background:var(--bad)}
+footer{margin-top:28px;color:var(--muted);font-size:.85rem}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+
+<div class="wrap">
+<header>
+  <div>
+    <div class="tag">Grade 8 Biology · Specialised cells · Topic 2.5–2.6</div>
+    <h1>Cells <em>at Work</em></h1>
+    <p class="sub">Change a cell's structure and watch what happens to its function. Each slide has a Predict → Observe → Explain card for the class.</p>
+  </div>
+</header>
+
+<nav role="tablist" aria-label="Simulations">
+  <button role="tab" id="t-rbc" aria-selected="true" style="--c:var(--eosin)" data-tab="rbc"><span class="dot"></span>Red blood cell</button>
+  <button role="tab" id="t-neu" aria-selected="false" style="--c:var(--amber)" data-tab="neu"><span class="dot"></span>Neurone</button>
+  <button role="tab" id="t-cil" aria-selected="false" style="--c:var(--hema)" data-tab="cil"><span class="dot"></span>Ciliated cell</button>
+  <button role="tab" id="t-pal" aria-selected="false" style="--c:var(--chloro)" data-tab="pal"><span class="dot"></span>Palisade cell</button>
+  <button role="tab" id="t-quiz" aria-selected="false" style="--c:var(--fg)" data-tab="quiz"><span class="dot"></span>Which cell am I?</button>
+</nav>
+
+<!-- ============ RBC ============ -->
+<section id="p-rbc" role="tabpanel">
+ <div class="panel">
+  <div style="min-width:0">
+   <div class="stage"><canvas id="cv-rbc" aria-label="Red blood cell travelling from the lungs through a narrow capillary to body tissue"></canvas>
+    <div class="cap"><span>Lungs → 5 µm capillary → body tissue</span><span>Scale: cell is 7 µm wide</span></div></div>
+   <div class="readouts">
+    <div class="ro"><span>Surface area</span><b id="rbc-sa">136 µm²</b></div>
+    <div class="ro"><span>Space for haemoglobin</span><b id="rbc-hb">100%</b></div>
+    <div class="ro"><span>Oxygen carried</span><b id="rbc-o2">0 / 24</b></div>
+    <div class="ro" id="rbc-tis-box"><span>Tissue oxygen</span><b id="rbc-tis">40%</b></div>
+   </div>
+  </div>
+  <aside class="ctrl" style="--accentc:var(--eosin)">
+   <div class="group"><h3>Shape</h3><div class="seg" data-key="shape"><button aria-pressed="true" data-v="bi">Biconcave</button><button aria-pressed="false" data-v="round">Round ball</button></div></div>
+   <div class="group"><h3>Nucleus</h3><div class="seg" data-key="nuc"><button aria-pressed="true" data-v="no">No nucleus</button><button aria-pressed="false" data-v="yes">Has nucleus</button></div></div>
+   <div class="group"><h3>Membrane</h3><div class="seg" data-key="flex"><button aria-pressed="true" data-v="flex">Flexible</button><button aria-pressed="false" data-v="stiff">Stiff</button></div></div>
+   <div class="group"><div class="btns"><button class="btn" id="rbc-play">Pause</button><button class="btn ghost" id="rbc-reset">Reset</button></div>
+    <div class="legend"><span><i style="background:var(--o2)"></i>oxygen</span><span><i style="background:var(--eosin)"></i>haemoglobin + O₂</span></div></div>
+  </aside>
+ </div>
+ <div class="poe">
+  <div><span class="k">1 · Predict</span><h4>Make it stiff</h4><p>What will happen to the tissue on the right if the cell cannot bend?</p></div>
+  <div><span class="k">2 · Observe</span><h4>Try all 3 switches</h4><p>Which switch changes how much O₂ it carries? Which changes how fast it loads O₂? Which stops it?</p></div>
+  <div><span class="k">3 · Explain</span><h4>Link structure → function</h4><p>Why is “no nucleus” a good design for an oxygen carrier?</p><button class="reveal" data-ans="a-rbc">Show answer</button><div class="ans" id="a-rbc" hidden>No nucleus = more space for haemoglobin → more oxygen per cell. Biconcave shape = bigger surface area → oxygen loads faster. Flexible = squeezes through capillaries narrower than itself. A stiff cell blocks the capillary (this happens in sickle cell disease).</div></div>
+ </div>
+</section>
+
+<!-- ============ NEURONE ============ -->
+<section id="p-neu" role="tabpanel" hidden>
+ <div class="panel">
+  <div style="min-width:0">
+   <div class="stage"><canvas id="cv-neu" aria-label="Two neurones race an electrical message from a finger to a muscle"></canvas>
+    <div class="cap"><span>Finger touches hot pan → message → arm muscle pulls hand away</span><span>Animation slowed; timers show real times</span></div></div>
+   <div class="readouts">
+    <div class="ro state-good"><span>Healthy neurone</span><b id="neu-t1">— ms</b></div>
+    <div class="ro"><span>Damaged neurone</span><b id="neu-t2">— ms</b></div>
+    <div class="ro" id="neu-x-box"><span>How much slower</span><b id="neu-x">—</b></div>
+   </div>
+  </div>
+  <aside class="ctrl" style="--accentc:var(--amber)">
+   <div class="group"><div class="lbl"><label for="neu-len">Axon length</label><output id="neu-len-o">1.0 m</output></div><input type="range" id="neu-len" min="0.1" max="1.5" step="0.1" value="1"><span class="legend">Spinal cord to big toe ≈ 1 m</span></div>
+   <div class="group"><div class="lbl"><label for="neu-dmg">Insulation damaged (lower neurone)</label><output id="neu-dmg-o">50%</output></div><input type="range" id="neu-dmg" min="0" max="100" step="10" value="50"></div>
+   <div class="group"><div class="btns"><button class="btn" id="neu-go">Touch the hot pan</button></div>
+    <div class="legend"><span><i style="background:var(--amber)"></i>insulation (fatty sheath)</span><span><i style="background:var(--o2)"></i>electrical message</span></div></div>
+  </aside>
+ </div>
+ <div class="poe">
+  <div><span class="k">1 · Predict</span><h4>Remove the insulation</h4><p>Will the message stop completely, or just slow down?</p></div>
+  <div><span class="k">2 · Observe</span><h4>Change the length</h4><p>Set damage to 100%. What happens to the delay as the axon gets longer?</p></div>
+  <div><span class="k">3 · Explain</span><h4>Why insulate?</h4><p>Why do neurones that control fast reflexes need insulation?</p><button class="reveal" data-ans="a-neu">Show answer</button><div class="ans" id="a-neu" hidden>Insulation lets the message jump between the gaps, so it travels about 50× faster. Without it the message still arrives, but late: a long axon makes the delay much worse. Slow messages = slow reactions, burnt fingers. Damaged insulation happens in multiple sclerosis (MS).</div></div>
+ </div>
+</section>
+
+<!-- ============ CILIATED ============ -->
+<section id="p-cil" role="tabpanel" hidden>
+ <div class="panel">
+  <div style="min-width:0">
+   <div class="stage"><canvas id="cv-cil" aria-label="Ciliated cells beating to move mucus, dust and bacteria out of the airway"></canvas>
+    <div class="cap"><span>Inside the trachea (windpipe): mucus moves up towards the throat →</span><span>Cilia ≈ 7 µm long</span></div></div>
+   <div class="readouts">
+    <div class="ro"><span>Cilia beat rate</span><b id="cil-beat">12 /s</b></div>
+    <div class="ro"><span>Mucus speed</span><b id="cil-spd">8 mm/min</b></div>
+    <div class="ro"><span>Dirt in airway</span><b id="cil-in">0</b></div>
+    <div class="ro" id="cil-risk-box"><span>Infection risk</span><b id="cil-risk">Low</b></div>
+   </div>
+  </div>
+  <aside class="ctrl" style="--accentc:var(--hema)">
+   <div class="group"><div class="lbl"><label for="cil-smoke">Cigarette smoke</label><output id="cil-smoke-o">0%</output></div><input type="range" id="cil-smoke" min="0" max="100" step="5" value="0"></div>
+   <div class="group"><div class="lbl"><label for="cil-mito">Mitochondria (energy)</label><output id="cil-mito-o">Many</output></div><input type="range" id="cil-mito" min="1" max="10" step="1" value="8"></div>
+   <div class="group"><div class="lbl"><label for="cil-dust">Dust in the air</label><output id="cil-dust-o">Normal</output></div><input type="range" id="cil-dust" min="1" max="3" step="1" value="2"></div>
+   <div class="group"><div class="btns"><button class="btn ghost" id="cil-reset">Clean airway</button></div>
+    <div class="legend"><span><i style="background:var(--muted)"></i>dust</span><span><i style="background:var(--hema)"></i>bacteria</span><span><i style="background:var(--bad)"></i>nucleus</span></div></div>
+  </aside>
+ </div>
+ <div class="poe">
+  <div><span class="k">1 · Predict</span><h4>Turn smoke up</h4><p>Where will the dust and bacteria go if the cilia stop?</p></div>
+  <div><span class="k">2 · Observe</span><h4>Watch for a cough</h4><p>Push smoke to 80%. When does the airway cough? Then lower the mitochondria instead.</p></div>
+  <div><span class="k">3 · Explain</span><h4>Smoker's cough</h4><p>Explain step by step why smokers cough more and get more chest infections.</p><button class="reveal" data-ans="a-cil">Show answer</button><div class="ans" id="a-cil" hidden>Smoke damages cilia → they stop beating → mucus with dust and bacteria is not moved up to the throat → it collects in the airways → the body coughs to remove it, and trapped bacteria can cause infections. Cilia need lots of energy, so these cells need many mitochondria.</div></div>
+ </div>
+</section>
+
+<!-- ============ PALISADE ============ -->
+<section id="p-pal" role="tabpanel" hidden>
+ <div class="panel">
+  <div style="min-width:0">
+   <div class="stage"><canvas id="cv-pal" aria-label="Light falling on a leaf cross-section with palisade and spongy cells"></canvas>
+    <div class="cap"><span>Leaf cut in half: light enters from the top</span><span>Palisade cell ≈ 0.1 mm tall</span></div></div>
+   <div class="readouts">
+    <div class="ro"><span>Light captured</span><b id="pal-cap">0%</b></div>
+    <div class="ro"><span>Light wasted</span><b id="pal-waste">0%</b></div>
+    <div class="ro state-good"><span>Sugar made</span><b id="pal-sugar">0</b></div>
+   </div>
+  </div>
+  <aside class="ctrl" style="--accentc:var(--chloro)">
+   <div class="group"><h3>Cell packing</h3><div class="seg" data-key="pack"><button aria-pressed="true" data-v="tight">Tightly packed</button><button aria-pressed="false" data-v="loose">Spread out</button></div></div>
+   <div class="group"><h3>Palisade layer position</h3><div class="seg" data-key="pos"><button aria-pressed="true" data-v="top">Top of leaf</button><button aria-pressed="false" data-v="bottom">Bottom</button></div></div>
+   <div class="group"><div class="lbl"><label for="pal-chl">Chloroplasts per cell</label><output id="pal-chl-o">30</output></div><input type="range" id="pal-chl" min="0" max="40" step="2" value="30"></div>
+   <div class="group"><div class="lbl"><label for="pal-sun">Sunlight</label><output id="pal-sun-o">Bright</output></div><input type="range" id="pal-sun" min="1" max="3" step="1" value="3"></div>
+   <div class="group"><button class="btn ghost" id="pal-reset">Reset sugar</button></div>
+  </aside>
+ </div>
+ <div class="poe">
+  <div><span class="k">1 · Predict</span><h4>Spread them out</h4><p>What happens to light that falls in the gaps between cells?</p></div>
+  <div><span class="k">2 · Observe</span><h4>Move the layer</h4><p>Put the palisade layer at the bottom. How does sugar production change? Why?</p></div>
+  <div><span class="k">3 · Explain</span><h4>Food factory design</h4><p>Give three features of palisade cells and how each helps photosynthesis.</p><button class="reveal" data-ans="a-pal">Show answer</button><div class="ans" id="a-pal" hidden>At the top of the leaf → get the most light. Brick-shaped and tightly packed → no gaps, so little light is wasted. Many chloroplasts (containing chlorophyll) → trap more light → make more sugar by photosynthesis. Cells deeper in the leaf (spongy cells) get less light, so they have fewer chloroplasts.</div></div>
+ </div>
+</section>
+
+<!-- ============ QUIZ ============ -->
+<section id="p-quiz" role="tabpanel" hidden>
+ <div class="quiz">
+  <div class="qcard">
+   <div class="tag" id="q-num">Clue 1 of 8</div>
+   <p class="clue" id="q-clue"></p>
+   <div class="opts" id="q-opts">
+    <button data-c="rbc" style="--c:var(--eosin)"><span class="dot"></span>Red blood cell</button>
+    <button data-c="neu" style="--c:var(--amber)"><span class="dot"></span>Neurone</button>
+    <button data-c="cil" style="--c:var(--hema)"><span class="dot"></span>Ciliated cell</button>
+    <button data-c="pal" style="--c:var(--chloro)"><span class="dot"></span>Palisade cell</button>
+   </div>
+   <div class="fb" id="q-fb" aria-live="polite"></div>
+   <div class="btns"><button class="btn" id="q-next" hidden>Next clue</button></div>
+   <div class="score" id="q-score"></div>
+  </div>
+ </div>
+</section>
+
+<footer>Based on Cells topics 2.5 Specialised animal cells and 2.6 Specialised plant cells. Numbers are rounded for teaching.</footer>
+</div>
+
+<script>
+(()=>{
+// ---------- shared ----------
+const $=s=>document.querySelector(s);
+const tok={};
+function readTok(){const cs=getComputedStyle(document.documentElement);
+ ['bg','panel','panel2','fg','muted','line','eosin','eosin-soft','hema','hema-soft','chloro','chloro-soft','o2','amber','bad','good','spec','spec-line','plasma','mucus'].forEach(k=>tok[k]=cs.getPropertyValue('--'+k).trim());}
+readTok();
+try{matchMedia('(prefers-color-scheme: dark)').addEventListener('change',readTok);}catch(e){}
+new MutationObserver(readTok).observe(document.documentElement,{attributes:true,attributeFilter:['data-theme']});
+const W=800;
+function fit(cv,H){const r=cv.getBoundingClientRect();const w=r.width||800;const dpr=Math.min(window.devicePixelRatio||1,2);
+ cv.style.height=(w*H/W)+'px';cv.width=Math.round(w*dpr);cv.height=Math.round(w*H/W*dpr);
+ const ctx=cv.getContext('2d');ctx.setTransform(cv.width/W,0,0,cv.width/W,0,0);return ctx;}
+const rnd=(a,b)=>a+Math.random()*(b-a);
+const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
+function alpha(c,a){ // hex -> rgba
+ if(c.startsWith('#')){let h=c.slice(1);if(h.length===3)h=h.split('').map(x=>x+x).join('');const n=parseInt(h,16);return `rgba(${n>>16&255},${n>>8&255},${n&255},${a})`;}return c;}
+function txt(ctx,s,x,y,o={}){ctx.font=`${o.w||700} ${o.size||13}px ${o.mono?'"JetBrains Mono",monospace':'"Atkinson Hyperlegible",sans-serif'}`;ctx.fillStyle=o.c||tok.muted;ctx.textAlign=o.al||'left';ctx.textBaseline='middle';ctx.fillText(s,x,y);}
+// segmented controls
+document.querySelectorAll('.seg').forEach(seg=>{seg.addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;
+ seg.querySelectorAll('button').forEach(x=>x.setAttribute('aria-pressed',x===b));seg.dispatchEvent(new CustomEvent('change',{detail:b.dataset.v}));});});
+document.querySelectorAll('.reveal').forEach(b=>b.addEventListener('click',()=>{const a=document.getElementById(b.dataset.ans);a.hidden=!a.hidden;b.textContent=a.hidden?'Show answer':'Hide answer';}));
+
+// ---------- tabs ----------
+const sims={};let active='rbc';
+document.querySelectorAll('nav button').forEach(b=>b.addEventListener('click',()=>show(b.dataset.tab)));
+function show(t){active=t;document.querySelectorAll('nav button').forEach(b=>b.setAttribute('aria-selected',b.dataset.tab===t));
+ document.querySelectorAll('[role=tabpanel]').forEach(p=>p.hidden=p.id!=='p-'+t);
+ if(sims[t]&&sims[t].resize)sims[t].resize();
+ try{localStorage.setItem('caw-tab',t);}catch(e){}}
+window.addEventListener('resize',()=>{if(sims[active]&&sims[active].resize)sims[active].resize();});
+
+// =====================================================
+// RED BLOOD CELL
+// =====================================================
+sims.rbc=(()=>{
+ const cv=$('#cv-rbc'),H=360,CY=180;let ctx;
+ const S={shape:'bi',nuc:'no',flex:'flex'};let running=true;
+ let cell,o2,tissue,released,blocked,t=0;
+ function half(x){ // capillary half-width
+  const wide=52,nar=21;const sm=(a,b,v)=>{const k=clamp((v-a)/(b-a),0,1);return k*k*(3-2*k);};
+  if(x<420)return wide-(wide-nar)*sm(350,420,x);
+  return nar+(wide-nar)*sm(560,630,x);}
+ function D(){return S.shape==='bi'?56:45;} // 7 µm vs same-volume sphere 5.6 µm (8px/µm)
+ function cap(){return S.nuc==='no'?24:16;}
+ function saF(){return S.shape==='bi'?1:0.71;}
+ function reset(){cell={x:-40,carry:0};o2=[];for(let i=0;i<70;i++)o2.push(newO2());
+  tissue=[];for(let i=0;i<4;i++){tissue.push({x:612+i*46,y:52,lvl:.4});tissue.push({x:612+i*46,y:H-92,lvl:.4});}
+  released=[];blocked=false;}
+ function newO2(){const x=rnd(10,330);const h=half(x)-4;return{x,y:CY+rnd(-h,h),vx:rnd(-.3,.3),vy:rnd(-.3,.3)};}
+ function step(){
+  t++;
+  // oxygen drift + respawn
+  o2.forEach(p=>{p.x+=p.vx;p.y+=p.vy;p.vx+=rnd(-.08,.08);p.vy+=rnd(-.08,.08);p.vx=clamp(p.vx,-.6,.6);p.vy=clamp(p.vy,-.6,.6);
+   const h=half(p.x)-4;if(p.y<CY-h||p.y>CY+h)p.vy*=-1,p.y=clamp(p.y,CY-h,CY+h);if(p.x<5||p.x>335)p.vx*=-1,p.x=clamp(p.x,5,335);});
+  if(o2.length<70&&t%6===0)o2.push(newO2());
+  // move cell
+  const d=D();const r=d/2;
+  if(!blocked){
+   const nextGap=2*half(cell.x+r+2)-4;
+   if(S.flex==='stiff'&&d>nextGap){blocked=true;}
+   else cell.x+=1.7;
+  }
+  if(cell.x>W+50){cell.x=-40;cell.carry=0;}
+  // load oxygen in lungs
+  if(cell.x<360){for(let i=o2.length-1;i>=0;i--){const p=o2[i];const dx=p.x-cell.x,dy=p.y-CY;
+   if(dx*dx+dy*dy<r*r*1.2&&cell.carry<cap()&&Math.random()<0.12*saF()){o2.splice(i,1);cell.carry++;}}}
+  // unload in tissue
+  if(cell.x>600&&cell.x<W&&cell.carry>0&&t%7===0){cell.carry--;let tgt=tissue.reduce((a,b)=>a.lvl<b.lvl?a:b);released.push({x:cell.x,y:CY,tx:tgt.x+18,ty:tgt.y+20,tg:tgt,k:0});}
+  released.forEach(p=>{p.k+=.05;});
+  for(let i=released.length-1;i>=0;i--){if(released[i].k>=1){released[i].tg.lvl=Math.min(1,released[i].tg.lvl+.09);released.splice(i,1);}}
+  tissue.forEach(c=>c.lvl=Math.max(0,c.lvl-0.0011));
+ }
+ function draw(){
+  ctx.fillStyle=tok.spec;ctx.fillRect(0,0,W,H);
+  // zone labels
+  txt(ctx,'LUNGS: oxygen enters blood',20,22,{mono:1,size:12});
+  txt(ctx,'NARROW CAPILLARY 5 µm',490,22,{mono:1,size:12,al:'center'});
+  txt(ctx,'BODY TISSUE',700,22,{mono:1,size:12,al:'center'});
+  // alveolus hint
+  ctx.fillStyle=alpha(tok.o2,.07);ctx.beginPath();ctx.ellipse(170,CY,190,120,0,0,7);ctx.fill();
+  // tissue cells
+  tissue.forEach(c=>{ctx.fillStyle=alpha(tok.eosin,.12+c.lvl*.55);ctx.strokeStyle=tok['spec-line'];ctx.lineWidth=1.5;ctx.beginPath();ctx.roundRect(c.x,c.y,40,40,8);ctx.fill();ctx.stroke();
+   ctx.fillStyle=alpha(tok.hema,.7);ctx.beginPath();ctx.arc(c.x+20,c.y+20,6,0,7);ctx.fill();});
+  // vessel lumen (plasma)
+  ctx.beginPath();for(let x=0;x<=W;x+=8)ctx.lineTo(x,CY-half(x));for(let x=W;x>=0;x-=8)ctx.lineTo(x,CY+half(x));ctx.closePath();
+  ctx.fillStyle=tok.plasma;ctx.fill();
+  ctx.strokeStyle=tok.eosin;ctx.lineWidth=4;ctx.beginPath();for(let x=0;x<=W;x+=8)ctx.lineTo(x,CY-half(x));ctx.stroke();
+  ctx.beginPath();for(let x=0;x<=W;x+=8)ctx.lineTo(x,CY+half(x));ctx.stroke();
+  // width markers
+  ctx.strokeStyle=tok.muted;ctx.lineWidth=1;ctx.setLineDash([3,3]);ctx.beginPath();ctx.moveTo(490,CY-21);ctx.lineTo(490,CY-60);ctx.moveTo(490,CY+21);ctx.lineTo(490,CY+60);ctx.stroke();ctx.setLineDash([]);
+  // O2
+  ctx.fillStyle=tok.o2;o2.forEach(p=>{ctx.beginPath();ctx.arc(p.x,p.y,3,0,7);ctx.fill();});
+  released.forEach(p=>{const x=p.x+(p.tx-p.x)*p.k,y=p.y+(p.ty-p.y)*p.k;ctx.fillStyle=tok.o2;ctx.beginPath();ctx.arc(x,y,3,0,7);ctx.fill();});
+  // cell
+  const d=D();let rx=d/2,ry=d/2;const gap=2*half(cell.x)-4;
+  if(S.flex==='flex'&&d>gap){ry=gap/2;rx=d*d/(4*ry);}  // squash, keep area
+  const cx=cell.x;
+  ctx.save();ctx.translate(cx,CY);
+  const g=ctx.createRadialGradient(0,0,1,0,0,Math.max(rx,ry));
+  const full=cell.carry/cap();
+  const base=S.shape==='bi'?[alpha(tok.eosin,.45),tok.eosin]:[tok.eosin,tok.eosin];
+  g.addColorStop(0,base[0]);g.addColorStop(S.shape==='bi'?.5:.2,tok.eosin);g.addColorStop(1,tok.eosin);
+  ctx.globalAlpha=.55+.45*full;ctx.fillStyle=g;ctx.beginPath();ctx.ellipse(0,0,rx,ry,0,0,7);ctx.fill();ctx.globalAlpha=1;
+  ctx.strokeStyle=alpha(tok.fg,.5);ctx.lineWidth=1.5;ctx.stroke();
+  if(S.nuc==='yes'){ctx.fillStyle=tok.hema;ctx.beginPath();ctx.ellipse(rx*.15,0,rx*.38,ry*.38,0,0,7);ctx.fill();}
+  // carried O2 dots on rim
+  for(let i=0;i<cell.carry;i++){const a=i/cap()*Math.PI*2;ctx.fillStyle=tok.o2;ctx.beginPath();ctx.arc(Math.cos(a)*rx*.72,Math.sin(a)*ry*.72,2.6,0,7);ctx.fill();}
+  ctx.restore();
+  if(blocked){ctx.fillStyle=alpha(tok.bad,.12);ctx.fillRect(0,0,W,H);
+   ctx.fillStyle=tok.bad;ctx.font='800 26px "Bricolage Grotesque",sans-serif';ctx.textAlign='center';ctx.fillText('BLOCKED: stiff cell cannot squeeze through',W/2,H-30);}
+  // readouts
+  $('#rbc-sa').textContent=(S.shape==='bi'?136:97)+' µm²';
+  $('#rbc-hb').textContent=(S.nuc==='no'?100:67)+'%';
+  $('#rbc-o2').textContent=cell.carry+' / '+cap();
+  const tl=Math.round(tissue.reduce((a,c)=>a+c.lvl,0)/tissue.length*100);
+  $('#rbc-tis').textContent=tl+'%';$('#rbc-tis-box').className='ro '+(tl<20?'state-bad':tl<45?'state-warn':'state-good');
+ }
+ ['shape','nuc','flex'].forEach(k=>document.querySelector(`#p-rbc .seg[data-key=${k}]`).addEventListener('change',e=>{S[k]=e.detail;if(k==='flex'&&e.detail==='flex')blocked=false;cell.carry=Math.min(cell.carry,cap());}));
+ $('#rbc-play').onclick=()=>{running=!running;$('#rbc-play').textContent=running?'Pause':'Play';};
+ $('#rbc-reset').onclick=()=>reset();
+ reset();
+ return{resize(){ctx=fit(cv,H);},frame(){if(running)step();draw();}};
+})();
+
+// =====================================================
+// NEURONE
+// =====================================================
+sims.neu=(()=>{
+ const cv=$('#cv-neu'),H=330;let ctx;
+ const X0=110,X1=690,SEG=10;const segW=(X1-X0)/SEG;
+ let lanes,len=1,dmg=.5,order=[];
+ function shuffle(){order=[...Array(SEG).keys()].sort(()=>Math.random()-.5);}
+ function damagedSet(){const n=Math.round(dmg*SEG);return new Set(order.slice(0,n));}
+ function build(){const ds=damagedSet();
+  lanes=[{y:105,name:'Healthy neurone',bad:new Set(),pos:-1,t:null,arr:0},{y:245,name:`Damaged neurone (${Math.round(dmg*100)}% insulation lost)`,bad:ds,pos:-1,t:null,arr:0}];
+  lanes.forEach(L=>L.real=realTime(L.bad));
+  $('#neu-t1').textContent=fmt(lanes[0].real);$('#neu-t2').textContent=fmt(lanes[1].real);
+  const x=lanes[1].real/lanes[0].real;$('#neu-x').textContent=x<1.05?'same':x.toFixed(x<10?1:0)+'× slower';
+  $('#neu-x-box').className='ro '+(x>8?'state-bad':x>1.5?'state-warn':'state-good');}
+ function realTime(bad){let s=0;for(let i=0;i<SEG;i++)s+=(len/SEG)/(bad.has(i)?2:100);return s*1000;} // m/s: 100 insulated, 2 bare
+ function fmt(ms){return ms<10?ms.toFixed(1)+' ms':Math.round(ms)+' ms';}
+ function go(){lanes.forEach(L=>{L.pos=X0;L.arr=0;});}
+ function step(){lanes.forEach(L=>{if(L.pos<0||L.pos>=X1)return;const i=clamp(Math.floor((L.pos-X0)/segW),0,SEG-1);L.pos+=L.bad.has(i)?0.9:11;if(L.pos>=X1){L.pos=X1;L.arr=1;}});
+  lanes.forEach(L=>{if(L.arr>0&&L.arr<60)L.arr++;});}
+ function draw(){
+  ctx.fillStyle=tok.spec;ctx.fillRect(0,0,W,H);
+  lanes.forEach(L=>{const y=L.y;
+   txt(ctx,L.name,X0,y-52,{c:tok.fg,size:15});
+   // finger / pan
+   ctx.fillStyle=alpha(tok.bad,.18);ctx.beginPath();ctx.roundRect(14,y-22,62,44,10);ctx.fill();txt(ctx,'HOT PAN',45,y+34,{mono:1,size:10,al:'center'});
+   ctx.fillStyle=tok.bad;for(let k=0;k<3;k++){ctx.beginPath();ctx.moveTo(28+k*16,y+12);ctx.quadraticCurveTo(22+k*16,y,30+k*16,y-12);ctx.lineWidth=3;ctx.strokeStyle=tok.bad;ctx.stroke();}
+   // dendrites+cell body
+   ctx.strokeStyle=tok.amber;ctx.lineWidth=3;ctx.lineCap='round';
+   [[-26,-24],[-30,0],[-24,22],[-10,-30],[-12,30]].forEach(([dx,dy])=>{ctx.beginPath();ctx.moveTo(X0-14,y);ctx.lineTo(X0-14+dx,y+dy);ctx.stroke();});
+   ctx.fillStyle=alpha(tok.amber,.35);ctx.strokeStyle=tok.amber;ctx.beginPath();ctx.arc(X0-14,y,17,0,7);ctx.fill();ctx.stroke();
+   ctx.fillStyle=tok.hema;ctx.beginPath();ctx.arc(X0-14,y,6,0,7);ctx.fill();
+   // axon
+   ctx.strokeStyle=alpha(tok.fg,.55);ctx.lineWidth=4;ctx.beginPath();ctx.moveTo(X0,y);ctx.lineTo(X1,y);ctx.stroke();
+   for(let i=0;i<SEG;i++){const x=X0+i*segW+3;if(L.bad.has(i)){ctx.strokeStyle=alpha(tok.amber,.5);ctx.setLineDash([4,5]);ctx.lineWidth=1.5;ctx.beginPath();ctx.roundRect(x,y-10,segW-6,20,10);ctx.stroke();ctx.setLineDash([]);}
+    else{ctx.fillStyle=tok.amber;ctx.beginPath();ctx.roundRect(x,y-10,segW-6,20,10);ctx.fill();}}
+   // branches + muscle
+   ctx.strokeStyle=tok.amber;ctx.lineWidth=3;[[-22],[0],[22]].forEach(([dy])=>{ctx.beginPath();ctx.moveTo(X1,y);ctx.lineTo(X1+26,y+dy);ctx.stroke();});
+   const pull=L.arr>0?Math.min(1,L.arr/18):0;
+   ctx.fillStyle=L.arr>0?alpha(tok.good,.35):alpha(tok.eosin,.18);ctx.strokeStyle=L.arr>0?tok.good:tok.eosin;ctx.lineWidth=2;
+   ctx.beginPath();ctx.ellipse(X1+62,y,30-pull*6,20+pull*8,0,0,7);ctx.fill();ctx.stroke();
+   txt(ctx,L.arr>0?'PULLED!':'MUSCLE',X1+62,y+40,{mono:1,size:10,al:'center',c:L.arr>0?tok.good:tok.muted});
+   // impulse
+   if(L.pos>=X0&&L.pos<X1){const gl=ctx.createRadialGradient(L.pos,y,0,L.pos,y,18);gl.addColorStop(0,tok.o2);gl.addColorStop(1,alpha(tok.o2,0));ctx.fillStyle=gl;ctx.beginPath();ctx.arc(L.pos,y,18,0,7);ctx.fill();}
+   if(L.arr>0)txt(ctx,'arrived in '+fmt(L.real),X1-4,y-26,{c:tok.fg,size:13,al:'right'});
+  });
+  txt(ctx,'axon length '+len.toFixed(1)+' m',X0+(X1-X0)/2,H-14,{mono:1,size:11,al:'center'});
+ }
+ $('#neu-len').oninput=e=>{len=+e.target.value;$('#neu-len-o').textContent=len.toFixed(1)+' m';build();};
+ $('#neu-dmg').oninput=e=>{dmg=+e.target.value/100;$('#neu-dmg-o').textContent=e.target.value+'%';build();};
+ $('#neu-go').onclick=()=>{go();};
+ shuffle();build();
+ return{resize(){ctx=fit(cv,H);},frame(){step();draw();}};
+})();
+
+// =====================================================
+// CILIATED
+// =====================================================
+sims.cil=(()=>{
+ const cv=$('#cv-cil'),H=340;let ctx;
+ const NC=7,cw=W/NC,CT=210;let smoke=0,mito=.8,dust=2,parts=[],smk=[],t=0,cleared=0,cough=0,shake=0;
+ const mitoPos=[...Array(NC)].map(()=>[...Array(12)].map(()=>[rnd(10,cw-18),rnd(CT+18,H-14)]));
+ const dead=[...Array(NC*10)].map(()=>Math.random());
+ function power(){return mito*(1-smoke);} // 0..1
+ function spawn(){const bac=Math.random()<.35;parts.push({x:rnd(-10,60),y:rnd(40,110),vy:rnd(.6,1.2),inM:false,bac,r:bac?0:rnd(2.5,4.5),a:rnd(0,6)});}
+ function step(){t++;const P=power();
+  if(Math.random()<.035*dust+.01)spawn();
+  if(smoke>0&&Math.random()<smoke*.6)smk.push({x:rnd(0,W),y:rnd(0,40),vx:rnd(.3,1),a:1});
+  smk.forEach(s=>{s.x+=s.vx;s.y+=.25;s.a-=.006;});smk=smk.filter(s=>s.a>0);
+  const v=0.15+2.2*P;let inAir=0;
+  parts.forEach(p=>{if(!p.inM){p.y+=p.vy;p.x+=.4;if(p.y>=CT-50+rnd(-6,10)){p.inM=true;}}else{p.x+=v*(0.8+Math.random()*.4)+(cough>0?9:0);p.y+=Math.sin(t*.05+p.a)*.15;}});
+  for(let i=parts.length-1;i>=0;i--)if(parts[i].x>W+10){parts.splice(i,1);cleared++;}
+  inAir=parts.filter(p=>p.inM).length;
+  if(inAir>55&&cough===0){cough=45;shake=14;}
+  if(cough>0)cough--;if(shake>0)shake--;
+  return inAir;}
+ let inAir=0;
+ function draw(){
+  ctx.save();if(shake>0)ctx.translate(rnd(-shake,shake)*.4,rnd(-shake,shake)*.4);
+  ctx.fillStyle=tok.spec;ctx.fillRect(-20,-20,W+40,H+40);
+  txt(ctx,'AIR breathed in',16,22,{mono:1,size:12});
+  txt(ctx,'towards throat →',W-16,CT-75,{mono:1,size:12,al:'right'});
+  // smoke haze
+  smk.forEach(s=>{ctx.fillStyle=alpha(tok.muted,.12*s.a);ctx.beginPath();ctx.arc(s.x,s.y+30,18,0,7);ctx.fill();});
+  // mucus layer
+  ctx.fillStyle=tok.mucus;ctx.beginPath();ctx.moveTo(0,CT-60);for(let x=0;x<=W;x+=20)ctx.lineTo(x,CT-60+Math.sin(x*.03+t*.02)*3);ctx.lineTo(W,CT-12);ctx.lineTo(0,CT-12);ctx.closePath();ctx.fill();
+  txt(ctx,'MUCUS',16,CT-38,{mono:1,size:11,c:tok.amber});
+  // cells
+  for(let i=0;i<NC;i++){const x=i*cw;
+   ctx.fillStyle=alpha(tok.hema,.12);ctx.strokeStyle=alpha(tok.hema,.6);ctx.lineWidth=1.5;ctx.beginPath();ctx.roundRect(x+3,CT,cw-6,H-CT+10,10);ctx.fill();ctx.stroke();
+   const nm=Math.round(mito*12);ctx.fillStyle=tok.chloro;
+   for(let k=0;k<nm;k++){const [mx,my]=mitoPos[i][k];ctx.beginPath();ctx.ellipse(x+mx,my,6,3,.5,0,7);ctx.fill();}
+   ctx.fillStyle=tok.bad;ctx.beginPath();ctx.ellipse(x+cw/2,CT+85,13,17,0,0,7);ctx.fill();
+   // cilia
+   for(let c=0;c<10;c++){const bx=x+10+c*(cw-20)/9;const isDead=dead[i*10+c]<smoke;
+    const P=power();const ang=isDead?0.15:Math.sin(t*(0.08+0.22*P)-bx*.03)*(0.15+0.55*P);
+    const L=isDead?14:34;ctx.strokeStyle=isDead?alpha(tok.muted,.6):tok.hema;ctx.lineWidth=2;ctx.lineCap='round';
+    ctx.beginPath();ctx.moveTo(bx,CT);ctx.quadraticCurveTo(bx+Math.sin(ang)*L*.4,CT-L*.6,bx+Math.sin(ang)*L,CT-Math.cos(ang)*L);ctx.stroke();}
+  }
+  // particles
+  parts.forEach(p=>{if(p.bac){ctx.fillStyle=tok.hema;ctx.save();ctx.translate(p.x,p.y);ctx.rotate(p.a);ctx.beginPath();ctx.roundRect(-6,-2.5,12,5,2.5);ctx.fill();ctx.restore();}
+   else{ctx.fillStyle=tok.muted;ctx.beginPath();ctx.arc(p.x,p.y,p.r,0,7);ctx.fill();}});
+  if(cough>0){ctx.fillStyle=tok.bad;ctx.font='800 44px "Bricolage Grotesque",sans-serif';ctx.textAlign='center';ctx.globalAlpha=Math.min(1,cough/20);ctx.fillText('COUGH!',W/2,80);ctx.globalAlpha=1;}
+  ctx.restore();
+  // readouts
+  const P=power();$('#cil-beat').textContent=(P<.05?0:(4+11*P)).toFixed(0)+' /s';
+  $('#cil-spd').textContent=(10*P).toFixed(1)+' mm/min';
+  $('#cil-in').textContent=inAir;
+  const risk=inAir>40?'High':inAir>20?'Medium':'Low';$('#cil-risk').textContent=risk;
+  $('#cil-risk-box').className='ro '+(risk==='High'?'state-bad':risk==='Medium'?'state-warn':'state-good');
+ }
+ $('#cil-smoke').oninput=e=>{smoke=+e.target.value/100;$('#cil-smoke-o').textContent=e.target.value+'%';};
+ $('#cil-mito').oninput=e=>{mito=+e.target.value/10;$('#cil-mito-o').textContent=mito>.65?'Many':mito>.3?'Some':'Few';};
+ $('#cil-dust').oninput=e=>{dust=+e.target.value;$('#cil-dust-o').textContent=['Clean','Normal','Dusty'][dust-1];};
+ $('#cil-reset').onclick=()=>{parts=[];cleared=0;};
+ return{resize(){ctx=fit(cv,H);},frame(){inAir=step();draw();}};
+})();
+
+// =====================================================
+// PALISADE
+// =====================================================
+sims.pal=(()=>{
+ const cv=$('#cv-pal'),H=380;let ctx;
+ const S={pack:'tight',pos:'top'};let chl=30,sun=3,ph=[],spark=[],sugar=0,hist=[];
+ const chloroSeed=[...Array(12)].map(()=>[...Array(40)].map(()=>[Math.random(),Math.random()]));
+ const spongy=[...Array(11)].map((_,i)=>({x:30+i*70+rnd(-8,8),y:rnd(0,1),r:rnd(22,30)}));
+ const spSeed=spongy.map(()=>[...Array(6)].map(()=>[rnd(-.6,.6),rnd(-.6,.6)]));
+ const TOPY=58,LAYH=135;
+ function layout(){const pal=S.pos==='top'?TOPY:TOPY+LAYH+12;const sp=S.pos==='top'?TOPY+LAYH+12:TOPY;
+  const cells=[];if(S.pack==='tight'){const n=11,w=W/n;for(let i=0;i<n;i++)cells.push({x:i*w+2,y:pal,w:w-4,h:LAYH});}
+  else{const n=6,w=70,g=(W-n*w)/n;for(let i=0;i<n;i++)cells.push({x:g/2+i*(w+g),y:pal,w,h:LAYH});}
+  return{pal,sp,cells};}
+ function step(){const L=layout();
+  for(let k=0;k<sun*1.6;k++)if(Math.random()<.9)ph.push({x:rnd(0,W),y:-10,dead:false});
+  const pd=chl/40*0.085, sd=0.012;
+  ph.forEach(p=>{p.y+=7;
+   // in palisade cell?
+   let inP=false;for(const c of L.cells){if(p.x>c.x&&p.x<c.x+c.w&&p.y>c.y&&p.y<c.y+c.h){inP=true;break;}}
+   const inS=p.y>L.sp+5&&p.y<L.sp+LAYH-5&&spongy.some(s=>Math.abs(p.x-s.x)<s.r);
+   const pr=inP?pd:inS?sd:0;
+   if(pr>0&&Math.random()<pr){p.dead=true;sugar++;hist.push(1);spark.push({x:p.x,y:p.y,a:1});}});
+  for(let i=ph.length-1;i>=0;i--){const p=ph[i];if(p.dead)ph.splice(i,1);else if(p.y>H-30){ph.splice(i,1);hist.push(0);}}
+  if(hist.length>600)hist.splice(0,hist.length-600);
+  spark.forEach(s=>{s.a-=.04;s.y-=.6;});spark=spark.filter(s=>s.a>0);
+  return L;}
+ function draw(L){
+  ctx.fillStyle=tok.spec;ctx.fillRect(0,0,W,H);
+  // sun glow at top
+  const sg=ctx.createLinearGradient(0,0,0,50);sg.addColorStop(0,alpha(tok.amber,.18*sun));sg.addColorStop(1,alpha(tok.amber,0));ctx.fillStyle=sg;ctx.fillRect(0,0,W,50);
+  // epidermis
+  ctx.fillStyle=alpha(tok.chloro,.12);ctx.fillRect(0,TOPY-18,W,16);ctx.fillRect(0,H-46,W,16);
+  txt(ctx,'upper epidermis (clear)',W-12,TOPY-10,{mono:1,size:10,al:'right'});
+  // spongy
+  ctx.lineWidth=1.5;spongy.forEach((s,i)=>{const cy=L.sp+LAYH/2+(s.y-.5)*40;ctx.fillStyle=alpha(tok.chloro,.1);ctx.strokeStyle=alpha(tok.chloro,.6);ctx.beginPath();ctx.arc(s.x,cy,s.r,0,7);ctx.fill();ctx.stroke();
+   ctx.fillStyle=alpha(tok.chloro,.8);spSeed[i].forEach(([a,b])=>{ctx.beginPath();ctx.arc(s.x+a*s.r,cy+b*s.r,3,0,7);ctx.fill();});});
+  txt(ctx,'spongy cells',12,L.sp+12,{mono:1,size:11,c:tok.chloro});
+  // palisade
+  L.cells.forEach((c,i)=>{ctx.fillStyle=alpha(tok.chloro,.14);ctx.strokeStyle=tok.chloro;ctx.beginPath();ctx.roundRect(c.x,c.y,c.w,c.h,8);ctx.fill();ctx.stroke();
+   ctx.fillStyle=alpha(tok.fg,.06);ctx.beginPath();ctx.roundRect(c.x+c.w*.3,c.y+25,c.w*.4,c.h-55,10);ctx.fill();
+   ctx.fillStyle=tok.chloro;const seeds=chloroSeed[i%12];for(let k=0;k<chl;k++){const [a,b]=seeds[k];const x=c.x+5+a*(c.w-10);const y=c.y+6+b*(c.h-12);ctx.beginPath();ctx.ellipse(x,y,4,2.6,.4,0,7);ctx.fill();}});
+  txt(ctx,'palisade cells',12,L.pal+12,{mono:1,size:11,c:tok.fg});
+  // photons
+  ctx.strokeStyle=tok.amber;ctx.lineWidth=2.2;ph.forEach(p=>{ctx.beginPath();ctx.moveTo(p.x,p.y-9);ctx.lineTo(p.x,p.y);ctx.stroke();});
+  spark.forEach(s=>{ctx.fillStyle=alpha(tok.good,s.a);ctx.beginPath();ctx.arc(s.x,s.y,4,0,7);ctx.fill();});
+  txt(ctx,'light passing straight through the leaf is wasted',W/2,H-12,{mono:1,size:11,al:'center'});
+  const cap=hist.length?hist.filter(Boolean).length/hist.length:0;
+  $('#pal-cap').textContent=Math.round(cap*100)+'%';$('#pal-waste').textContent=Math.round((1-cap)*100)+'%';$('#pal-sugar').textContent=sugar.toLocaleString();
+ }
+ ['pack','pos'].forEach(k=>document.querySelector(`#p-pal .seg[data-key=${k}]`).addEventListener('change',e=>{S[k]=e.detail;hist=[];}));
+ $('#pal-chl').oninput=e=>{chl=+e.target.value;$('#pal-chl-o').textContent=chl;hist=[];};
+ $('#pal-sun').oninput=e=>{sun=+e.target.value;$('#pal-sun-o').textContent=['Dim','Cloudy','Bright'][sun-1];};
+ $('#pal-reset').onclick=()=>{sugar=0;hist=[];};
+ return{resize(){ctx=fit(cv,H);},frame(){draw(step());}};
+})();
+
+// =====================================================
+// QUIZ
+// =====================================================
+(()=>{
+ const Q=[
+  ['I have no nucleus, so I have more room for my red cargo.','rbc','No nucleus → more space for haemoglobin → more oxygen.'],
+  ['I can be longer than 1 metre.','neu','Neurone axons are long to carry messages around the body.'],
+  ['I am full of mitochondria because my tiny hairs never stop working.','cil','Cilia beat all the time, which needs lots of energy from mitochondria.'],
+  ['I live at the top of a leaf, packed tightly with my neighbours.','pal','Palisade cells are at the top to get the most light, packed together so little light is wasted.'],
+  ['A dimple on both my sides gives me a big surface area.','rbc','The biconcave shape = big surface area to pick up oxygen quickly.'],
+  ['Cigarette smoke stops me working, and then people cough.','cil','Damaged cilia cannot move mucus, so it builds up and must be coughed out.'],
+  ['My fatty coat makes my electrical messages travel faster.','neu','Insulation lets the message travel much faster along the axon.'],
+  ['I am green because I contain lots of chlorophyll.','pal','Chlorophyll in chloroplasts traps light for photosynthesis.']
+ ];
+ let i=0,res=[];const opts=[...document.querySelectorAll('#q-opts button')];
+ const sc=$('#q-score');sc.innerHTML=Q.map(()=>'<i></i>').join('');
+ function load(){const q=Q[i];$('#q-num').textContent=`Clue ${i+1} of ${Q.length}`;$('#q-clue').textContent='“'+q[0]+'”';$('#q-fb').textContent='';
+  opts.forEach(b=>{b.className='';b.disabled=false;});$('#q-next').hidden=true;}
+ opts.forEach(b=>b.addEventListener('click',()=>{const q=Q[i];const ok=b.dataset.c===q[1];
+  opts.forEach(x=>{x.disabled=true;if(x.dataset.c===q[1])x.className='right';});if(!ok)b.className='wrong';
+  res[i]=ok;sc.children[i].className=ok?'ok':'no';
+  $('#q-fb').innerHTML=`<b>${ok?'Correct.':'Not quite.'}</b> ${q[2]}`;
+  $('#q-next').hidden=false;$('#q-next').textContent=i<Q.length-1?'Next clue':'See score';}));
+ $('#q-next').onclick=()=>{if(i<Q.length-1){i++;load();}else{const s=res.filter(Boolean).length;$('#q-clue').textContent=`You scored ${s} out of ${Q.length}.`;$('#q-num').textContent='Finished';
+  $('#q-fb').textContent=s===Q.length?'Every structure matched to its function. Excellent.':'Go back to the simulations for the cells you missed, then try again.';
+  opts.forEach(b=>b.disabled=true);$('#q-next').textContent='Play again';$('#q-next').onclick2=true;i=-1;res=[];
+  $('#q-next').onclick=()=>{i=0;sc.innerHTML=Q.map(()=>'<i></i>').join('');load();$('#q-next').onclick=nextH;};}};
+ const nextH=$('#q-next').onclick;
+ load();
+})();
+
+// ---------- loop ----------
+let t0=0;
+function loop(ts){if(sims[active]&&sims[active].frame){if(!sims[active]._ctx){sims[active].resize();sims[active]._ctx=1;}sims[active].frame();}requestAnimationFrame(loop);}
+let saved=null;try{saved=localStorage.getItem('caw-tab');}catch(e){}
+if(saved&&document.getElementById('p-'+saved))show(saved);else show('rbc');
+Object.values(sims).forEach(s=>s.resize&&0);
+requestAnimationFrame(loop);
+})();
+</script>
+
+</body></html>

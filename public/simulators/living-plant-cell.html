@@ -1,0 +1,438 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>The Living Plant Cell</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Young+Serif&family=Atkinson+Hyperlegible:wght@400;700&family=IBM+Plex+Mono:wght@500&display=swap">
+<style>
+/* Layout: specimen plate. Big cell diagram on the left, study card on the right, comparison table below. */
+:root{
+  --bg:#eef3ea; --surface:#f9fbf6; --ink:#1d2b1f; --muted:#556656; --line:#cbd7c5; --accent:#2f7a3a; --accent-ink:#ffffff;
+  --wall:#c3d18f; --wall-ink:#6f8240; --cyto:#e3eed0; --grain:#9bb07a; --membrane:#cf8636;
+  --vac:#d3e8ef; --vac-ink:#5f98ad; --nuc:#c9b4e2; --nuc-ink:#6d4f93; --nucleolus:#4f3378;
+  --chl:#58a145; --chl-ink:#2d6224; --grana:#2a6122; --mito:#f0ab7c; --mito-ink:#a8542a;
+  --ribo:#7a3e5a; --rer:#c27aa0; --good:#2f7a3a; --bad:#b4442e;
+  --display:"Young Serif", Georgia, "Times New Roman", serif;
+  --body:"Atkinson Hyperlegible", "Segoe UI", system-ui, sans-serif;
+  --mono:"IBM Plex Mono", ui-monospace, Consolas, monospace;
+}
+@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]){
+  --bg:#0e1510; --surface:#152018; --ink:#e3ecdf; --muted:#9db09e; --line:#2b3b2e; --accent:#8fd07e; --accent-ink:#0e1510;
+  --wall:#3a4922; --wall-ink:#a9c06a; --cyto:#1a2819; --grain:#5f7a4a; --membrane:#e3a35c;
+  --vac:#143240; --vac-ink:#6fb7cf; --nuc:#3d2f57; --nuc-ink:#b89ae0; --nucleolus:#d6c0f2;
+  --chl:#3e8a2f; --chl-ink:#a3e38e; --grana:#1d4a17; --mito:#7c4226; --mito-ink:#f2a77c;
+  --ribo:#eaa4c6; --rer:#a3618a; --good:#8fd07e; --bad:#ef7a62; color-scheme:dark }}
+:root[data-theme="dark"]{
+  --bg:#0e1510; --surface:#152018; --ink:#e3ecdf; --muted:#9db09e; --line:#2b3b2e; --accent:#8fd07e; --accent-ink:#0e1510;
+  --wall:#3a4922; --wall-ink:#a9c06a; --cyto:#1a2819; --grain:#5f7a4a; --membrane:#e3a35c;
+  --vac:#143240; --vac-ink:#6fb7cf; --nuc:#3d2f57; --nuc-ink:#b89ae0; --nucleolus:#d6c0f2;
+  --chl:#3e8a2f; --chl-ink:#a3e38e; --grana:#1d4a17; --mito:#7c4226; --mito-ink:#f2a77c;
+  --ribo:#eaa4c6; --rer:#a3618a; --good:#8fd07e; --bad:#ef7a62; color-scheme:dark }
+
+body{background:var(--bg);color:var(--ink);font-family:var(--body);font-size:16px;line-height:1.55}
+.wrap{max-width:1180px;margin:0 auto;padding-inline:20px;padding-block:28px 48px;display:grid;gap:28px}
+header{display:grid;gap:6px}
+.eyebrow{font-family:var(--mono);font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin:0}
+h1{font-family:var(--display);font-weight:400;font-size:clamp(30px,5vw,46px);line-height:1.1;margin:0;text-wrap:balance}
+header p.lede{margin:0;max-width:62ch;color:var(--muted)}
+
+.stage{display:grid;grid-template-columns:minmax(0,1fr) 340px;gap:24px;align-items:start}
+@media (max-width:860px){.stage{grid-template-columns:minmax(0,1fr)}}
+
+.plate{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:12px;min-width:0}
+.tools{display:flex;flex-wrap:wrap;gap:8px;justify-content:space-between;align-items:center;padding:4px 4px 8px}
+.tools .hint{font-size:14px;color:var(--muted)}
+.tgl{display:flex;gap:8px;flex-wrap:wrap}
+button{font:inherit;cursor:pointer;color:var(--ink);background:transparent;border:1px solid var(--line);border-radius:999px;padding:6px 14px;font-size:14px}
+button:hover{border-color:var(--accent)}
+button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+button[aria-pressed="true"]{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+
+svg#cell{display:block;width:100%;height:auto;max-width:100%}
+.org{cursor:pointer;transition:opacity .35s ease, filter .35s ease}
+.focus .org:not(.on), .focus .lbl:not(.on){opacity:.22}
+.org.on{filter:drop-shadow(0 0 7px var(--accent))}
+.org.right{filter:drop-shadow(0 0 9px var(--good))}
+.org.wrong{filter:drop-shadow(0 0 9px var(--bad))}
+
+.wall{fill:var(--wall);stroke:var(--wall-ink);stroke-width:1.5}
+.fibre{fill:none;stroke:var(--wall-ink);stroke-width:1.2;stroke-dasharray:3 7;opacity:.7;pointer-events:none}
+.cyto{fill:var(--cyto)}
+.grain{fill:var(--grain);pointer-events:none}
+.membrane{fill:none;stroke:var(--membrane);stroke-width:3.5}
+.hit{fill:none;stroke:transparent;stroke-width:12}
+.hitfill{fill:transparent}
+.vac{fill:var(--vac);stroke:var(--vac-ink);stroke-width:2.5}
+.vac-shine{fill:none;stroke:var(--vac-ink);stroke-width:1.5;opacity:.35}
+.sap{fill:var(--vac-ink);opacity:.5}
+.nuc-env{fill:var(--nuc);stroke:var(--nuc-ink);stroke-width:2;stroke-dasharray:14 3}
+.nuc-in{fill:none;stroke:var(--nuc-ink);stroke-width:1;opacity:.6}
+.chromatin{fill:none;stroke:var(--nuc-ink);stroke-width:1.4;stroke-linecap:round;opacity:.75}
+.nucleolus{fill:var(--nucleolus)}
+.chl-body{fill:var(--chl);stroke:var(--chl-ink);stroke-width:1.6}
+.chl-stroma{fill:none;stroke:var(--chl-ink);stroke-width:.8;opacity:.6}
+.grana rect{fill:var(--grana)}
+.thyl{stroke:var(--grana);stroke-width:1}
+.mito-body{fill:var(--mito);stroke:var(--mito-ink);stroke-width:1.8}
+.cristae{fill:none;stroke:var(--mito-ink);stroke-width:1.5;stroke-linejoin:round}
+.rer-line{fill:none;stroke:var(--rer);stroke-width:4;stroke-linecap:round}
+.ribo-dot{fill:var(--ribo)}
+.lbl line{stroke:var(--ink);stroke-width:1.2;opacity:.7}
+.lbl circle{fill:var(--ink)}
+.lbl text{fill:var(--ink);font-family:var(--body);font-size:19px;font-weight:700}
+.lbl{cursor:pointer;transition:opacity .35s ease}
+.scale line{stroke:var(--ink);stroke-width:3}
+.scale text{fill:var(--muted);font-family:var(--mono);font-size:15px}
+#labels[hidden]{display:none}
+
+/* motion */
+.drift{transform-box:fill-box;transform-origin:center;animation:drift 7s ease-in-out infinite alternate}
+@keyframes drift{0%{transform:translate(0,0) rotate(0)}50%{transform:translate(2px,-3px) rotate(4deg)}100%{transform:translate(-2px,2px) rotate(-3deg)}}
+.breathe{transform-box:fill-box;transform-origin:center;animation:breathe 6s ease-in-out infinite}
+@keyframes breathe{0%,100%{transform:scale(1)}50%{transform:scale(1.018)}}
+.pulse .cristae{animation:glow 2.4s ease-in-out infinite}
+@keyframes glow{0%,100%{opacity:.55}50%{opacity:1}}
+.nucleolus{transform-box:fill-box;transform-origin:center;animation:breathe 4s ease-in-out infinite}
+.twinkle{animation:glow 3s ease-in-out infinite}
+.paused *, .paused{animation-play-state:paused !important}
+
+/* study card */
+.card{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:18px;display:grid;gap:16px;min-width:0}
+.modes{display:flex;gap:6px;flex-wrap:wrap}
+#info{display:grid;gap:10px;min-height:250px;align-content:start}
+#info h2{font-family:var(--display);font-weight:400;font-size:28px;line-height:1.15;margin:0;text-wrap:balance}
+#info p{margin:0}
+.tag{display:inline-block;font-family:var(--mono);font-size:12px;letter-spacing:.06em;text-transform:uppercase;padding:3px 9px;border-radius:999px;border:1px solid var(--line);color:var(--muted);justify-self:start}
+.tag.plant{border-color:var(--accent);color:var(--accent)}
+.tip{border-top:1px dashed var(--line);padding-top:10px;font-size:15px}
+.tip b{font-family:var(--mono);font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--accent);display:block;margin-bottom:2px;font-weight:500}
+.eq{font-family:var(--mono);font-size:13px;background:var(--bg);border-radius:8px;padding:8px 10px}
+.nav{display:flex;gap:8px;align-items:center;justify-content:space-between;flex-wrap:wrap}
+.step{font-family:var(--mono);font-size:13px;color:var(--muted)}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chips button{font-size:13px;padding:4px 10px}
+.chips-label{font-family:var(--mono);font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin:0 0 6px}
+.prompt{font-size:20px}
+.prompt strong{font-family:var(--display);font-weight:400;font-size:26px;display:block;color:var(--accent)}
+.feedback{min-height:1.6em;font-weight:700}
+.feedback.ok{color:var(--good)} .feedback.no{color:var(--bad)}
+.score{font-family:var(--mono);font-size:13px;color:var(--muted)}
+.bignum{font-family:var(--display);font-size:56px;line-height:1;color:var(--accent)}
+
+/* compare */
+.compare{display:grid;gap:10px}
+.compare h2{font-family:var(--display);font-weight:400;font-size:24px;margin:0}
+.tablewrap{overflow-x:auto;background:var(--surface);border:1px solid var(--line);border-radius:14px}
+table{border-collapse:collapse;width:100%;min-width:480px;font-size:15px}
+th,td{text-align:left;padding:10px 16px;border-bottom:1px solid var(--line)}
+th{font-family:var(--mono);font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);font-weight:500}
+tr:last-child td{border-bottom:0}
+td.no{color:var(--bad)} td.yes{color:var(--good)}
+tr.plant td:first-child{font-weight:700}
+
+@media (prefers-reduced-motion: reduce){ .drift,.breathe,.pulse .cristae,.nucleolus,.twinkle{animation:none} }
+</style>
+
+<div class="wrap">
+  <header>
+    <p class="eyebrow">Biology · Grade 9 · Cell structure</p>
+    <h1>The Living Plant Cell</h1>
+    <p class="lede">A leaf cell seen under the microscope. The cytoplasm is moving, the chloroplasts drift and the mitochondria are busy releasing energy. Tap any part to learn what it does, take the guided tour, or test yourself with the quiz.</p>
+  </header>
+
+  <section class="stage">
+    <div class="plate">
+      <div class="tools">
+        <span class="hint">Tap a structure or a label</span>
+        <div class="tgl">
+          <button id="btnLabels" aria-pressed="true">Labels</button>
+          <button id="btnMotion" aria-pressed="true">Motion</button>
+        </div>
+      </div>
+      <svg id="cell" viewBox="0 0 1000 620" role="img" aria-label="Animated, labelled diagram of a plant cell">
+        <defs>
+          <path id="streamPath" d="M300,113 H700 Q732,113 732,145 V475 Q732,507 700,507 H300 Q268,507 268,475 V145 Q268,113 300,113 Z"/>
+          <g id="chlShape">
+            <ellipse rx="25" ry="12" class="chl-body"/>
+            <ellipse rx="20" ry="8" class="chl-stroma"/>
+            <line x1="-17" y1="0" x2="17" y2="0" class="thyl"/>
+            <g class="grana">
+              <rect x="-16" y="-5" width="5" height="10" rx="1"/>
+              <rect x="-7" y="-6" width="5" height="12" rx="1"/>
+              <rect x="2" y="-6" width="5" height="12" rx="1"/>
+              <rect x="11" y="-5" width="5" height="10" rx="1"/>
+            </g>
+          </g>
+          <g id="mitoShape">
+            <rect x="-23" y="-11" width="46" height="22" rx="11" class="mito-body"/>
+            <path class="cristae" d="M-16 5 L-12 -6 L-8 5 L-4 -6 L0 5 L4 -6 L8 5 L12 -6 L16 5"/>
+          </g>
+        </defs>
+
+        <!-- cell wall -->
+        <g class="org" data-id="wall">
+          <path class="wall" fill-rule="evenodd" d="M248,70 H752 Q780,70 780,98 V522 Q780,550 752,550 H248 Q220,550 220,522 V98 Q220,70 248,70 Z M258,88 H742 Q762,88 762,108 V512 Q762,532 742,532 H258 Q238,532 238,512 V108 Q238,88 258,88 Z"/>
+          <rect class="fibre" x="229" y="79" width="542" height="462" rx="24"/>
+        </g>
+
+        <!-- cytoplasm -->
+        <rect class="org cyto" data-id="cytoplasm" x="238" y="88" width="524" height="444" rx="20"/>
+        <g id="stream"></g>
+
+        <!-- vacuole -->
+        <g class="org" data-id="vacuole">
+          <g class="breathe">
+            <path class="vac" d="M362,172 C432,140 600,148 662,178 C704,208 692,300 684,360 C674,432 604,466 502,463 C410,461 342,442 333,382 C322,320 320,204 362,172 Z"/>
+            <path class="vac-shine" d="M380,196 C450,172 580,176 630,198"/>
+            <g id="sap"></g>
+          </g>
+        </g>
+
+        <!-- nucleus -->
+        <g class="org" data-id="nucleus">
+          <circle class="nuc-env" cx="295" cy="135" r="40"/>
+          <circle class="nuc-in" cx="295" cy="135" r="35"/>
+          <path class="chromatin" d="M272,124 q6,-8 12,0 t12,2 M281,152 q7,5 14,-2 t12,4 M300,113 q5,4 10,0 M310,150 q6,-6 10,2 M270,142 q4,6 9,3"/>
+          <circle class="nucleolus" cx="303" cy="131" r="11"/>
+        </g>
+
+        <!-- rough ER -->
+        <g class="org" data-id="rer">
+          <rect class="hitfill" x="340" y="94" width="100" height="42"/>
+          <path class="rer-line" d="M346,104 q11,-7 22,0 t22,0 t22,0 t22,0"/>
+          <path class="rer-line" d="M346,117 q11,-7 22,0 t22,0 t22,0 t22,0"/>
+          <path class="rer-line" d="M346,130 q11,-7 22,0 t22,0 t22,0 t22,0"/>
+          <g id="rerDots"></g>
+        </g>
+
+        <!-- chloroplasts, mitochondria, ribosomes -->
+        <g id="chloros"></g>
+        <g id="mitos"></g>
+        <g class="org" data-id="ribosomes" id="ribos"></g>
+
+        <!-- membrane on top so its edge stays crisp -->
+        <g class="org" data-id="membrane">
+          <rect class="hit" x="238" y="88" width="524" height="444" rx="20"/>
+          <rect class="membrane" x="238" y="88" width="524" height="444" rx="20"/>
+        </g>
+
+        <!-- labels -->
+        <g id="labels">
+          <g class="lbl" data-id="nucleus"><line x1="200" y1="120" x2="262" y2="128"/><circle cx="262" cy="128" r="3"/><text x="194" y="126" text-anchor="end">Nucleus</text></g>
+          <g class="lbl" data-id="wall"><line x1="200" y1="210" x2="226" y2="210"/><circle cx="226" cy="210" r="3"/><text x="194" y="216" text-anchor="end">Cell wall</text></g>
+          <g class="lbl" data-id="membrane"><line x1="200" y1="292" x2="238" y2="292"/><circle cx="238" cy="292" r="3"/><text x="194" y="298" text-anchor="end">Cell membrane</text></g>
+          <g class="lbl" data-id="mitochondrion"><line x1="200" y1="372" x2="281" y2="322"/><circle cx="281" cy="322" r="3"/><text x="194" y="378" text-anchor="end">Mitochondrion</text></g>
+          <g class="lbl" data-id="cytoplasm"><line x1="200" y1="470" x2="332" y2="514"/><circle cx="332" cy="514" r="3"/><text x="194" y="476" text-anchor="end">Cytoplasm</text></g>
+          <g class="lbl" data-id="chloroplast"><line x1="810" y1="200" x2="740" y2="200"/><circle cx="740" cy="200" r="3"/><text x="816" y="206">Chloroplast</text></g>
+          <g class="lbl" data-id="vacuole"><line x1="810" y1="290" x2="682" y2="290"/><circle cx="682" cy="290" r="3"/><text x="816" y="296">Vacuole</text></g>
+          <g class="lbl" data-id="ribosomes"><line x1="810" y1="380" x2="752" y2="377"/><circle cx="752" cy="377" r="3"/><text x="816" y="386">Ribosomes</text></g>
+          <g class="lbl" data-id="rer"><line x1="390" y1="44" x2="390" y2="104"/><circle cx="390" cy="104" r="3"/><text x="390" y="36" text-anchor="middle">Rough ER</text></g>
+        </g>
+
+        <g class="scale" aria-hidden="true">
+          <line x1="675" y1="585" x2="762" y2="585"/>
+          <text x="718" y="608" text-anchor="middle">10 µm</text>
+        </g>
+      </svg>
+    </div>
+
+    <aside class="card">
+      <div class="modes" role="group" aria-label="Mode">
+        <button data-mode="explore" aria-pressed="true">Explore</button>
+        <button data-mode="tour" aria-pressed="false">Guided tour</button>
+        <button data-mode="quiz" aria-pressed="false">Quiz</button>
+      </div>
+      <div id="info" aria-live="polite"></div>
+      <div id="chipBox">
+        <p class="chips-label">Structures</p>
+        <div class="chips" id="chips"></div>
+      </div>
+    </aside>
+  </section>
+
+  <section class="compare">
+    <h2>Plant cell or animal cell?</h2>
+    <div class="tablewrap">
+      <table>
+        <thead><tr><th>Structure</th><th>Plant cell</th><th>Animal cell</th></tr></thead>
+        <tbody id="ctable"></tbody>
+      </table>
+    </div>
+  </section>
+</div>
+
+<script>
+const ORG = [
+  {id:'wall', name:'Cell wall', plant:true, animal:'No',
+   fn:'A tough layer made of cellulose, outside the cell membrane. It supports the cell, keeps its shape and stops it bursting when it takes in a lot of water.',
+   tip:'The cell wall is fully permeable. It is the cell membrane that controls what gets in and out.'},
+  {id:'membrane', name:'Cell membrane', plant:false, animal:'Yes',
+   fn:'A thin layer pressed against the inside of the cell wall. It is partially permeable, so it controls which substances enter and leave the cell.',
+   tip:'Every living cell has a membrane. Plant cells have a wall as well, on the outside.'},
+  {id:'cytoplasm', name:'Cytoplasm', plant:false, animal:'Yes',
+   fn:'A jelly-like liquid that fills the cell. Most of the cell’s chemical reactions happen here, controlled by enzymes. The moving dots show how cytoplasm flows around the vacuole in a living cell.',
+   tip:'This flowing movement is called cytoplasmic streaming. It carries substances around the cell.'},
+  {id:'nucleus', name:'Nucleus', plant:false, animal:'Yes',
+   fn:'Contains the genetic material, DNA, arranged in chromosomes. It controls the activities of the cell, including cell division.',
+   tip:'The dark spot inside is the nucleolus. In plant cells the big vacuole usually pushes the nucleus to one side.'},
+  {id:'vacuole', name:'Large permanent vacuole', plant:true, animal:'Small, temporary ones only',
+   fn:'A large space filled with cell sap: water with dissolved sugars and salts. When it is full, it pushes the cytoplasm against the wall and keeps the cell firm, or turgid.',
+   tip:'The membrane around the vacuole is called the tonoplast. A plant wilts when its vacuoles lose water.'},
+  {id:'chloroplast', name:'Chloroplast', plant:true, animal:'No',
+   fn:'Contains the green pigment chlorophyll, which absorbs light energy for photosynthesis.',
+   eq:'carbon dioxide + water → glucose + oxygen',
+   tip:'Root cells have no chloroplasts because they receive no light. Not every plant cell has them.'},
+  {id:'mitochondrion', name:'Mitochondrion', plant:false, animal:'Yes',
+   fn:'The site of aerobic respiration. Glucose reacts with oxygen here to release the energy the cell needs. The plural is mitochondria.',
+   eq:'glucose + oxygen → carbon dioxide + water',
+   tip:'Mitochondria release energy. Never write that they “make” or “produce” energy in an exam.'},
+  {id:'ribosomes', name:'Ribosomes', plant:false, animal:'Yes',
+   fn:'Tiny structures that make proteins by joining amino acids together. Some float free in the cytoplasm and others sit on the rough ER.',
+   tip:'Ribosomes are too small to see with a light microscope. You need an electron microscope.'},
+  {id:'rer', name:'Rough endoplasmic reticulum', plant:false, animal:'Yes',
+   fn:'A network of folded membranes covered in ribosomes. It makes proteins and carries them through the cell.',
+   tip:'It is called “rough” because the ribosomes on its surface make it look bumpy.'}
+];
+const byId = Object.fromEntries(ORG.map(o=>[o.id,o]));
+const NS = 'http://www.w3.org/2000/svg';
+const $ = s => document.querySelector(s);
+const svg = $('#cell');
+function el(tag, attrs, parent){const e=document.createElementNS(NS,tag);for(const k in attrs)e.setAttribute(k,attrs[k]);parent&&parent.appendChild(e);return e;}
+
+/* build chloroplasts */
+const CHL=[[480,118,0],[580,121,-8],[680,126,14],[730,200,86],[727,320,95],[722,420,80],[652,500,5],[522,502,-5],[402,497,8],[282,232,80],[284,380,96],[292,470,32]];
+CHL.forEach(([x,y,r],i)=>{
+  const g=el('g',{class:'org','data-id':'chloroplast',transform:`translate(${x},${y}) rotate(${r})`},$('#chloros'));
+  const d=el('g',{class:'drift',style:`animation-delay:${-i*1.3}s;animation-duration:${6+i%4}s`},g);
+  el('use',{href:'#chlShape'},d);
+});
+/* mitochondria */
+[[285,300,82],[727,252,92],[590,506,8]].forEach(([x,y,r],i)=>{
+  const g=el('g',{class:'org pulse','data-id':'mitochondrion',transform:`translate(${x},${y}) rotate(${r})`},$('#mitos'));
+  const d=el('g',{class:'drift',style:`animation-delay:${-i*2}s`},g);
+  el('use',{href:'#mitoShape'},d);
+  d.querySelector('use');
+});
+/* free ribosomes */
+const RIB=[[748,368],[741,379],[755,378],[746,389],[262,196],[312,262],[455,505],[466,516],[700,472],[745,150],[752,161],[622,522],[356,520],[257,340],[318,420],[540,520],[740,445]];
+RIB.forEach(([x,y],i)=>{
+  el('circle',{cx:x,cy:y,r:7,class:'hitfill'},$('#ribos'));
+  el('circle',{cx:x,cy:y,r:3,class:'ribo-dot twinkle',style:`animation-delay:${-i*.4}s`},$('#ribos'));
+});
+/* ribosomes on rough ER */
+[104,117,130].forEach(y=>{for(let x=352;x<=430;x+=11){el('circle',{cx:x,cy:y+((x-346)%22<11?-6:5),r:2.2,class:'ribo-dot'},$('#rerDots'));}});
+/* cytoplasmic streaming granules */
+for(let i=0;i<34;i++){
+  const c=el('circle',{r:(1.6+(i%3)*.7),class:'grain',cy:((i%5)-2)*5},$('#stream'));
+  const m=el('animateMotion',{dur:'34s',repeatCount:'indefinite',begin:`-${i}s`},c);
+  el('mpath',{href:'#streamPath'},m);
+}
+/* sap particles */
+[[450,260],[560,240],[520,340],[610,380],[420,390],[480,430],[630,280]].forEach(([x,y],i)=>{
+  el('circle',{cx:x,cy:y,r:2.5,class:'sap twinkle',style:`animation-delay:${-i*.7}s`},$('#sap'));
+});
+
+/* chips + table */
+ORG.forEach(o=>{
+  const b=document.createElement('button');b.textContent=o.name.replace('Rough endoplasmic reticulum','Rough ER').replace('Large permanent vacuole','Vacuole');
+  b.dataset.id=o.id;b.addEventListener('click',()=>pick(o.id));$('#chips').appendChild(b);
+  const tr=document.createElement('tr');if(o.plant)tr.className='plant';
+  tr.innerHTML=`<td>${o.name}</td><td class="yes">Yes</td><td class="${o.animal==='Yes'?'yes':'no'}">${o.animal}</td>`;
+  $('#ctable').appendChild(tr);
+});
+
+/* state */
+let mode='explore', current=null, tourIdx=0, quiz=null;
+const info=$('#info');
+
+function highlight(id){
+  svg.classList.toggle('focus',!!id);
+  svg.querySelectorAll('.org,.lbl').forEach(g=>g.classList.toggle('on',g.dataset.id===id));
+  document.querySelectorAll('#chips button').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.id===id)));
+}
+function cardHTML(o){
+  return `<span class="tag ${o.plant?'plant':''}">${o.plant?'Plant cells only':'Plant and animal cells'}</span>
+  <h2>${o.name}</h2><p>${o.fn}</p>${o.eq?`<p class="eq">${o.eq}</p>`:''}
+  <p class="tip"><b>Exam tip</b>${o.tip}</p>`;
+}
+function renderExplore(){
+  if(!current){
+    info.innerHTML=`<span class="tag plant">Key idea</span><h2>Three things only plants have</h2>
+    <p>Plant cells have everything an animal cell has, plus a <strong>cell wall</strong>, <strong>chloroplasts</strong> and a <strong>large permanent vacuole</strong>.</p>
+    <p class="tip"><b>Try it</b>Tap a chloroplast in the diagram, or pick a structure below.</p>`;
+  } else info.innerHTML=cardHTML(byId[current]);
+}
+function renderTour(){
+  const o=ORG[tourIdx];
+  info.innerHTML=cardHTML(o)+`<div class="nav"><span class="step">Stop ${tourIdx+1} of ${ORG.length}</span>
+  <span style="display:flex;gap:8px"><button id="tPrev" ${tourIdx===0?'disabled':''}>Back</button><button id="tNext">${tourIdx===ORG.length-1?'Finish':'Next'}</button></span></div>`;
+  $('#tPrev').onclick=()=>{tourIdx--;highlight(ORG[tourIdx].id);renderTour();};
+  $('#tNext').onclick=()=>{ if(tourIdx===ORG.length-1){setMode('quiz');return;} tourIdx++;highlight(ORG[tourIdx].id);renderTour();};
+}
+function newQuiz(){
+  quiz={order:ORG.map(o=>o.id).sort(()=>Math.random()-.5),i:0,score:0,tries:0,locked:false};
+}
+function renderQuiz(msg='',cls=''){
+  if(quiz.i>=quiz.order.length){
+    const n=quiz.order.length;
+    info.innerHTML=`<span class="tag">Quiz complete</span><div class="bignum">${quiz.score}/${n}</div>
+    <p>${quiz.score===n?'Perfect! You know your plant cell.':quiz.score>=6?'Good work. Use Explore to revise the ones you missed.':'Take the guided tour, then try again.'}</p>
+    <div class="nav"><button id="qAgain">Try again</button><button id="qTour">Guided tour</button></div>`;
+    $('#qAgain').onclick=()=>{newQuiz();renderQuiz();};
+    $('#qTour').onclick=()=>setMode('tour');
+    return;
+  }
+  const o=byId[quiz.order[quiz.i]];
+  info.innerHTML=`<span class="step">Question ${quiz.i+1} of ${quiz.order.length} · Score ${quiz.score}</span>
+  <p class="prompt">Tap the<strong>${o.name}</strong></p>
+  <p class="feedback ${cls}">${msg}</p>
+  <p class="score">Labels are hidden during the quiz. First try earns the point.</p>`;
+}
+function flash(id,cls){
+  svg.querySelectorAll(`.org[data-id="${id}"]`).forEach(g=>{g.classList.add(cls);setTimeout(()=>g.classList.remove(cls),900);});
+}
+function answer(id){
+  if(quiz.locked||quiz.i>=quiz.order.length)return;
+  const target=quiz.order[quiz.i];
+  if(id===target){
+    if(quiz.tries===0)quiz.score++;
+    flash(id,'right');quiz.locked=true;
+    renderQuiz(`Correct: ${byId[id].name}.`,'ok');
+    setTimeout(()=>{quiz.i++;quiz.tries=0;quiz.locked=false;renderQuiz();},1100);
+  } else {
+    quiz.tries++;flash(id,'wrong');
+    renderQuiz(`That is the ${byId[id].name.toLowerCase()}. Try again.`,'no');
+  }
+}
+function pick(id){
+  if(mode==='quiz'){answer(id);return;}
+  if(mode==='tour'){tourIdx=ORG.findIndex(o=>o.id===id);highlight(id);renderTour();return;}
+  current = current===id?null:id; highlight(current); renderExplore();
+}
+let labelsOn = window.innerWidth>=640;
+function applyLabels(){ $('#labels').hidden = !(labelsOn && mode!=='quiz'); $('#btnLabels').setAttribute('aria-pressed',String(labelsOn)); }
+function setMode(m){
+  mode=m;
+  document.querySelectorAll('[data-mode]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.mode===m)));
+  $('#chipBox').hidden = m==='quiz';
+  applyLabels();
+  if(m==='explore'){current=null;highlight(null);renderExplore();}
+  if(m==='tour'){tourIdx=0;highlight(ORG[0].id);renderTour();}
+  if(m==='quiz'){highlight(null);newQuiz();renderQuiz();}
+}
+document.querySelectorAll('[data-mode]').forEach(b=>b.addEventListener('click',()=>setMode(b.dataset.mode)));
+svg.addEventListener('click',e=>{const g=e.target.closest('[data-id]');if(g)pick(g.dataset.id);});
+$('#btnLabels').onclick=()=>{labelsOn=!labelsOn;applyLabels();};
+
+let moving=true;
+function applyMotion(){
+  svg.classList.toggle('paused',!moving);
+  try{ moving?svg.unpauseAnimations():svg.pauseAnimations(); }catch(e){}
+  $('#btnMotion').setAttribute('aria-pressed',String(moving));
+}
+$('#btnMotion').onclick=()=>{moving=!moving;applyMotion();};
+if(window.matchMedia('(prefers-reduced-motion: reduce)').matches){moving=false;}
+applyMotion();
+setMode('explore');
+</script>
+
+</body></html>

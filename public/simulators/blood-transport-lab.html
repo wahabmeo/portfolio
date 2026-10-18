@@ -1,0 +1,414 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>Blood Transport Lab</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600&family=Nunito+Sans:wght@400;700&display=swap">
+<style>
+/* Layout: lab-bench tabs; one interactive stage per tab with a side panel of readouts and questions */
+:root{
+  --bg:#FBF6F0; --panel:#FFFFFF; --fg:#2A1B3D; --muted:#5E4F6E; --line:#E6DCEA;
+  --blood:#C8344A; --blood-dark:#7E1F33; --plasma:#E9C85E; --blue:#2F5D9E; --soft:#F4EEF6;
+  --good:#2E7D4F; --bad:#B3261E;
+  --display:'Fredoka', 'Trebuchet MS', Arial, sans-serif;
+  --body:'Nunito Sans', 'Segoe UI', Arial, sans-serif;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#1B1326; --panel:#251B33; --fg:#F3ECF7; --muted:#BCADCB; --line:#3B2E4C;
+  --blood:#E0566B; --blood-dark:#A8384C; --plasma:#E9C85E; --blue:#7FA8E6; --soft:#2E2340;
+  --good:#6BCB8F; --bad:#F2867D; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#1B1326; --panel:#251B33; --fg:#F3ECF7; --muted:#BCADCB; --line:#3B2E4C;
+  --blood:#E0566B; --blood-dark:#A8384C; --plasma:#E9C85E; --blue:#7FA8E6; --soft:#2E2340;
+  --good:#6BCB8F; --bad:#F2867D; color-scheme:dark}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--fg);font-family:var(--body);font-size:16px;line-height:1.5}
+.wrap{max-width:1180px;margin:0 auto;padding-inline:20px;padding-block:24px 48px}
+header{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:12px;margin-bottom:18px}
+.eyebrow{font-size:13px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--blood)}
+h1{font-family:var(--display);font-weight:600;font-size:clamp(28px,4.5vw,44px);line-height:1.05;margin:4px 0 0;text-wrap:balance}
+h2{font-family:var(--display);font-weight:600;font-size:24px;margin:0;text-wrap:balance}
+h3{font-size:16px;margin:0}
+p{margin:0}
+.tabs{display:flex;flex-wrap:wrap;gap:6px;margin:8px 0 18px;border-bottom:2px solid var(--line)}
+.tab{font:700 15px var(--body);color:var(--muted);background:none;border:none;padding:10px 14px;border-bottom:3px solid transparent;margin-bottom:-2px;cursor:pointer;border-radius:8px 8px 0 0}
+.tab[aria-selected="true"]{color:var(--fg);border-bottom-color:var(--blood)}
+.tab:hover{background:var(--soft)}
+.tab:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible{outline:3px solid var(--blue);outline-offset:2px}
+.stage{display:grid;grid-template-columns:minmax(0,1.6fr) minmax(0,1fr);gap:20px;align-items:start}
+@media (max-width:820px){.stage{grid-template-columns:1fr}}
+.canvas-box{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:10px}
+canvas{display:block;width:100%;height:auto;border-radius:10px;touch-action:manipulation}
+.side{display:flex;flex-direction:column;gap:14px;min-width:0}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:16px;display:flex;flex-direction:column;gap:10px}
+.lead{color:var(--muted)}
+.controls{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin-top:10px}
+.btn{font:700 15px var(--body);border:2px solid var(--blood);background:var(--blood);color:#fff;padding:8px 16px;border-radius:999px;cursor:pointer}
+.btn.ghost{background:transparent;color:var(--fg);border-color:var(--line)}
+.btn:disabled{opacity:.5;cursor:default}
+label.sl{display:flex;flex-direction:column;gap:4px;font-weight:700;font-size:14px;flex:1;min-width:180px}
+input[type=range]{width:100%;accent-color:var(--blood)}
+.stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+.stat{background:var(--soft);border-radius:12px;padding:10px}
+.stat b{display:block;font-family:var(--display);font-size:24px;font-weight:600;font-variant-numeric:tabular-nums}
+.stat span{font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;font-weight:700}
+.legend{display:flex;flex-direction:column;gap:6px;font-size:14px}
+.legend div{display:flex;align-items:center;gap:8px}
+.sw{width:14px;height:14px;border-radius:50%;flex:none}
+.q{border-left:4px solid var(--blue);padding-left:12px;font-size:15px}
+.q b{color:var(--blue)}
+.checklist{display:grid;grid-template-columns:1fr 1fr;gap:6px;font-size:14px}
+.checklist div{padding:6px 10px;border-radius:10px;background:var(--soft);color:var(--muted)}
+.checklist div.found{background:var(--good);color:#fff;font-weight:700}
+table{border-collapse:collapse;width:100%;font-size:14px;font-variant-numeric:tabular-nums}
+th,td{text-align:left;padding:7px 8px;border-bottom:1px solid var(--line)}
+th{font-size:12px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted)}
+td.hi{color:var(--bad);font-weight:700}
+.opts{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.opt{font:700 14px var(--body);text-align:left;padding:10px 12px;border-radius:12px;border:2px solid var(--line);background:var(--panel);color:var(--fg);cursor:pointer}
+.opt.right{border-color:var(--good);background:color-mix(in srgb,var(--good) 15%,var(--panel))}
+.opt.wrong{border-color:var(--bad);background:color-mix(in srgb,var(--bad) 12%,var(--panel))}
+.feedback{font-size:15px;min-height:1.5em}
+.pill{display:inline-block;font-size:12px;font-weight:700;padding:3px 10px;border-radius:999px;background:var(--soft);color:var(--muted)}
+.score{font-family:var(--display);font-size:18px}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+
+<div class="wrap">
+  <header>
+    <div>
+      <p class="eyebrow">IGCSE Biology · 9.1</p>
+      <h1>Blood Transport Lab</h1>
+    </div>
+    <p class="lead" style="max-width:46ch">Five interactive models to use alongside the lesson. Each one has questions to answer in your notebook.</p>
+  </header>
+
+  <div class="tabs" role="tablist" aria-label="Simulations">
+    <button class="tab" role="tab" id="t-flow" aria-controls="p-flow" aria-selected="true">Mass flow</button>
+    <button class="tab" role="tab" id="t-sav" aria-controls="p-sav" aria-selected="false">Size and diffusion</button>
+    <button class="tab" role="tab" id="t-spin" aria-controls="p-spin" aria-selected="false">Centrifuge</button>
+    <button class="tab" role="tab" id="t-smear" aria-controls="p-smear" aria-selected="false">Blood smear</button>
+    <button class="tab" role="tab" id="t-det" aria-controls="p-det" aria-selected="false">Blood detective</button>
+  </div>
+
+  <!-- 1 MASS FLOW -->
+  <section id="p-flow" role="tabpanel" aria-labelledby="t-flow" class="stage">
+    <div class="canvas-box">
+      <canvas id="cFlow" width="800" height="520" aria-label="Animation of red blood cells pumped by the heart to the lungs and body"></canvas>
+      <div class="controls">
+        <button class="btn" id="flowPlay">Pause</button>
+        <label class="sl" for="hr">Heart rate: <span id="hrVal">70</span> beats per minute
+          <input type="range" id="hr" min="20" max="180" value="70">
+        </label>
+        <button class="btn ghost" id="flowLabels" aria-pressed="true">Hide labels</button>
+      </div>
+    </div>
+    <div class="side">
+      <div class="card">
+        <h2>The four parts</h2>
+        <div class="legend">
+          <div><span class="sw" style="background:var(--blood)"></span><span><b>Medium:</b> blood (watch the cells move)</span></div>
+          <div><span class="sw" style="background:var(--muted)"></span><span><b>Tubes:</b> arteries carry blood away from the heart, veins carry it back</span></div>
+          <div><span class="sw" style="background:var(--blood-dark)"></span><span><b>Pump:</b> the heart beats to push the blood</span></div>
+          <div><span class="sw" style="background:var(--blue)"></span><span><b>Exchange:</b> capillaries in the lungs and body</span></div>
+        </div>
+      </div>
+      <div class="card">
+        <h3>Watch the colour</h3>
+        <p class="lead">Bright red cells carry lots of oxygen. Dark cells have given their oxygen to the body. Small blue dots are oxygen molecules diffusing.</p>
+      </div>
+      <div class="card">
+        <p class="q"><b>Q1</b> Where do the cells pick up oxygen? Where do they lose it?</p>
+        <p class="q"><b>Q2</b> Raise the heart rate. What happens to the speed of delivery? When would your body need this?</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- 2 SA:V -->
+  <section id="p-sav" role="tabpanel" aria-labelledby="t-sav" class="stage" hidden>
+    <div class="canvas-box">
+      <canvas id="cSav" width="800" height="440" aria-label="Cross-section of a cube with a substance diffusing in from the edges"></canvas>
+      <div class="controls">
+        <label class="sl" for="side">Cube side length: <span id="sideVal">2</span> cm
+          <input type="range" id="side" min="1" max="10" value="2">
+        </label>
+        <button class="btn" id="savGo">Start diffusion</button>
+        <button class="btn ghost" id="savReset">Reset</button>
+      </div>
+    </div>
+    <div class="side">
+      <div class="card">
+        <h2>Surface area to volume</h2>
+        <div class="stats">
+          <div class="stat"><span>Surface area</span><b id="sa">24</b><span>cm²</span></div>
+          <div class="stat"><span>Volume</span><b id="vol">8</b><span>cm³</span></div>
+          <div class="stat"><span>SA : V</span><b id="ratio">3.0</b><span>: 1</span></div>
+        </div>
+        <p class="lead">Substances diffuse in at about 1 mm per minute (model value). Time to reach the centre: <b id="tCentre">10 min</b></p>
+        <p class="lead">Time so far: <b id="tNow">0.0 min</b></p>
+      </div>
+      <div class="card">
+        <p class="q"><b>Q1</b> Fill in a table of side, SA, volume and SA:V for sides 1 to 5 cm.</p>
+        <p class="q"><b>Q2</b> As the cube gets bigger, what happens to SA:V and to the time for oxygen to reach the centre?</p>
+        <p class="q"><b>Q3</b> Use this to explain why a whale needs a circulatory system but a flatworm does not.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- 3 CENTRIFUGE -->
+  <section id="p-spin" role="tabpanel" aria-labelledby="t-spin" class="stage" hidden>
+    <div class="canvas-box">
+      <canvas id="cSpin" width="800" height="520" aria-label="Test tube of blood that separates into layers when spun"></canvas>
+      <div class="controls">
+        <button class="btn" id="spinGo">Spin the sample</button>
+        <button class="btn ghost" id="spinReset">New sample</button>
+      </div>
+    </div>
+    <div class="side">
+      <div class="card">
+        <h2>Separating blood</h2>
+        <p class="lead">A sample of blood is mixed with a chemical that stops clotting, then spun fast. Heavier parts sink.</p>
+        <div class="legend">
+          <div><span class="sw" style="background:var(--plasma)"></span><span><b>Plasma</b> about 55%: water with dissolved substances</span></div>
+          <div><span class="sw" style="background:#F4F1EA;border:1px solid var(--line)"></span><span><b>White cells and platelets</b>: thin pale layer</span></div>
+          <div><span class="sw" style="background:#B8263D"></span><span><b>Red cells</b> about 45%: densest, sink to the bottom</span></div>
+        </div>
+      </div>
+      <div class="card">
+        <p class="q"><b>Q1</b> Which layer would you test for glucose? Name the test and the positive result.</p>
+        <p class="q"><b>Q2</b> Why do the red cells end up at the bottom?</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- 4 SMEAR -->
+  <section id="p-smear" role="tabpanel" aria-labelledby="t-smear" class="stage" hidden>
+    <div class="canvas-box">
+      <canvas id="cSmear" width="800" height="520" aria-label="Stained blood smear. Click a cell to identify it"></canvas>
+      <div class="controls"><span class="pill">Click or tap any cell to identify it</span><button class="btn ghost" id="smearNew">New slide</button></div>
+    </div>
+    <div class="side">
+      <div class="card">
+        <h3>Find all four</h3>
+        <div class="checklist" id="found">
+          <div data-k="rbc">Red blood cell</div><div data-k="phago">Phagocyte</div>
+          <div data-k="lympho">Lymphocyte</div><div data-k="plate">Platelet</div>
+        </div>
+      </div>
+      <div class="card" id="cellInfo" aria-live="polite">
+        <h2>Click a cell</h2>
+        <p class="lead">This is what blood looks like under a light microscope after staining. Red cells are pink; white cell nuclei stain purple.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- 5 DETECTIVE -->
+  <section id="p-det" role="tabpanel" aria-labelledby="t-det" class="stage" hidden>
+    <div class="canvas-box">
+      <canvas id="cDet" width="800" height="440" aria-label="Blood smear from the current patient"></canvas>
+      <div class="controls"><span class="pill" id="caseNo">Patient 1 of 5</span><span class="score" id="score">Score 0</span><button class="btn ghost" id="nextCase">Next patient</button></div>
+    </div>
+    <div class="side">
+      <div class="card">
+        <h2 id="caseName">Patient A</h2>
+        <p id="caseStory" class="lead"></p>
+        <div style="overflow-x:auto"><table id="caseTable"></table></div>
+      </div>
+      <div class="card">
+        <h3>Your diagnosis</h3>
+        <div class="opts" id="opts"></div>
+        <p class="feedback" id="fb" aria-live="polite"></p>
+      </div>
+    </div>
+  </section>
+</div>
+
+<script>
+(function(){
+const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+const css = n => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+function rng(seed){return function(){seed|=0;seed=seed+0x6D2B79F5|0;let t=Math.imul(seed^seed>>>15,1|seed);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296}}
+function prep(c){const W=+c.getAttribute('width'),H=+c.getAttribute('height');const d=Math.min(2,window.devicePixelRatio||1);c.width=W*d;c.height=H*d;const x=c.getContext('2d');x.setTransform(d,0,0,d,0,0);return{x,W,H}}
+function pt(c,e){const r=c.getBoundingClientRect();return{x:(e.clientX-r.left)*(+c.dataset.w)/r.width,y:(e.clientY-r.top)*(+c.dataset.h)/r.height}}
+
+/* ---------- Tabs ---------- */
+const tabs=[...document.querySelectorAll('.tab')];
+let active='p-flow';
+function show(t){tabs.forEach(b=>{const on=b===t;b.setAttribute('aria-selected',on);document.getElementById(b.getAttribute('aria-controls')).hidden=!on});active=t.getAttribute('aria-controls');try{localStorage.setItem('bl-tab',t.id)}catch(e){}}
+tabs.forEach(b=>b.addEventListener('click',()=>show(b)));
+document.querySelector('.tabs').addEventListener('keydown',e=>{const i=tabs.indexOf(document.activeElement);if(i<0)return;let j=e.key==='ArrowRight'?i+1:e.key==='ArrowLeft'?i-1:null;if(j===null)return;j=(j+tabs.length)%tabs.length;tabs[j].focus();show(tabs[j])});
+try{const s=localStorage.getItem('bl-tab');if(s&&document.getElementById(s))show(document.getElementById(s))}catch(e){}
+
+/* ---------- Cell drawing ---------- */
+function rbc(x,cx,cy,r){const g=x.createRadialGradient(cx,cy,r*.1,cx,cy,r);g.addColorStop(0,'#F3A1AC');g.addColorStop(.45,'#E06576');g.addColorStop(1,'#C23A4E');x.fillStyle=g;x.beginPath();x.arc(cx,cy,r,0,7);x.fill()}
+function sickle(x,cx,cy,r,a){x.save();x.translate(cx,cy);x.rotate(a);x.fillStyle='#C23A4E';x.beginPath();x.arc(0,0,r*1.1,Math.PI*.15,Math.PI*.85);x.arc(0,r*.55,r*.8,Math.PI*.8,Math.PI*.2,true);x.closePath();x.fill();x.restore()}
+function phago(x,cx,cy,r,rot){x.fillStyle='#E9DDF0';x.beginPath();x.arc(cx,cy,r,0,7);x.fill();x.strokeStyle='#C9B5D8';x.lineWidth=1.5;x.stroke();x.fillStyle='#5B2A86';for(let i=0;i<3;i++){const a=rot+i*2.1;x.beginPath();x.arc(cx+Math.cos(a)*r*.38,cy+Math.sin(a)*r*.38,r*.32,0,7);x.fill()}}
+function lympho(x,cx,cy,r,odd){x.fillStyle='#DCE6F5';x.beginPath();x.arc(cx,cy,r,0,7);x.fill();x.fillStyle=odd?'#3D2470':'#4B2A7E';x.beginPath();if(odd){x.ellipse(cx+r*.08,cy,r*.82,r*.68,.5,0,7)}else{x.arc(cx+r*.06,cy,r*.78,0,7)}x.fill()}
+function plate(x,cx,cy,r,a){x.fillStyle='#7A4C9E';x.beginPath();x.ellipse(cx,cy,r,r*.6,a,0,7);x.fill()}
+
+function makeSmear(seed,W,H,cfg){
+  const R=rng(seed),cells=[];
+  function place(type,n,r){for(let i=0;i<n;i++){for(let t=0;t<40;t++){const cx=r+R()*(W-2*r),cy=r+R()*(H-2*r);if(cells.every(c=>Math.hypot(c.cx-cx,c.cy-cy)>(c.r+r)*.82)){cells.push({type,cx,cy,r,a:R()*6.28});break}}}}
+  place('phago',cfg.phago||0,30);place('lympho',cfg.lympho||0,cfg.odd?30:24);
+  place('rbc',cfg.rbc||0,19);place('sickle',cfg.sickle||0,19);place('plate',cfg.plate||0,5);
+  return cells;
+}
+function drawSmear(x,W,H,cells,hl,odd){
+  const bg=x.createRadialGradient(W/2,H/2,50,W/2,H/2,W*.7);bg.addColorStop(0,'#FFFBF6');bg.addColorStop(1,'#F1E6E8');x.fillStyle=bg;x.fillRect(0,0,W,H);
+  for(const c of cells){
+    if(c.type==='rbc')rbc(x,c.cx,c.cy,c.r);else if(c.type==='sickle')sickle(x,c.cx,c.cy,c.r,c.a);
+    else if(c.type==='phago')phago(x,c.cx,c.cy,c.r,c.a);else if(c.type==='lympho')lympho(x,c.cx,c.cy,c.r,odd);else plate(x,c.cx,c.cy,c.r,c.a);
+    if(c===hl){x.strokeStyle='#2F5D9E';x.lineWidth=3;x.setLineDash([6,4]);x.beginPath();x.arc(c.cx,c.cy,c.r+7,0,7);x.stroke();x.setLineDash([])}
+  }
+}
+
+/* ---------- 1. Mass flow ---------- */
+const cF=document.getElementById('cFlow');let F=prep(cF);cF.dataset.w=F.W;cF.dataset.h=F.H;
+const path=[[440,240],[620,240],[620,90],[560,90],[500,90],[440,90],[360,90],[300,90],[240,90],[180,90],[180,240],[360,240],[360,280],[180,280],[180,440],[240,440],[300,440],[360,440],[440,440],[500,440],[560,440],[620,440],[620,280],[440,280],[440,240]];
+const seg=[];let L=0;for(let i=0;i<path.length-1;i++){const [a,b]=[path[i],path[i+1]];const l=Math.hypot(b[0]-a[0],b[1]-a[1]);seg.push({a,b,s:L,l});L+=l}
+const lungA=seg[3].s,lungB=seg[9].s+seg[9].l, bodyA=seg[14].s,bodyB=seg[20].s+seg[20].l;
+function at(s){s=((s%L)+L)%L;for(const g of seg){if(s<=g.s+g.l){const t=(s-g.s)/g.l;return[g.a[0]+(g.b[0]-g.a[0])*t,g.a[1]+(g.b[1]-g.a[1])*t]}}return path[0]}
+function oxy(s){s=((s%L)+L)%L;if(s>=lungA&&s<=lungB)return (s-lungA)/(lungB-lungA)*0.85+0.15;if(s>lungB&&s<bodyA)return 1;if(s>=bodyA&&s<=bodyB)return 1-(s-bodyA)/(bodyB-bodyA)*0.85;return .15}
+const cellsF=Array.from({length:46},(_,i)=>({s:i*L/46+Math.random()*8}));
+let mols=[],flowOn=!reduce,labels=true,hr=70,beat=0,last=performance.now();
+document.getElementById('flowPlay').textContent=flowOn?'Pause':'Play';
+function mix(o){const r1=[0x6E,0x1A,0x30],r2=[0xE0,0x2E,0x46];const c=r1.map((v,i)=>Math.round(v+(r2[i]-v)*o));return `rgb(${c})`}
+function drawFlow(dt){
+  const {x,W,H}=F;x.clearRect(0,0,W,H);
+  const fg=css('--fg'),mut=css('--muted'),blue=css('--blue'),panel=css('--panel'),line=css('--line');
+  x.fillStyle=panel;x.fillRect(0,0,W,H);
+  // organ zones
+  x.fillStyle=css('--soft');x.beginPath();x.roundRect(200,40,400,100,24);x.fill();x.beginPath();x.roundRect(200,390,400,100,24);x.fill();
+  // vessels
+  x.lineCap='round';x.lineJoin='round';
+  for(let i=0;i<seg.length;i++){const g=seg[i];const cap=(i>=3&&i<=9)||(i>=14&&i<=20);x.strokeStyle=cap?blue:line;x.lineWidth=cap?10:22;x.globalAlpha=cap?.35:1;x.beginPath();x.moveTo(...g.a);x.lineTo(...g.b);x.stroke();x.globalAlpha=1}
+  // heart
+  const p=hr/60;beat+=dt*p;const ph=beat%1;const sq=ph<.18?Math.sin(ph/.18*Math.PI):0;
+  const hrad=46-sq*8;x.fillStyle=css('--blood-dark');x.beginPath();x.arc(400,260,hrad,0,7);x.fill();
+  x.fillStyle='#fff';x.font='700 15px Nunito Sans, Arial';x.textAlign='center';x.fillText('HEART',400,256);x.font='12px Nunito Sans, Arial';x.fillText('pump',400,273);
+  // move cells: surge on beat
+  const v=(40+hr*1.2)*(0.6+sq*1.2);
+  for(const c of cellsF){if(flowOn)c.s=(c.s+v*dt)%L;const [px,py]=at(c.s);const o=oxy(c.s);x.fillStyle=mix(o);x.beginPath();x.ellipse(px,py,8,6,0,0,7);x.fill();
+    if(flowOn&&Math.random()<dt*1.2){const s=((c.s%L)+L)%L;if(s>bodyA&&s<bodyB)mols.push({x:px,y:py,vx:(Math.random()-.5)*20,vy:30+Math.random()*20,life:1.4});if(s>lungA&&s<lungB)mols.push({x:px,y:py-34,vx:(Math.random()-.5)*20,vy:28,life:1.1})}}
+  mols=mols.filter(m=>(m.life-=dt)>0);x.fillStyle=blue;for(const m of mols){if(flowOn){m.x+=m.vx*dt;m.y+=m.vy*dt}x.globalAlpha=Math.min(1,m.life);x.beginPath();x.arc(m.x,m.y,3,0,7);x.fill()}x.globalAlpha=1;
+  // labels
+  x.fillStyle=fg;x.font='600 18px Fredoka, Arial';x.textAlign='center';x.fillText('LUNGS',400,30);x.fillText('BODY TISSUES',400,512);
+  if(labels){x.font='700 13px Nunito Sans, Arial';x.fillStyle=mut;
+    x.textAlign='left';x.fillText('Artery to lungs',630,170);x.fillText('Vein from body',630,370);
+    x.textAlign='right';x.fillText('Vein from lungs',170,170);x.fillText('Artery to body',170,370);
+    x.textAlign='center';x.fillStyle=blue;x.fillText('Capillaries: O₂ diffuses INTO blood',400,128);x.fillText('Capillaries: O₂ diffuses OUT to cells',400,412)}
+}
+document.getElementById('flowPlay').onclick=e=>{flowOn=!flowOn;e.target.textContent=flowOn?'Pause':'Play'};
+document.getElementById('hr').oninput=e=>{hr=+e.target.value;document.getElementById('hrVal').textContent=hr};
+document.getElementById('flowLabels').onclick=e=>{labels=!labels;e.target.textContent=labels?'Hide labels':'Show labels';e.target.setAttribute('aria-pressed',labels)};
+
+/* ---------- 2. SA:V ---------- */
+const cS=document.getElementById('cSav');let S=prep(cS);cS.dataset.w=S.W;cS.dataset.h=S.H;
+let side=2,tMin=0,savRun=false;const rate=1; // mm per minute
+function savStats(){const sa=6*side*side,v=side**3;document.getElementById('sa').textContent=sa;document.getElementById('vol').textContent=v;document.getElementById('ratio').textContent=(sa/v).toFixed(1);document.getElementById('tCentre').textContent=(side*10/2/rate).toFixed(0)+' min'}
+function drawSav(){
+  const {x,W,H}=S;x.fillStyle=css('--panel');x.fillRect(0,0,W,H);
+  const max=360,px=max*side/10, cx=260, cy=H/2;
+  const depthMm=tMin*rate, half=side*10/2, frac=Math.min(1,depthMm/half);
+  // cube (isometric hint)
+  const s=px,o=Math.max(8,s*.25);x.fillStyle='#E9C3C9';x.beginPath();x.moveTo(cx-s/2,cy-s/2);x.lineTo(cx-s/2+o,cy-s/2-o);x.lineTo(cx+s/2+o,cy-s/2-o);x.lineTo(cx+s/2,cy-s/2);x.fill();
+  x.fillStyle='#D9A9B1';x.beginPath();x.moveTo(cx+s/2,cy-s/2);x.lineTo(cx+s/2+o,cy-s/2-o);x.lineTo(cx+s/2+o,cy+s/2-o);x.lineTo(cx+s/2,cy+s/2);x.fill();
+  x.fillStyle='#F7EEF0';x.fillRect(cx-s/2,cy-s/2,s,s);
+  // diffused zone
+  x.fillStyle='#C8344A';x.globalAlpha=.85;x.fillRect(cx-s/2,cy-s/2,s,s);x.globalAlpha=1;
+  const inner=s*(1-frac);x.fillStyle='#F7EEF0';x.fillRect(cx-inner/2,cy-inner/2,inner,inner);
+  x.strokeStyle=css('--fg');x.lineWidth=2;x.strokeRect(cx-s/2,cy-s/2,s,s);
+  x.fillStyle=css('--fg');x.font='700 15px Nunito Sans, Arial';x.textAlign='center';x.fillText(side+' cm',cx,cy+s/2+22);
+  // centre marker
+  x.fillStyle=frac>=1?css('--good'):css('--muted');x.beginPath();x.arc(cx,cy,5,0,7);x.fill();
+  // ratio bars
+  const bx=520;x.textAlign='left';x.font='600 17px Fredoka, Arial';x.fillText('SA : V ratio for each size',bx,60);
+  for(let i=1;i<=10;i++){const r=6/i,y=74+i*30,w=r*36;x.fillStyle=i===side?css('--blood'):css('--line');x.fillRect(bx+40,y,w,18);x.fillStyle=css('--fg');x.font='13px Nunito Sans, Arial';x.fillText(i+' cm',bx,y+14);x.fillText(r.toFixed(1),bx+46+w,y+14)}
+  x.font='700 14px Nunito Sans, Arial';x.fillStyle=frac>=1?css('--good'):css('--muted');x.textAlign='center';x.fillText(frac>=1?'Centre reached':'Centre not reached yet',cx,40);
+}
+document.getElementById('side').oninput=e=>{side=+e.target.value;document.getElementById('sideVal').textContent=side;tMin=0;savRun=false;document.getElementById('savGo').textContent='Start diffusion';savStats();updT()};
+function updT(){document.getElementById('tNow').textContent=tMin.toFixed(1)+' min'}
+document.getElementById('savGo').onclick=e=>{savRun=!savRun;e.target.textContent=savRun?'Pause':'Start diffusion'};
+document.getElementById('savReset').onclick=()=>{tMin=0;savRun=false;document.getElementById('savGo').textContent='Start diffusion';updT()};
+savStats();
+
+/* ---------- 3. Centrifuge ---------- */
+const cC=document.getElementById('cSpin');let C=prep(cC);cC.dataset.w=C.W;cC.dataset.h=C.H;
+const tube={x:320,top:70,w:150,h:390};let parts=[],spin=0,spinning=false,settled=0;
+function newSample(){parts=[];const R=Math.random;for(let i=0;i<260;i++)parts.push({t:'r',x:R(),y:R(),ty:.55+R()*.45-.005,tx:R()});for(let i=0;i<22;i++)parts.push({t:'w',x:R(),y:R(),ty:.535+R()*.018,tx:R()});spin=0;settled=0;spinning=false;document.getElementById('spinGo').disabled=false}
+function drawSpin(dt){
+  const {x,W,H}=C;x.fillStyle=css('--panel');x.fillRect(0,0,W,H);
+  if(spinning){spin+=dt;if(spin>2.2){spinning=false}}
+  if(!spinning&&spin>0)settled=Math.min(1,settled+dt*.7);
+  x.save();
+  if(spinning){x.translate(W/2-5,H/2);x.rotate(spin*spin*6);x.translate(-(W/2-5),-H/2)}
+  const {x:tx,top,w,h}=tube;
+  // liquid
+  x.save();x.beginPath();x.moveTo(tx,top);x.lineTo(tx,top+h-w/2);x.arc(tx+w/2,top+h-w/2,w/2,Math.PI,0,true);x.lineTo(tx+w,top);x.closePath();x.clip();
+  const mixed='#9E2236';
+  x.fillStyle=mixed;x.fillRect(tx,top+20,w,h);
+  if(settled>0){x.globalAlpha=settled;x.fillStyle=css('--plasma');x.fillRect(tx,top+20,w,(h-20)*.53);x.fillStyle='#F4F1EA';x.fillRect(tx,top+20+(h-20)*.53,w,(h-20)*.025);x.fillStyle='#B8263D';x.fillRect(tx,top+20+(h-20)*.555,w,h);x.globalAlpha=1}
+  for(const p of parts){const yy=p.y+(p.ty-p.y)*settled;const xx=p.x+(p.tx-p.x)*settled;const px=tx+6+xx*(w-12),py=top+26+yy*(h-40);
+    if(p.t==='r'){x.fillStyle=settled>.9?'#A61F35':'#C8344A';x.beginPath();x.arc(px,py,3.2,0,7);x.fill()}else{x.fillStyle='#E9DDF0';x.beginPath();x.arc(px,py,3.6,0,7);x.fill()}}
+  x.restore();
+  x.strokeStyle=css('--fg');x.lineWidth=3;x.beginPath();x.moveTo(tx-8,top);x.lineTo(tx,top);x.lineTo(tx,top+h-w/2);x.arc(tx+w/2,top+h-w/2,w/2,Math.PI,0,true);x.lineTo(tx+w,top);x.lineTo(tx+w+8,top);x.stroke();
+  x.restore();
+  x.fillStyle=css('--fg');x.textAlign='left';
+  if(settled>.95){x.font='700 16px Nunito Sans, Arial';const lx=tx+w+40;
+    const ys=[top+20+(h-20)*.26, top+20+(h-20)*.545, top+20+(h-20)*.8];const tx2=['Plasma (55%)','White cells + platelets','Red cells (45%)'];
+    ys.forEach((y,i)=>{x.strokeStyle=css('--muted');x.lineWidth=1.5;x.beginPath();x.moveTo(tx+w+6,y);x.lineTo(lx-6,y);x.stroke();x.fillText(tx2[i],lx,y+5)})}
+  else{x.font='600 18px Fredoka, Arial';x.textAlign='center';x.fillText(spinning?'Spinning…':(spin>0?'Settling…':'Whole blood, well mixed'),W/2,40)}
+}
+document.getElementById('spinGo').onclick=e=>{if(spin>0)return;spinning=true;spin=0.0001;e.target.disabled=true;if(reduce){spinning=false;settled=1}};
+document.getElementById('spinReset').onclick=newSample;newSample();
+
+/* ---------- 4. Smear explorer ---------- */
+const cM=document.getElementById('cSmear');let M=prep(cM);cM.dataset.w=M.W;cM.dataset.h=M.H;
+let seedM=7,smear,hl=null;const found=new Set();
+const info={
+ rbc:['Red blood cell (erythrocyte)','Carries oxygen from the lungs to respiring tissues.','Full of haemoglobin, no nucleus (more room for haemoglobin), biconcave disc gives a large surface area, flexible to squeeze through capillaries.'],
+ phago:['Phagocyte (white blood cell)','Engulfs and digests microorganisms such as bacteria.','Lobed, irregular nucleus helps it squeeze out through capillary walls. Contains enzymes to digest what it engulfs.'],
+ lympho:['Lymphocyte (white blood cell)','Produces antibodies that defend against disease.','Large round nucleus holds many copies of the genes that control antibody production.'],
+ plate:['Platelet','Helps blood to clot at a wound.','A tiny cell fragment, not a whole cell. Releases blood-clotting enzymes.']};
+function newSmear(){smear=makeSmear(seedM++,M.W,M.H,{rbc:150,phago:2,lympho:2,plate:22});hl=null;drawM()}
+function drawM(){drawSmear(M.x,M.W,M.H,smear,hl,false)}
+cM.addEventListener('click',e=>{const p=pt(cM,e);let best=null,bd=1e9;for(const c of smear){const d=Math.hypot(c.cx-p.x,c.cy-p.y)-c.r;if(d<bd){bd=d;best=c}}if(!best||bd>10)return;hl=best;drawM();const k=best.type;const [n,f,s]=info[k];found.add(k);
+  document.querySelectorAll('#found div').forEach(d=>d.classList.toggle('found',found.has(d.dataset.k)));
+  const box=document.getElementById('cellInfo');box.innerHTML=`<h2>${n}</h2><p><b>Function:</b> ${f}</p><p><b>Adapted because:</b> ${s}</p>`+(found.size===4?'<p class="pill" style="background:var(--good);color:#fff">All four found</p>':'')});
+document.getElementById('smearNew').onclick=newSmear;newSmear();
+
+/* ---------- 5. Detective ---------- */
+const cD=document.getElementById('cDet');let D=prep(cD);cD.dataset.w=D.W;cD.dataset.h=D.H;
+const normal={rbc:'4.5–5.5 million',wbc:'4 000–11 000',plt:'150 000–400 000',glu:'4–6'};
+const choices=['Healthy','Anaemia','Sickle cell anaemia','Leukaemia','Diabetes','HIV / AIDS'];
+const cases=[
+ {n:'Patient A',story:'Feels tired all the time, gets out of breath climbing stairs, looks pale.',v:{rbc:2.4e6,wbc:7000,plt:260000,glu:5.1},hi:['rbc'],smear:{rbc:55,phago:1,lympho:1,plate:14},ans:'Anaemia',why:'Red cell count is about half of normal, so less haemoglobin is available to carry oxygen. That explains the tiredness and breathlessness.'},
+ {n:'Patient B',story:'Painful joints and tiredness. The smear looks unusual.',v:{rbc:3.6e6,wbc:8500,plt:280000,glu:4.9},hi:['rbc'],smear:{rbc:90,sickle:28,phago:1,lympho:1,plate:16},ans:'Sickle cell anaemia',why:'Many red cells are long and hook-shaped. Sickle cells carry less oxygen and can block narrow capillaries, causing pain.'},
+ {n:'Patient C',story:'Gets infections often and bruises easily.',v:{rbc:3.9e6,wbc:85000,plt:60000,glu:5.0},hi:['wbc','plt'],smear:{rbc:70,lympho:16,plate:4},odd:true,ans:'Leukaemia',why:'Very high numbers of oddly shaped white cells. This is a cancer of white blood cells. They do not work properly, and few platelets are made, so bruising is common.'},
+ {n:'Patient D',story:'Always thirsty and passes large amounts of urine.',v:{rbc:5.0e6,wbc:7500,plt:250000,glu:14.2},hi:['glu'],smear:{rbc:130,phago:1,lympho:1,plate:20},ans:'Diabetes',why:'The cells look normal, but plasma glucose is far above normal. Diabetes is detected by a high glucose concentration in the plasma.'},
+ {n:'Patient E',story:'Many infections over the last year. A test found antibodies to HIV.',v:{rbc:4.6e6,wbc:1500,plt:210000,glu:5.2},hi:['wbc'],smear:{rbc:130,plate:18},ans:'HIV / AIDS',why:'Antibodies to HIV show the person is HIV positive. In later stages the number of white cells is very much reduced, so the body cannot fight infections.'},
+ {n:'Patient F',story:'Routine check before a football season. Feels well.',v:{rbc:5.1e6,wbc:6800,plt:255000,glu:5.0},hi:[],smear:{rbc:130,phago:1,lympho:1,plate:20},ans:'Healthy',why:'Every value is inside the normal range and the cells look normal.'}
+];
+let ci=0,score=0,answered=false,dSmear;
+const fmt=n=>n>=1e6?(n/1e6).toFixed(1)+' million':n.toLocaleString('en-US').replace(/,/g,' ');
+function loadCase(){const c=cases[ci];answered=false;document.getElementById('caseNo').textContent=`Patient ${ci+1} of ${cases.length}`;document.getElementById('caseName').textContent=c.n;document.getElementById('caseStory').textContent=c.story;
+  const rows=[['Red cells per mm³','rbc',fmt(c.v.rbc)],['White cells per mm³','wbc',fmt(c.v.wbc)],['Platelets per mm³','plt',fmt(c.v.plt)],['Plasma glucose (mmol/L)','glu',c.v.glu.toFixed(1)]];
+  document.getElementById('caseTable').innerHTML='<tr><th>Test</th><th>Result</th><th>Normal</th></tr>'+rows.map(r=>`<tr><td>${r[0]}</td><td class="${c.hi.includes(r[1])?'hi':''}">${r[2]}${c.hi.includes(r[1])?' (abnormal)':''}</td><td>${normal[r[1]]}</td></tr>`).join('');
+  const o=document.getElementById('opts');o.innerHTML='';choices.forEach(ch=>{const b=document.createElement('button');b.className='opt';b.textContent=ch;b.onclick=()=>pick(b,ch);o.appendChild(b)});
+  document.getElementById('fb').textContent='';dSmear=makeSmear(100+ci,D.W,D.H,c.smear);drawSmear(D.x,D.W,D.H,dSmear,null,c.odd)}
+function pick(b,ch){if(answered)return;answered=true;const c=cases[ci];const ok=ch===c.ans;if(ok)score++;document.getElementById('score').textContent='Score '+score;
+  document.querySelectorAll('.opt').forEach(x=>{if(x.textContent===c.ans)x.classList.add('right');else if(x===b)x.classList.add('wrong')});
+  document.getElementById('fb').innerHTML=(ok?'<b style="color:var(--good)">Correct.</b> ':'<b style="color:var(--bad)">Not this time.</b> The answer is '+c.ans+'. ')+c.why}
+document.getElementById('nextCase').onclick=()=>{ci=(ci+1)%cases.length;if(ci===0){score=0;document.getElementById('score').textContent='Score 0'}loadCase()};
+loadCase();
+
+/* ---------- loop ---------- */
+function frame(now){const dt=Math.min(.05,(now-last)/1000);last=now;
+  if(active==='p-flow')drawFlow(dt);
+  if(active==='p-sav'){if(savRun){tMin+=dt*(side*10/2)/4;if(tMin>=side*10/2/rate){tMin=side*10/2/rate;savRun=false;document.getElementById('savGo').textContent='Start diffusion'}updT()}drawSav()}
+  if(active==='p-spin')drawSpin(dt);
+  requestAnimationFrame(frame)}
+requestAnimationFrame(frame);
+matchMedia('(prefers-color-scheme: dark)').addEventListener('change',()=>{drawM();loadCase()});
+})();
+</script>
+
+</body></html>

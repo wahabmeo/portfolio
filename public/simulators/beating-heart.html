@@ -1,0 +1,658 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>The beating heart: blood flow, valves and double circulation</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+<style>
+:root{
+  --paper:#F4F6F9; --panel:#FFFFFF; --ink:#1E2A38; --muted:#556375; --line:#D3DAE3;
+  --grid:#F6DCDC; --gridBold:#EDBDBD;
+  --oxy:#C62839; --deoxy:#2E55B4; --lumenO:#F9E3E6; --lumenD:#E2E8F7;
+  --muscle:#E0A396; --isch:#9AA3AD;
+  --focus:#2E55B4; --ok:#1E7A4C; --bad:#B42318; --chip:#EEF1F6; --plaque:#E8B931;
+  color-scheme:light;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --paper:#131920; --panel:#1B232E; --ink:#E7ECF2; --muted:#A2AEBC; --line:#344150;
+    --grid:#2A2731; --gridBold:#3A2F3B;
+    --oxy:#F25A6B; --deoxy:#7393F2; --lumenO:#3B2830; --lumenD:#26304A;
+    --muscle:#A9685D; --isch:#5C6672;
+    --focus:#93AAF5; --ok:#5CC28F; --bad:#F2806F; --chip:#25303D; --plaque:#D9A91F;
+    color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --paper:#131920; --panel:#1B232E; --ink:#E7ECF2; --muted:#A2AEBC; --line:#344150;
+  --grid:#2A2731; --gridBold:#3A2F3B;
+  --oxy:#F25A6B; --deoxy:#7393F2; --lumenO:#3B2830; --lumenD:#26304A;
+  --muscle:#A9685D; --isch:#5C6672;
+  --focus:#93AAF5; --ok:#5CC28F; --bad:#F2806F; --chip:#25303D; --plaque:#D9A91F;
+  color-scheme:dark;
+}
+:root{box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);}
+html{scroll-padding-top:env(safe-area-inset-top,0px);}
+*,*::before,*::after{box-sizing:inherit;}
+body{margin:0;background:var(--paper);color:var(--ink);
+  font-family:"Atkinson Hyperlegible",system-ui,-apple-system,"Segoe UI",Arial,sans-serif;
+  font-size:1rem;line-height:1.5;}
+.wrap{max-width:1180px;margin:0 auto;padding:1.25rem 1rem 3rem;}
+header h1{font-size:clamp(1.6rem,3.6vw,2.4rem);line-height:1.15;margin:.2rem 0 .4rem;letter-spacing:-.01em;}
+header p{margin:0;color:var(--muted);max-width:68ch;}
+.layout{display:grid;grid-template-columns:minmax(0,1.55fr) minmax(0,1fr);gap:1rem;margin-top:1.1rem;align-items:start;}
+@media (max-width:860px){.layout{grid-template-columns:1fr;}}
+.paper{background-color:var(--panel);
+  background-image:
+   linear-gradient(var(--gridBold) 1px,transparent 1px),
+   linear-gradient(90deg,var(--gridBold) 1px,transparent 1px),
+   linear-gradient(var(--grid) 1px,transparent 1px),
+   linear-gradient(90deg,var(--grid) 1px,transparent 1px);
+  background-size:50px 50px,50px 50px,10px 10px,10px 10px;
+  border:1px solid var(--line);border-radius:14px;overflow:hidden;}
+.diagram{position:relative;}
+svg#heart{display:block;width:100%;height:auto;}
+.caption{font-size:.9rem;color:var(--muted);padding:.5rem .9rem .7rem;margin:0;background:var(--panel);border-top:1px solid var(--line);}
+.ecgbox{border-top:1px solid var(--line);position:relative;}
+.ecgbox canvas{display:block;width:100%;height:84px;}
+.ecgtag{position:absolute;left:.7rem;top:.35rem;font-size:.8rem;color:var(--muted);}
+.sound{position:absolute;right:.8rem;top:.3rem;font-weight:700;font-size:1.25rem;color:var(--oxy);opacity:0;}
+.sound.show{animation:pop .7s ease-out;}
+@keyframes pop{0%{opacity:0;transform:scale(.7)}20%{opacity:1;transform:scale(1.1)}100%{opacity:0;transform:scale(1)}}
+
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:1rem;}
+.side{display:flex;flex-direction:column;gap:1rem;}
+.panel h2{font-size:1.1rem;margin:0 0 .6rem;}
+.stages{list-style:none;margin:0;padding:0;display:grid;gap:.4rem;counter-reset:st;}
+.stages li{counter-increment:st;display:grid;grid-template-columns:1.8rem 1fr;gap:.5rem;align-items:start;
+  padding:.5rem .6rem;border-radius:10px;border:1px solid transparent;color:var(--muted);}
+.stages li::before{content:counter(st);display:grid;place-items:center;width:1.6rem;height:1.6rem;border-radius:50%;
+  border:1.5px solid var(--line);font-weight:700;font-size:.85rem;}
+.stages li.on{background:var(--chip);border-color:var(--line);color:var(--ink);}
+.stages li.on::before{background:var(--ink);color:var(--panel);border-color:var(--ink);}
+.stages strong{display:block;color:inherit;}
+.stages span{font-size:.92rem;}
+.valves{display:flex;gap:.5rem;flex-wrap:wrap;margin-top:.7rem;}
+.vchip{font-size:.85rem;padding:.25rem .6rem;border-radius:999px;background:var(--chip);border:1px solid var(--line);}
+.vchip b{font-weight:700;}
+.vchip.open b{color:var(--ok);} .vchip.shut b{color:var(--bad);}
+
+.controls{display:flex;flex-wrap:wrap;gap:.5rem;}
+button{font:inherit;font-size:.95rem;cursor:pointer;border-radius:10px;border:1.5px solid var(--line);
+  background:var(--panel);color:var(--ink);padding:.5rem .8rem;line-height:1.2;}
+button:hover{border-color:var(--muted);}
+button.primary{background:var(--ink);color:var(--panel);border-color:var(--ink);font-weight:700;}
+button[aria-pressed="true"]{background:var(--chip);border-color:var(--ink);font-weight:700;}
+button:focus-visible,input:focus-visible,[tabindex]:focus-visible{outline:3px solid var(--focus);outline-offset:2px;}
+.rate{margin-top:.9rem;}
+.rate label{display:flex;justify-content:space-between;font-weight:700;}
+.rate input{width:100%;accent-color:var(--oxy);margin:.4rem 0;}
+.rate .presets{display:flex;gap:.5rem;}
+.rate p{margin:.5rem 0 0;font-size:.92rem;color:var(--muted);}
+.out{font-size:1.05rem;color:var(--ink);}
+
+.info h3{margin:0;font-size:1.15rem;}
+.info .ru{color:var(--muted);font-style:italic;margin:.1rem 0 .4rem;}
+.info p{margin:0;}
+.info .empty{color:var(--muted);}
+
+.trace ol{margin:.2rem 0 0;padding-left:1.4rem;}
+.trace li{padding:.1rem .3rem;border-radius:6px;font-size:.95rem;}
+.trace li.on{background:var(--chip);font-weight:700;}
+.trace .hint{font-size:.92rem;color:var(--muted);margin:0;}
+
+.below{display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-top:1rem;}
+@media (max-width:860px){.below{grid-template-columns:1fr;}}
+.predict ol{margin:0;padding-left:1.3rem;}
+.predict li{margin-bottom:.45rem;}
+.q{margin-bottom:1rem;}
+.q p{margin:0 0 .4rem;font-weight:700;}
+.opts{display:flex;flex-wrap:wrap;gap:.4rem;}
+.opts button{font-size:.92rem;}
+.opts button.right{border-color:var(--ok);color:var(--ok);font-weight:700;}
+.opts button.wrong{border-color:var(--bad);color:var(--bad);}
+.fb{font-size:.92rem;margin:.4rem 0 0;min-height:1.2em;}
+.warn{display:none;margin:.6rem 0 0;font-size:.92rem;padding:.5rem .7rem;border-left:4px solid var(--plaque);background:var(--chip);border-radius:6px;}
+.warn.show{display:block;}
+
+/* SVG */
+.muscle{fill:var(--muscle);}
+.lumenO{fill:var(--lumenO);} .lumenD{fill:var(--lumenD);}
+.isch{fill:var(--isch);opacity:0;transition:opacity .6s;}
+.blocked .isch{opacity:.85;}
+.cap-box{fill:var(--panel);stroke:var(--line);stroke-width:1.5;opacity:.92;}
+.vessel{fill:none;stroke-width:14;stroke-linecap:round;stroke-linejoin:round;stroke-opacity:.3;}
+.v-o{stroke:var(--oxy);} .v-d{stroke:var(--deoxy);}
+.v-cap{fill:none;stroke:var(--muted);stroke-width:7;stroke-opacity:.22;stroke-linecap:round;}
+.guide{fill:none;stroke:none;}
+.cor{fill:none;stroke:var(--oxy);stroke-width:5;stroke-linecap:round;stroke-opacity:.45;}
+.corflow{fill:none;stroke:var(--oxy);stroke-width:5;stroke-linecap:round;stroke-dasharray:4 9;}
+.blocked .corB{stroke:var(--isch);}
+.plaque{fill:var(--plaque);stroke:var(--ink);stroke-width:1.5;opacity:0;transition:opacity .4s;}
+.blocked .plaque{opacity:1;}
+.flap{stroke:var(--ink);stroke-width:4;stroke-linecap:round;}
+.lbl{font-size:13px;font-weight:700;fill:var(--ink);paint-order:stroke;stroke:var(--panel);stroke-width:4px;stroke-linejoin:round;pointer-events:none;}
+.lbl.sm{font-size:11.5px;font-weight:400;}
+.lbl.side{fill:var(--muted);font-weight:400;font-size:12px;}
+.nolabels .lbl{opacity:0;}
+.chamber{transform-box:fill-box;transform-origin:center;transition:transform .14s ease-out;}
+.chamber.squeeze{transform:scale(.9);}
+.blocked .chamber.lv.squeeze{transform:scale(.96);}
+[data-part]{cursor:pointer;}
+svg [tabindex]:focus{outline:none;}
+svg [tabindex]:focus-visible{outline:3px solid var(--focus);}
+.hit{fill:transparent;}
+.sel{stroke:var(--focus);stroke-width:3;}
+@media (prefers-reduced-motion: reduce){.chamber{transition:none;}.sound.show{animation:none;opacity:1;}}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header>
+  <h1>The beating heart</h1>
+  <p>Watch how muscle contraction and valves keep blood flowing one way, and follow a red blood cell around the double circulation. Click any part of the heart to learn what it does.</p>
+</header>
+
+<div class="layout">
+  <div class="paper diagram" id="diagramBox">
+    <svg id="heart" viewBox="95 30 650 595" role="img" aria-labelledby="svgTitle">
+      <title id="svgTitle">Diagram of the human heart and double circulation with moving blood cells</title>
+
+      <!-- capillary beds -->
+      <rect class="cap-box" x="170" y="40" width="460" height="74" rx="30" data-part="lungs" tabindex="0" role="button" aria-label="Lungs"/>
+      <rect class="cap-box" x="110" y="540" width="580" height="72" rx="30" data-part="body" tabindex="0" role="button" aria-label="Body organs"/>
+
+      <!-- chambers -->
+      <g id="gRA" class="chamber" data-part="ra" tabindex="0" role="button" aria-label="Right atrium">
+        <rect class="muscle" x="224" y="199" width="142" height="97" rx="22"/>
+        <rect class="lumenD" x="230" y="205" width="130" height="85" rx="17"/>
+      </g>
+      <g id="gLA" class="chamber" data-part="la" tabindex="0" role="button" aria-label="Left atrium">
+        <rect class="muscle" x="434" y="199" width="142" height="97" rx="22"/>
+        <rect class="lumenO" x="440" y="205" width="130" height="85" rx="17"/>
+      </g>
+      <g id="gRV" class="chamber" data-part="rv" tabindex="0" role="button" aria-label="Right ventricle">
+        <rect class="muscle" x="220" y="296" width="170" height="148" rx="28"/>
+        <rect class="lumenD" x="230" y="306" width="150" height="128" rx="20"/>
+      </g>
+      <g id="gLV" class="chamber lv" data-part="lv" tabindex="0" role="button" aria-label="Left ventricle">
+        <rect class="muscle" x="410" y="296" width="184" height="162" rx="32"/>
+        <path class="isch" d="M410 362 H594 V426 Q594 458 562 458 H442 Q410 458 410 426 Z"/>
+        <rect class="lumenO" x="434" y="320" width="136" height="114" rx="18"/>
+      </g>
+      <rect class="muscle" x="386" y="199" width="28" height="259" rx="6" data-part="septum" tabindex="0" role="button" aria-label="Septum"/>
+
+      <!-- coronary artery -->
+      <g data-part="cor" tabindex="0" role="button" aria-label="Coronary artery">
+        <path class="cor" d="M432 292 C480 276 598 282 598 330 L598 362"/>
+        <path class="cor corB" d="M598 362 L598 446"/>
+        <path id="corA" class="corflow" d="M432 292 C480 276 598 282 598 330 L598 362"/>
+        <path id="corB" class="corflow corB" d="M598 362 L598 446"/>
+        <circle class="plaque" cx="598" cy="362" r="8"/>
+        <path class="hit" d="M432 292 C480 276 598 282 598 330 L598 446" style="fill:none;stroke:transparent;stroke-width:16"/>
+      </g>
+
+      <!-- flow paths: chamber segments are invisible guides -->
+      <path id="s1" class="guide" d="M230 247 Q290 250 300 300"/>
+      <path id="s2" class="guide" d="M300 300 Q300 400 340 392 Q372 372 373 312"/>
+      <path id="s6" class="guide" d="M560 215 Q520 250 505 300"/>
+      <path id="s7" class="guide" d="M505 300 Q500 420 460 402 Q428 382 427 312"/>
+
+      <path id="s4" class="v-cap" d="M210 110 C240 50 300 50 330 80 S420 110 450 75 S540 50 560 110" data-part="lungs"/>
+      <path id="s9" class="v-cap" d="M690 575 C640 612 600 540 540 575 S420 612 380 575 S240 540 140 575" data-part="body"/>
+      <path id="s0" class="vessel v-d" d="M140 575 L140 247 L230 247" data-part="vc"/>
+      <path id="s3" class="vessel v-d" d="M373 312 L373 160 L210 160 L210 110" data-part="pa"/>
+      <path id="s5" class="vessel v-o" d="M560 110 L560 215" data-part="pv"/>
+      <path id="s8" class="vessel v-o" d="M427 312 L427 165 L710 165 L710 575 L690 575" data-part="ao"/>
+
+      <!-- valves -->
+      <g id="valves">
+        <line class="flap" id="avR1" x1="280" y1="298" x2="300" y2="298"/>
+        <line class="flap" id="avR2" x1="320" y1="298" x2="300" y2="298"/>
+        <line class="flap" id="avL1" x1="485" y1="298" x2="505" y2="298"/>
+        <line class="flap" id="avL2" x1="525" y1="298" x2="505" y2="298"/>
+        <line class="flap" id="slP1" x1="366" y1="312" x2="373" y2="312"/>
+        <line class="flap" id="slP2" x1="380" y1="312" x2="373" y2="312"/>
+        <line class="flap" id="slA1" x1="420" y1="312" x2="427" y2="312"/>
+        <line class="flap" id="slA2" x1="434" y1="312" x2="427" y2="312"/>
+      </g>
+
+      <g id="cells" style="pointer-events:none"></g>
+
+      <!-- labels -->
+      <g id="labels">
+        <text class="lbl side" x="300" y="189" text-anchor="middle" data-en="Heart's right side" data-ru="Правая сторона сердца">Heart's right side</text>
+        <text class="lbl side" x="505" y="189" text-anchor="middle" data-en="Heart's left side" data-ru="Левая сторона сердца">Heart's left side</text>
+        <text class="lbl" x="440" y="134" text-anchor="middle" data-en="Lungs (capillaries)" data-ru="Лёгкие (капилляры)">Lungs (capillaries)</text>
+        <text class="lbl" x="415" y="532" text-anchor="middle" data-en="Body organs (capillaries)" data-ru="Органы тела (капилляры)">Body organs (capillaries)</text>
+        <text class="lbl" x="296" y="232" text-anchor="middle" data-en="Right atrium" data-ru="Правое предсердие">Right atrium</text>
+        <text class="lbl" x="505" y="232" text-anchor="middle" data-en="Left atrium" data-ru="Левое предсердие">Left atrium</text>
+        <text class="lbl" x="285" y="425" text-anchor="middle" data-en="Right ventricle" data-ru="Правый желудочек">Right ventricle</text>
+        <text class="lbl" x="502" y="425" text-anchor="middle" data-en="Left ventricle" data-ru="Левый желудочек">Left ventricle</text>
+        <text class="lbl sm" x="400" y="476" text-anchor="middle" data-en="Septum" data-ru="Перегородка">Septum</text>
+        <text class="lbl" x="126" y="400" text-anchor="middle" transform="rotate(-90 126 400)" data-en="Vena cava" data-ru="Полая вена">Vena cava</text>
+        <text class="lbl" x="292" y="151" text-anchor="middle" data-en="Pulmonary artery" data-ru="Лёгочная артерия">Pulmonary artery</text>
+        <text class="lbl" x="572" y="182" data-en="Pulmonary vein" data-ru="Лёгочная вена">Pulmonary vein</text>
+        <text class="lbl" x="730" y="360" text-anchor="middle" transform="rotate(90 730 360)" data-en="Aorta" data-ru="Аорта">Aorta</text>
+        <text class="lbl sm" x="606" y="404" data-en="Coronary" data-ru="Коронарная">Coronary</text>
+        <text class="lbl sm" x="606" y="419" data-en="artery" data-ru="артерия">artery</text>
+        <text class="lbl sm" x="216" y="302" text-anchor="end" data-en="AV valve" data-ru="AV-клапан">AV valve</text>
+        <text class="lbl sm" x="362" y="334" text-anchor="end" data-en="Semilunar valve" data-ru="Полулунный клапан">Semilunar valve</text>
+      </g>
+
+      <!-- valve hit areas -->
+      <circle class="hit" cx="300" cy="298" r="16" data-part="av" tabindex="0" role="button" aria-label="Right atrioventricular valve"/>
+      <circle class="hit" cx="505" cy="298" r="16" data-part="av" tabindex="0" role="button" aria-label="Left atrioventricular valve"/>
+      <circle class="hit" cx="373" cy="312" r="13" data-part="sl" tabindex="0" role="button" aria-label="Pulmonary semilunar valve"/>
+      <circle class="hit" cx="427" cy="312" r="13" data-part="sl" tabindex="0" role="button" aria-label="Aortic semilunar valve"/>
+    </svg>
+    <div class="ecgbox">
+      <span class="ecgtag">ECG trace (one peak = one beat)</span>
+      <span class="sound" id="sound" aria-live="polite"></span>
+      <canvas id="ecg" aria-hidden="true"></canvas>
+    </div>
+    <p class="caption">The heart is drawn as if it faces you, so the heart's right side is on your left. Red = oxygenated blood, blue = deoxygenated blood.</p>
+  </div>
+
+  <div class="side">
+    <section class="panel" aria-labelledby="hStage">
+      <h2 id="hStage">One heartbeat in three stages</h2>
+      <ol class="stages" id="stages">
+        <li data-i="0"><div><strong>Atria contract</strong><span>Blood is pushed through the open AV valves into the ventricles.</span></div></li>
+        <li data-i="1"><div><strong>Ventricles contract</strong><span>Pressure rises. AV valves are pushed shut ("lub"). Semilunar valves open and blood leaves in the arteries.</span></div></li>
+        <li data-i="2"><div><strong>Heart relaxes</strong><span>Blood in the arteries pushes the semilunar valves shut ("dub"). The atria refill and blood flows into the ventricles.</span></div></li>
+      </ol>
+      <div class="valves">
+        <span class="vchip" id="chipAV">AV valves: <b>open</b></span>
+        <span class="vchip" id="chipSL">Semilunar valves: <b>closed</b></span>
+      </div>
+      <div class="controls" style="margin-top:.9rem">
+        <button class="primary" id="btnPlay" type="button">Pause</button>
+        <button id="btnStep" type="button">Next stage</button>
+        <button id="btnSlow" type="button" aria-pressed="false">Slow motion</button>
+      </div>
+      <div class="rate">
+        <label for="hr"><span>Heart rate</span><span><span id="hrOut">70</span> beats per minute</span></label>
+        <input type="range" id="hr" min="50" max="180" step="5" value="70">
+        <div class="presets">
+          <button id="btnRest" type="button">Resting (70)</button>
+          <button id="btnEx" type="button">Exercising (150)</button>
+        </div>
+        <p class="out">About <b id="volOut">4.9</b> dm³ of blood pumped per minute</p>
+        <p>Assumes 70 cm³ of blood per beat from each ventricle. During exercise, muscles respire more: they need more oxygen and glucose, and more carbon dioxide must be removed, so the heart beats faster.</p>
+      </div>
+    </section>
+
+    <section class="panel" aria-labelledby="hTools">
+      <h2 id="hTools">Explore</h2>
+      <div class="controls">
+        <button id="btnTrace" type="button" aria-pressed="false">Follow one red blood cell</button>
+        <button id="btnBlock" type="button" aria-pressed="false">Block a coronary artery</button>
+        <button id="btnLabels" type="button" aria-pressed="false">Hide labels (quiz mode)</button>
+        <button id="btnRu" type="button" aria-pressed="false">Russian labels</button>
+      </div>
+      <p class="warn" id="blockMsg">A fatty deposit blocks the coronary artery. Heart muscle beyond it gets less oxygen and glucose, so it cannot respire aerobically enough. The grey muscle cannot contract properly, and the left ventricle pumps less blood. This is coronary heart disease.</p>
+      <div class="trace" id="traceBox" hidden>
+        <p class="hint" style="margin-top:.7rem">The large cell's route. It passes through the heart twice in one circuit: this is double circulation.</p>
+        <ol id="traceList"></ol>
+      </div>
+    </section>
+
+    <section class="panel info" aria-live="polite" id="info">
+      <p class="empty">Click or tap any part of the diagram: a chamber, valve, vessel, the lungs or the body.</p>
+    </section>
+  </div>
+</div>
+
+<div class="below">
+  <section class="panel predict" aria-labelledby="hPred">
+    <h2 id="hPred">Predict, then test</h2>
+    <ol>
+      <li>Pause, then press <b>Next stage</b> slowly. Before each press, predict which valves will be open. Were you right?</li>
+      <li>Predict what happens to the cells waiting in the atria while the AV valves are closed. Watch the atria during stage 2.</li>
+      <li>Turn on <b>Follow one red blood cell</b>. Where does it move most slowly? Suggest why this helps exchange.</li>
+      <li>Change the heart rate from 70 to 150. Calculate the new volume pumped per minute, then check it.</li>
+      <li>Block the coronary artery. Explain why the heart muscle is damaged even though the heart is full of blood.</li>
+    </ol>
+  </section>
+  <section class="panel" aria-labelledby="hCheck">
+    <h2 id="hCheck">Quick check</h2>
+    <div id="quiz"></div>
+  </section>
+</div>
+</div>
+
+<script>
+(function(){
+  const svg = document.getElementById('heart');
+  const NS = 'http://www.w3.org/2000/svg';
+  const reduce = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  // ---------- segments ----------
+  const SEGS = ['s0','s1','s2','s3','s4','s5','s6','s7','s8','s9'].map(id=>{
+    const el = document.getElementById(id); return {el, len: el.getTotalLength()};
+  });
+  const TRACE = [
+    'Vena cava (back from the body)','Right atrium','Right ventricle','Pulmonary artery',
+    'Lung capillaries: oxygen diffuses in','Pulmonary vein','Left atrium','Left ventricle',
+    'Aorta (to the body)','Body capillaries: oxygen diffuses out to cells'
+  ];
+  // oxygenation per segment: 0 deoxy, 1 oxy, 'up' / 'down' = capillary change
+  const OX = [0,0,0,0,'up',1,1,1,1,'down'];
+
+  // ---------- colours ----------
+  let cOxy=[198,40,57], cDe=[46,85,180];
+  function hexToRgb(h){h=h.trim().replace('#','');if(h.length===3)h=h.split('').map(c=>c+c).join('');const n=parseInt(h,16);return [(n>>16)&255,(n>>8)&255,n&255];}
+  function readColours(){
+    const cs=getComputedStyle(document.documentElement);
+    try{cOxy=hexToRgb(cs.getPropertyValue('--oxy'));cDe=hexToRgb(cs.getPropertyValue('--deoxy'));}catch(e){}
+    inkColour=cs.getPropertyValue('--ink').trim()||'#1E2A38';
+    ecgColour=cs.getPropertyValue('--ink').trim()||'#1E2A38';
+  }
+  let inkColour='#1E2A38', ecgColour='#1E2A38';
+  readColours();
+  if(window.matchMedia){matchMedia('(prefers-color-scheme: dark)').addEventListener?.('change',readColours);}
+  function mix(a,b,t){return 'rgb('+[0,1,2].map(i=>Math.round(a[i]+(b[i]-a[i])*t)).join(',')+')';}
+
+  // ---------- particles ----------
+  const N = 96, GAP = 8;
+  const cellsG = document.getElementById('cells');
+  const total = SEGS.reduce((a,s)=>a+s.len,0);
+  const parts = [];
+  for(let i=0;i<N;i++){
+    let d = i*total/N, k=0;
+    while(d > SEGS[k].len){ d -= SEGS[k].len; k++; }
+    const c = document.createElementNS(NS,'circle');
+    c.setAttribute('r', 4.6);
+    cellsG.appendChild(c);
+    parts.push({seg:k, s:d, el:c});
+  }
+  // traced cell drawn on top
+  cellsG.appendChild(parts[0].el);
+
+  // ---------- state ----------
+  const BOUNDS=[0.15,0.5,1];
+  const state={playing:!reduce, T:0, stepEnd:null, hr:70, slow:false, blocked:false, trace:false, phase:-1};
+  function phaseOf(f){return f<BOUNDS[0]?0:(f<BOUNDS[1]?1:2);}
+
+  function segSpeed(k, ph){
+    switch(k){
+      case 1: case 6: return ph===0?2.2:(ph===2?0.8:0.35); // atria
+      case 2: case 7: { let v = ph===1?2.6:0.9; if(k===7&&state.blocked&&ph===1) v=1.5; return v; } // ventricles
+      case 3: case 8: return ph===1?2.0:0.65; // arteries surge, elastic recoil keeps flow
+      case 4: case 9: return 0.45; // capillaries: slow
+      default: return 0.85; // veins
+    }
+  }
+  function gateClosed(k, ph){
+    if(k===1||k===6) return ph===1;        // AV valves shut in ventricular contraction
+    if(k===2||k===7) return ph!==1;        // semilunar valves open only in ventricular contraction
+    return false;
+  }
+
+  function moveParticles(dt, ph){
+    const base = 120*(state.hr/70);
+    const bySeg = SEGS.map(()=>[]);
+    parts.forEach(p=>bySeg[p.seg].push(p));
+    bySeg.forEach(a=>a.sort((x,y)=>y.s-x.s));
+    for(let k=SEGS.length-1;k>=0;k--){
+      const len=SEGS[k].len, nk=(k+1)%SEGS.length;
+      const closed=gateClosed(k,ph);
+      const nextArr = bySeg[nk];
+      const nextMin = nextArr.length? Math.min(...nextArr.map(p=>p.s)) : Infinity;
+      let ahead = closed ? len-1 : len + nextMin - GAP;
+      const ds = base*segSpeed(k,ph)*dt;
+      const list = bySeg[k].slice();
+      for(const p of list){
+        let target = Math.min(p.s+ds, ahead);
+        if(target < p.s) target = p.s;
+        if(target >= len && !closed){
+          p.seg = nk; p.s = target-len; bySeg[nk].push(p);
+        } else {
+          p.s = Math.min(target, len-0.01);
+        }
+        ahead = (p.seg===k ? p.s : len + p.s) - GAP;
+      }
+    }
+  }
+
+  function drawParticles(){
+    for(let i=0;i<parts.length;i++){
+      const p=parts[i], sg=SEGS[p.seg];
+      const pt=sg.el.getPointAtLength(p.s);
+      let t = OX[p.seg];
+      if(t==='up') t = p.s/sg.len; else if(t==='down') t = 1-p.s/sg.len;
+      const col = mix(cDe,cOxy,t);
+      p.el.setAttribute('cx',pt.x.toFixed(1)); p.el.setAttribute('cy',pt.y.toFixed(1));
+      p.el.setAttribute('fill',col);
+      if(i===0 && state.trace){
+        p.el.setAttribute('r',8); p.el.setAttribute('stroke',inkColour); p.el.setAttribute('stroke-width',2.5);
+        p.el.setAttribute('opacity',1);
+      } else {
+        p.el.setAttribute('r',4.6); p.el.removeAttribute('stroke');
+        p.el.setAttribute('opacity', state.trace?0.4:0.95);
+      }
+    }
+    if(state.trace) highlightTrace(parts[0].seg);
+  }
+
+  // ---------- valves ----------
+  const flaps={
+    avR1:{hx:280,hy:298,open:70}, avR2:{hx:320,hy:298,open:-70},
+    avL1:{hx:485,hy:298,open:70}, avL2:{hx:525,hy:298,open:-70},
+    slP1:{hx:366,hy:312,open:-70}, slP2:{hx:380,hy:312,open:70},
+    slA1:{hx:420,hy:312,open:-70}, slA2:{hx:434,hy:312,open:70}
+  };
+  Object.keys(flaps).forEach(id=>{flaps[id].el=document.getElementById(id);flaps[id].a=0;});
+  function updateValves(dt, ph, instant){
+    const avOpen = ph!==1, slOpen = ph===1;
+    for(const id in flaps){
+      const f=flaps[id], isAV=id.startsWith('av');
+      const target = (isAV?avOpen:slOpen) ? f.open : 0;
+      f.a = instant ? target : f.a + (target-f.a)*Math.min(1,dt*16);
+      f.el.setAttribute('transform','rotate('+f.a.toFixed(1)+' '+f.hx+' '+f.hy+')');
+    }
+  }
+
+  // ---------- chambers + UI per phase ----------
+  const gRA=document.getElementById('gRA'), gLA=document.getElementById('gLA');
+  const gRV=document.getElementById('gRV'), gLV=document.getElementById('gLV');
+  const stageItems=[...document.querySelectorAll('#stages li')];
+  const chipAV=document.getElementById('chipAV'), chipSL=document.getElementById('chipSL');
+  const sound=document.getElementById('sound');
+  function setPhaseUI(ph){
+    if(ph===state.phase) return;
+    const prev=state.phase; state.phase=ph;
+    [gRA,gLA].forEach(g=>g.classList.toggle('squeeze',ph===0));
+    [gRV,gLV].forEach(g=>g.classList.toggle('squeeze',ph===1));
+    stageItems.forEach((li,i)=>li.classList.toggle('on',i===ph));
+    const avOpen=ph!==1, slOpen=ph===1;
+    chipAV.className='vchip '+(avOpen?'open':'shut'); chipAV.querySelector('b').textContent=avOpen?'open':'closed';
+    chipSL.className='vchip '+(slOpen?'open':'shut'); chipSL.querySelector('b').textContent=slOpen?'open':'closed';
+    if(prev!==-1){
+      if(ph===1) flash('lub'); else if(ph===2) flash('dub');
+    }
+  }
+  function flash(t){
+    sound.textContent=t; sound.classList.remove('show'); void sound.offsetWidth; sound.classList.add('show');
+  }
+
+  // ---------- coronary flow ----------
+  const corA=document.getElementById('corA'), corB=document.getElementById('corB');
+  let corOff=0;
+  function updateCoronary(dt, ph){
+    corOff -= dt*(ph===2?26:12)*(state.hr/70);
+    corA.style.strokeDashoffset=corOff;
+    corB.style.strokeDashoffset=state.blocked?0:corOff;
+  }
+
+  // ---------- ECG ----------
+  const canvas=document.getElementById('ecg'), ctx=canvas.getContext('2d');
+  let cw=600, ch=84, dpr=1, samples=[], acc=0;
+  const PXS=110; // px per second of trace
+  function resize(){
+    dpr=window.devicePixelRatio||1; cw=Math.max(200,canvas.clientWidth); ch=canvas.clientHeight||84;
+    canvas.width=Math.round(cw*dpr); canvas.height=Math.round(ch*dpr);
+    ctx.setTransform(dpr,0,0,dpr,0,0);
+    if(samples.length>cw) samples=samples.slice(samples.length-cw);
+    drawECG();
+  }
+  if(window.ResizeObserver) new ResizeObserver(resize).observe(canvas); else window.addEventListener('resize',resize);
+  function g(x,m,s){return Math.exp(-((x-m)*(x-m))/(2*s*s));}
+  function ecgVal(f){
+    return 0.13*g(f,.06,.022) - 0.12*g(f,.165,.007) + 1.0*g(f,.18,.009) - 0.26*g(f,.197,.008) + 0.28*g(f,.40,.038);
+  }
+  function addECG(T0,T1,dtReal){
+    acc += dtReal*PXS; const n=Math.floor(acc); acc-=n;
+    for(let i=1;i<=n;i++){const T=T0+(T1-T0)*i/n; samples.push(ecgVal(T-Math.floor(T)));}
+    if(samples.length>cw) samples.splice(0,samples.length-cw);
+  }
+  function drawECG(){
+    ctx.clearRect(0,0,cw,ch);
+    if(!samples.length) return;
+    ctx.beginPath(); ctx.lineWidth=2; ctx.strokeStyle=ecgColour; ctx.lineJoin='round';
+    const x0=cw-samples.length;
+    for(let i=0;i<samples.length;i++){
+      const y=ch*0.68 - samples[i]*ch*0.5;
+      if(i===0) ctx.moveTo(x0+i,y); else ctx.lineTo(x0+i,y);
+    }
+    ctx.stroke();
+  }
+
+  // ---------- main loop ----------
+  let last=performance.now();
+  function frame(now){
+    let dt=Math.min(0.05,(now-last)/1000); last=now;
+    const run = state.playing || state.stepEnd!==null;
+    const beatDur = 60/state.hr;
+    let ph = phaseOf(state.T-Math.floor(state.T));
+    if(run){
+      const eff = dt*(state.slow?0.25:1);
+      const T0=state.T;
+      let T1=T0+eff/beatDur;
+      if(state.stepEnd!==null && T1>=state.stepEnd){T1=state.stepEnd-1e-6; state.stepEnd=null;}
+      state.T=T1;
+      ph = phaseOf(T1-Math.floor(T1));
+      moveParticles(eff, ph);
+      addECG(T0,T1,dt);
+      updateCoronary(eff, ph);
+    }
+    setPhaseUI(ph);
+    updateValves(dt, ph, false);
+    drawParticles();
+    drawECG();
+    requestAnimationFrame(frame);
+  }
+
+  // ---------- controls ----------
+  const btnPlay=document.getElementById('btnPlay');
+  function setPlay(v){state.playing=v; btnPlay.textContent=v?'Pause':'Play'; if(v) state.stepEnd=null;}
+  btnPlay.addEventListener('click',()=>setPlay(!state.playing));
+  document.getElementById('btnStep').addEventListener('click',()=>{
+    setPlay(false);
+    const f=state.T-Math.floor(state.T);
+    const nb=BOUNDS.find(b=>b>f+1e-4);
+    state.stepEnd=Math.floor(state.T)+nb;
+  });
+  const btnSlow=document.getElementById('btnSlow');
+  btnSlow.addEventListener('click',()=>{state.slow=!state.slow;btnSlow.setAttribute('aria-pressed',state.slow);});
+
+  const hr=document.getElementById('hr'), hrOut=document.getElementById('hrOut'), volOut=document.getElementById('volOut');
+  function setHR(v){state.hr=+v; hr.value=v; hrOut.textContent=v; volOut.textContent=(v*70/1000).toFixed(1);}
+  hr.addEventListener('input',e=>setHR(e.target.value));
+  document.getElementById('btnRest').addEventListener('click',()=>setHR(70));
+  document.getElementById('btnEx').addEventListener('click',()=>setHR(150));
+
+  function toggle(btn, key, fn){
+    btn.addEventListener('click',()=>{state[key]=!state[key]; btn.setAttribute('aria-pressed',state[key]); fn&&fn(state[key]);});
+  }
+  toggle(document.getElementById('btnBlock'),'blocked',v=>{
+    svg.classList.toggle('blocked',v); document.getElementById('blockMsg').classList.toggle('show',v);
+  });
+  const traceBox=document.getElementById('traceBox'), traceList=document.getElementById('traceList');
+  TRACE.forEach(t=>{const li=document.createElement('li');li.textContent=t;traceList.appendChild(li);});
+  const traceItems=[...traceList.children];
+  let lastTrace=-1;
+  function highlightTrace(k){ if(k===lastTrace) return; lastTrace=k; traceItems.forEach((li,i)=>li.classList.toggle('on',i===k)); }
+  toggle(document.getElementById('btnTrace'),'trace',v=>{traceBox.hidden=!v; lastTrace=-1;});
+  const btnLabels=document.getElementById('btnLabels'); let hidden=false;
+  btnLabels.addEventListener('click',()=>{hidden=!hidden;svg.classList.toggle('nolabels',hidden);btnLabels.setAttribute('aria-pressed',hidden);});
+  const btnRu=document.getElementById('btnRu'); let ru=false;
+  btnRu.addEventListener('click',()=>{ru=!ru;btnRu.setAttribute('aria-pressed',ru);
+    document.querySelectorAll('#labels text').forEach(t=>t.textContent=ru?t.dataset.ru:t.dataset.en);});
+
+  // ---------- info cards ----------
+  const INFO={
+    ra:['Right atrium','Правое предсердие','Receives deoxygenated blood from the vena cava. Its wall is thin because it only pushes blood a short distance into the right ventricle.'],
+    la:['Left atrium','Левое предсердие','Receives oxygenated blood from the lungs through the pulmonary vein, then pushes it into the left ventricle.'],
+    rv:['Right ventricle','Правый желудочек','Pumps deoxygenated blood to the lungs. Its wall is thinner than the left ventricle: the lungs are close, and high pressure would damage the delicate lung capillaries.'],
+    lv:['Left ventricle','Левый желудочек','Pumps oxygenated blood to the whole body. It has the thickest muscle wall because it must produce the highest pressure.'],
+    septum:['Septum','Перегородка','A wall of muscle that keeps oxygenated and deoxygenated blood separate, so blood going to the body carries as much oxygen as possible.'],
+    av:['Atrioventricular (AV) valves','Предсердно-желудочковые клапаны','Between each atrium and ventricle. Pushed open when the atria contract; pushed shut when the ventricles contract, which stops blood flowing back into the atria. Their closing makes the first heart sound ("lub"). Valves do not pump: pressure opens and closes them.'],
+    sl:['Semilunar valves','Полулунные клапаны','At the start of the pulmonary artery and the aorta. Open when the ventricles contract; shut when the ventricles relax, which stops blood flowing back into the ventricles. Their closing makes the second heart sound ("dub").'],
+    vc:['Vena cava','Полая вена','Brings deoxygenated blood from the body back to the right atrium. Like all veins: thin wall, wide lumen, low pressure.'],
+    pa:['Pulmonary artery','Лёгочная артерия','Carries deoxygenated blood from the right ventricle to the lungs. Exam trap: this artery carries deoxygenated blood. Artery means "away from the heart".'],
+    pv:['Pulmonary vein','Лёгочная вена','Carries oxygenated blood from the lungs back to the left atrium. A vein that carries oxygenated blood.'],
+    ao:['Aorta','Аорта','The largest artery. Carries oxygenated blood at high pressure from the left ventricle to the body. Its thick, elastic wall stretches and recoils with each beat.'],
+    cor:['Coronary artery','Коронарная артерия','Branches from the aorta and supplies the heart muscle itself with oxygen and glucose. The heart muscle is too thick to get oxygen from the blood inside its chambers. Try "Block a coronary artery".'],
+    lungs:['Lung capillaries','Капилляры лёгких','Blood moves slowly in single file, giving time for exchange. Oxygen diffuses into the blood; carbon dioxide diffuses out. Blood loses pressure here, so it returns to the heart to be pumped again: double circulation.'],
+    body:['Body capillaries','Капилляры тканей','Oxygen and glucose diffuse from the blood to respiring cells; carbon dioxide and urea diffuse into the blood. The wall is one cell thick, so the diffusion distance is short.']
+  };
+  const info=document.getElementById('info');
+  let selEl=null;
+  function showInfo(key, el){
+    const d=INFO[key]; if(!d) return;
+    info.innerHTML='';
+    const h=document.createElement('h3'); h.textContent=d[0];
+    const r=document.createElement('p'); r.className='ru'; r.textContent=d[1];
+    const p=document.createElement('p'); p.textContent=d[2];
+    info.append(h,r,p);
+  }
+  svg.querySelectorAll('[data-part]').forEach(el=>{
+    el.addEventListener('click',e=>{e.stopPropagation();showInfo(el.dataset.part,el);});
+    el.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();showInfo(el.dataset.part,el);}});
+  });
+
+  // ---------- quiz ----------
+  const QUIZ=[
+    {q:'When the ventricles contract, which valves are open?',o:['AV valves only','Semilunar valves only','Both','Neither'],a:1,
+     e:'Pressure in the ventricles pushes the AV valves shut and the semilunar valves open, so blood leaves through the arteries.'},
+    {q:'Which vessel carries deoxygenated blood away from the heart?',o:['Aorta','Pulmonary artery','Pulmonary vein','Vena cava'],a:1,
+     e:'Arteries carry blood away from the heart. The pulmonary artery takes deoxygenated blood to the lungs.'},
+    {q:'Why does blood flow slowly through capillaries?',o:['The heart beats more slowly there','It gives more time for diffusion','Capillaries have valves','The blood is cleaned there'],a:1,
+     e:'Slow flow gives more time for oxygen, glucose and carbon dioxide to diffuse between blood and cells.'},
+    {q:'Why is the left ventricle wall thicker than the right?',o:['It holds more blood','It pumps blood to the whole body at higher pressure','It receives blood from the lungs','It has more valves'],a:1,
+     e:'Both ventricles pump the same volume per beat. The left must produce higher pressure to send blood all around the body.'}
+  ];
+  const quiz=document.getElementById('quiz');
+  QUIZ.forEach((item,qi)=>{
+    const box=document.createElement('div'); box.className='q';
+    const p=document.createElement('p'); p.textContent=(qi+1)+'. '+item.q;
+    const opts=document.createElement('div'); opts.className='opts';
+    const fb=document.createElement('p'); fb.className='fb'; fb.setAttribute('aria-live','polite');
+    item.o.forEach((t,oi)=>{
+      const b=document.createElement('button'); b.type='button'; b.textContent=t;
+      b.addEventListener('click',()=>{
+        [...opts.children].forEach(x=>x.classList.remove('right','wrong'));
+        if(oi===item.a){b.classList.add('right');fb.textContent='Correct. '+item.e;}
+        else{b.classList.add('wrong');fb.textContent='Not quite. Watch the diagram again and try another answer.';}
+      });
+      opts.appendChild(b);
+    });
+    box.append(p,opts,fb); quiz.appendChild(box);
+  });
+
+  // ---------- start ----------
+  setHR(70);
+  setPlay(state.playing);
+  updateValves(0, phaseOf(0), true);
+  setPhaseUI(0);
+  resize();
+  requestAnimationFrame(frame);
+})();
+</script>
+</body>
+</html>

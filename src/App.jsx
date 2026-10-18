@@ -1,0 +1,28 @@
+import { Routes, Route } from 'react-router-dom'
+import Layout from './components/Layout.jsx'
+import Home from './pages/Home.jsx'
+import About from './pages/About.jsx'
+import Teaching from './pages/Teaching.jsx'
+import Resources from './pages/Resources.jsx'
+import Simulators from './pages/Simulators.jsx'
+import Gallery from './pages/Gallery.jsx'
+import Contact from './pages/Contact.jsx'
+import NotFound from './pages/NotFound.jsx'
+
+export default function App() {
+  return (
+    <Routes>
+      <Route element={<Layout />}>
+        <Route index element={<Home />} />
+        <Route path="about" element={<About />} />
+        <Route path="teaching" element={<Teaching />} />
+        <Route path="simulators" element={<Simulators />} />
+        <Route path="simulators/:slug" element={<Simulators />} />
+        <Route path="resources" element={<Resources />} />
+        <Route path="gallery" element={<Gallery />} />
+        <Route path="contact" element={<Contact />} />
+        <Route path="*" element={<NotFound />} />
+      </Route>
+    </Routes>
+  )
+}
